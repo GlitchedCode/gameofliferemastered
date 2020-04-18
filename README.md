@@ -17,5 +17,8 @@ The game supports all desktop systems (i hope).
 Right now the game runs on a hardcoded 200 rows by 300 columns grid, and the only unit type currently available is called Cell, which behaves like the original *Life* cells.
 
 ### How to build
-Open the project using NetBeans and click the run button. I still don't know how to make it run normally as a JAR, so there are no releases at the moment.
+Open the project using NetBeans and click the build button. The fat jar is in the build/libs directory, named gameofliferemastered-all.jar
 You need to at least compile for Java 8 and the have org.json library installed.
+
+### Assets
+In-game assets are courtesy of [Kenney](https://kenney.nl/), from the [1 Bit pack](https://kenney.nl/assets/bit-pack). 
