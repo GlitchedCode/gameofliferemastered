@@ -7,31 +7,21 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  *
  * @author glitchedcode
  */
-public class DeadUnit extends Unit 
+public class DeadUnit implements UnitInterface
 {
-    private UnitInterface bornUnit;
-    
-    public DeadUnit()
-    {
-        super();
-        species = Species.INVALID;
-        currentState = State.DEAD;
-        nextTurnState = State.INVALID;
-        minimumFriendly = -1;
-        health = 0;
-        
-        bornUnit = null;
-    }
+    private UnitInterface bornUnit = null;
     
     // This function implements rule #3: reproduction
     @Override
     @SuppressWarnings("unchecked")
-    protected void boardStep(UnitInterface[] adjacentUnits)
+    public void computeNextTurn(UnitInterface[] adjacentUnits)
     {        
         // Contains how many units of a given species are adjacent.
         HashMap<Species, Integer> reproductionCounters = new HashMap<>();
@@ -55,7 +45,7 @@ public class DeadUnit extends Unit
                 continue;
             }
             
-            species = current.getSpecies();
+            Species species = current.getSpecies();
             // Add new species to the map as we find them in
             // nearby cells
             if(reproductionCounters.keySet().contains(species))
@@ -119,12 +109,6 @@ public class DeadUnit extends Unit
         
     }
     
-    @Override
-    protected void endStep()
-    {
-        // nothing
-    }
-    
     /**
      *
      * @return
@@ -139,10 +123,30 @@ public class DeadUnit extends Unit
     {
         bornUnit = null;
     }
-
+    
+    // overrides
+    
     @Override
-    public boolean reproduce(Integer adjacencyPosition)
-    {
-        return false;
-    }
+    public boolean      reproduce(Integer a) {return false;}
+    @Override
+    public boolean      attack(Integer a) {return false;}
+    @Override
+    public void         independentAction() {}
+    @Override
+    public State        getNextTurnState() {return State.INVALID; }
+    @Override
+    public State        getCurrentState() { return State.INVALID; }
+    @Override
+    public Species      getSpecies() { return Species.INVALID; }
+    @Override
+    public Set<Species> getFriendlySpecies() { return new HashSet<>(); }
+    @Override
+    public Set<Species> getHostileSpecies() { return new HashSet<>(); }
+    @Override
+    public Integer      getMinimumFriendlyUnits() { return 9; }
+    @Override
+    public Integer      getHealth() { return 0; }
+    @Override
+    public void         incrementHealth(Integer increment) { }
+
 }

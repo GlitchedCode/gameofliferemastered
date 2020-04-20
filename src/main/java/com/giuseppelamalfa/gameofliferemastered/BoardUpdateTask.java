@@ -26,7 +26,7 @@ public class BoardUpdateTask extends TimerTask
         super();
         this.grid = grid;
         this.canvas = canvas;
-        msInterval = 250;
+        msInterval = 150;
     }
 
     @Override

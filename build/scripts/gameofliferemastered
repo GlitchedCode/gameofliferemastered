@@ -80,7 +80,7 @@ case "`uname`" in
     ;;
 esac
 
-CLASSPATH=$APP_HOME/lib/gameofliferemastered.jar:$APP_HOME/lib/json-20190722.jar
+CLASSPATH=$APP_HOME/lib/gameofliferemastered-0.01.jar:$APP_HOME/lib/json-20190722.jar
 
 # Determine the Java command to use to start the JVM.
 if [ -n "$JAVA_HOME" ] ; then

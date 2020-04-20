@@ -5,6 +5,7 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic;
 
+import com.giuseppelamalfa.gameofliferemastered.utils.Selector;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -12,42 +13,39 @@ import java.util.Set;
  *
  * @author glitchedcode
  */
-public abstract class Unit implements UnitInterface {
-    
+public abstract class Unit implements UnitInterface
+{
+
     // ALL FIELDS MARKED WITH * MUST BE INITIALIZED IN ALL SUBCLASSES
-    
-    protected State             currentState;   // *
-    protected State             nextTurnState;  // *
-    
-    protected Species           species;        // *
-    protected Set<Species>      friendlySpecies;
-    protected Set<Species>      hostileSpecies;
-    
-    protected Integer           health;         // *
-    protected boolean           healthChanged;  
-    protected Integer           minimumFriendly;
-    protected Integer           maximumFriendly;
-    protected Integer           minimumHostile;
-    protected Integer           maximumHostile;
-    
+    protected State currentState;   // *
+    protected State nextTurnState;  // *
+
+    protected Species species;        // *
+    protected Set<Species> friendlySpecies;
+    protected Set<Species> hostileSpecies;
+
+    protected Integer health;         // *
+    protected boolean healthChanged;
+
+    protected Selector<Integer> friendlyCountSelector;
+    protected Selector<Integer> hostileCountSelector;
+    protected Selector<Integer> reproductionSelector;
+
     protected Unit()
     {
         healthChanged = false;
-        
+
         // default population and hostility parameters
         friendlySpecies = new HashSet<>();
         hostileSpecies = new HashSet<>();
-        minimumHostile = 0;
-        maximumHostile = 9;
-        minimumFriendly = 0;
-        maximumFriendly = 9;
-        
+
         currentState = State.INVALID;
         nextTurnState = State.ALIVE;
     }
-    
+
     /**
      * Intermediary function to compute the unit's state relative to the board
+     *
      * @param adjacentUnits array of units adjacent to this unit
      */
     protected void boardStep(UnitInterface[] adjacentUnits)
@@ -55,54 +53,59 @@ public abstract class Unit implements UnitInterface {
         int hostileCount = 0;
         int friendlyCount = 0;
         int healthIncrement = 0;
-        
+
         for (int i = 0; i < 8; i++) // conto le unità ostili ed amichevoli
         {
             UnitInterface current = adjacentUnits[i];
-            if (current == null) 
+            if ( current == null )
+            {
                 continue;
-            
+            }
+
             Integer oppositeDir = UnitInterface.getOppositeDirection(i);
-            if (friendlySpecies.contains(current.getSpecies()))
+
+            if ( friendlySpecies.contains(current.getSpecies()) )
             {
                 friendlyCount++;
             }
-            
+
             // additionally check if the adjacent cell can attack from 
             // their position relative to this cell
-            if (current.attack(oppositeDir) & 
-                    hostileSpecies.contains(current.getSpecies()))
+            boolean attacked = false;
+            if ( hostileSpecies.contains(current.getSpecies()) )
+            {
+                attacked = current.attack(oppositeDir);
+            }
+            if ( attacked )
             {
                 hostileCount++;
             }
         }
-        
+
         // rule #1: population
         // rule #2: hostility
-        
-        boolean friendlyPenalty = friendlyCount < minimumFriendly | friendlyCount > maximumFriendly;
-        boolean hostilePenalty = hostileCount < minimumHostile | hostileCount > maximumHostile;
-        
-        if (friendlyPenalty | hostilePenalty)
+        boolean friendlyPenalty = !friendlyCountSelector.test(friendlyCount);
+        boolean hostilePenalty = !hostileCountSelector.test(hostileCount);
+
+        if ( friendlyPenalty | hostilePenalty )
         {
             healthIncrement--;
         }
-        
-        
-        if (healthIncrement != 0)
+
+        if ( healthIncrement != 0 )
         {
             incrementHealth(healthIncrement);
         }
     }
-    
+
     protected void endStep()
     {
-        if (!healthChanged) // rule #4: inactivity
+        if ( !healthChanged ) // rule #4: inactivity
         {
-            passiveAction();
+            independentAction();
         }
-        
-        if (health < 1) // regola #5: hp
+
+        if ( health < 1 ) // regola #5: hp
         {
             nextTurnState = State.DEAD;
         }
@@ -111,9 +114,10 @@ public abstract class Unit implements UnitInterface {
             nextTurnState = State.ALIVE;
         }
     }
-    
+
     /**
      * Computes the unit's state for the next turn
+     *
      * @param adjacentUnits
      */
     @Override
@@ -122,70 +126,81 @@ public abstract class Unit implements UnitInterface {
         boardStep(adjacentUnits);
         endStep();
     }
-    
+
     /**
      * Updates the unit's status to the next turn
      */
     @Override
     public void update()
     {
-        currentState = nextTurnState;
-        nextTurnState = State.INVALID;
+        if (currentState != nextTurnState)
+        {
+            currentState.exit(this);
+            currentState = nextTurnState;
+            currentState.enter(this);
+            nextTurnState = State.INVALID;
+        }
         healthChanged = false;
     }
 
-    
     /**
-     * Returns true if the unit can reproduce based on the unit's position relative to the caller
+     * Returns true if the unit can reproduce based on the unit's position
+     * relative to the caller
+     *
      * @param adjacencyPostition This unit's position relative to the caller
      * @return
      */
     @Override
     public boolean reproduce(Integer adjacencyPostition)
     {
-        boolean ret = currentState == State.DEAD | currentState == State.INVALID;
-        return !ret;
+        boolean ret = currentState != State.DEAD & currentState != State.INVALID;
+        return currentState.reproductionModifier(ret, adjacencyPostition);
     }
-    
+
     /**
-     * Returns true if the unit can attack based on the unit's position relative to the caller
+     * Returns true if the unit can attack based on the unit's position relative
+     * to the caller
+     *
      * @param adjacencyPosition This unit's position relative to the caller
      * @return
      */
     @Override
     public boolean attack(Integer adjacencyPosition)
     {
-        return currentState != State.DEAD & currentState != State.INVALID;
+        boolean temp = currentState != State.DEAD & currentState != State.INVALID;
+        return currentState.attackModifier(temp, adjacencyPosition);
     }
-    
+
     /**
-     * In base alla regola #4, questa funzione viene eseguita
-     * durante lo computeNextTurn se i punti vita dell'unità
-     * non sono cambiati
+     * In base alla regola #4, questa funzione viene eseguita durante lo
+     * computeNextTurn se i punti vita dell'unità non sono cambiati
      */
     @Override
-    public void passiveAction()
+    public void independentAction()
     {
-        // vuoto
+        currentState.independentAction(this);
     }
-    
+
     /**
      * Returns the unit's state for the next turn
-     * @return 
-     * @throws com.giuseppelamalfa.gameofliferemastered.gamelogic.GameLogicException 
+     *
+     * @return
+     * @throws
+     * com.giuseppelamalfa.gameofliferemastered.gamelogic.GameLogicException
      */
     @Override
     public State getNextTurnState() throws GameLogicException
     {
-        if (nextTurnState == State.INVALID)
+        if ( nextTurnState == State.INVALID )
         {
             throw new GameLogicException(this, "Invalid state.");
         }
         return nextTurnState;
     }
-    
+
     /**
      * Get the unit's state in the current turn
+     *
      * @return
      */
     @Override
@@ -193,9 +208,10 @@ public abstract class Unit implements UnitInterface {
     {
         return currentState;
     }
-    
+
     /**
      * Get the unit's texture code
+     *
      * @return
      */
     @Override
@@ -203,7 +219,7 @@ public abstract class Unit implements UnitInterface {
     {
         return species;
     }
-    
+
     /**
      *
      * @return set with friendly species
@@ -213,7 +229,7 @@ public abstract class Unit implements UnitInterface {
     {
         return friendlySpecies;
     }
-    
+
     /**
      *
      * @return set with hostile species
@@ -223,17 +239,17 @@ public abstract class Unit implements UnitInterface {
     {
         return hostileSpecies;
     }
-    
+
     /**
      *
      * @return lower bound of friendly units adjacent to this unit
      */
     @Override
-    public final Integer getMinimumFriendlyUnits()
+    public final Selector<Integer> getReproductionSelector()
     {
-        return minimumFriendly;
+        return reproductionSelector;
     }
-    
+
     /**
      * @return unit's health points
      */
@@ -242,9 +258,10 @@ public abstract class Unit implements UnitInterface {
     {
         return health;
     }
-    
+
     /**
      * Increments the unit's health
+     *
      * @param increment health increment
      */
     @Override
@@ -253,7 +270,7 @@ public abstract class Unit implements UnitInterface {
         health = health + increment;
         healthChanged = true;
     }
-    
+
     @Override
     public String toString()
     {

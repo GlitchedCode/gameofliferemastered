@@ -6,8 +6,6 @@
 package com.giuseppelamalfa.gameofliferemastered;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import javax.swing.ImageIcon;
 import java.net.URL;
 import java.util.Timer;
@@ -72,6 +70,8 @@ public class ApplicationFrame extends javax.swing.JFrame{
         setPreferredSize(new java.awt.Dimension(800, 600));
         setSize(new java.awt.Dimension(800, 600));
 
+        gridCanvas.setBackground(new java.awt.Color(82, 82, 82));
+        gridCanvas.setForeground(new java.awt.Color(105, 105, 105));
         gridCanvas.addHierarchyBoundsListener(new java.awt.event.HierarchyBoundsListener()
         {
             public void ancestorMoved(java.awt.event.HierarchyEvent evt)

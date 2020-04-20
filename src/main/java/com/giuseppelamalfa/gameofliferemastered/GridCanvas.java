@@ -6,7 +6,6 @@
 package com.giuseppelamalfa.gameofliferemastered;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -174,6 +173,7 @@ public class GridCanvas extends JPanel implements MouseListener, MouseMotionList
         Dimension size = getSize();
         setScreenOrigin(new Point((gridSize.width - size.width) / 2,
                 (gridSize.height - size.height) / 2));
+        grid.setForeground(getForeground());
     }
 
     public void setScreenOrigin(Point newOrigin)
@@ -186,7 +186,6 @@ public class GridCanvas extends JPanel implements MouseListener, MouseMotionList
         screenOrigin.x = Integer.min(maxX, Integer.max(screenOrigin.x, 0));
         screenOrigin.y = Integer.min(maxY, Integer.max(screenOrigin.y, 0));
         grid.setScreenOrigin(screenOrigin);
-
     }
 
     public void resetScreenOrigin()
@@ -198,7 +197,7 @@ public class GridCanvas extends JPanel implements MouseListener, MouseMotionList
     public void paintComponent(Graphics g)
     {
         Dimension size = getSize();
-        g.setColor(Color.BLACK);
+        g.setColor(getBackground());
         g.fillRect(0, 0, size.width, size.height);
         if (grid != null)
         {

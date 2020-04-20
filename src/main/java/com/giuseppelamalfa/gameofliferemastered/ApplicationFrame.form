@@ -50,6 +50,14 @@
   </Layout>
   <SubComponents>
     <Container class="com.giuseppelamalfa.gameofliferemastered.GridCanvas" name="gridCanvas">
+      <Properties>
+        <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+          <Color blue="52" green="52" red="52" type="rgb"/>
+        </Property>
+        <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+          <Color blue="69" green="69" red="69" type="rgb"/>
+        </Property>
+      </Properties>
       <Events>
         <EventHandler event="ancestorResized" listener="java.awt.event.HierarchyBoundsListener" parameters="java.awt.event.HierarchyEvent" handler="gridCanvasAncestorResized"/>
       </Events>

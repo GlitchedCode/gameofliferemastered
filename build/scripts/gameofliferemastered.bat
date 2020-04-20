@@ -79,7 +79,7 @@ set CMD_LINE_ARGS=%*
 :execute
 @rem Setup the command line
 
-set CLASSPATH=%APP_HOME%\lib\gameofliferemastered.jar;%APP_HOME%\lib\json-20190722.jar
+set CLASSPATH=%APP_HOME%\lib\gameofliferemastered-0.01.jar;%APP_HOME%\lib\json-20190722.jar
 
 @rem Execute gameofliferemastered
 "%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GAMEOFLIFEREMASTERED_OPTS%  -classpath "%CLASSPATH%" com.giuseppelamalfa.gameofliferemastered.ApplicationFrame %CMD_LINE_ARGS%

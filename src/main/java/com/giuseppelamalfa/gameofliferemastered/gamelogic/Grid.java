@@ -15,8 +15,6 @@ import java.awt.Image;
 import java.awt.Point;
 import java.awt.geom.AffineTransform;
 import java.awt.image.ImageObserver;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Class for handling all of game logic and rendering all units to the grid
@@ -29,29 +27,31 @@ public class Grid
     private final TwoDimensionalContainer<UnitInterface> board;
     private final ImageManager tileManager;
 
-    private Integer turn;
-    private Integer sideLength;
-    private Integer lineSpacing;
-    private Float tileScale;
+    private Integer             turn;
+    private Integer             sideLength;
+    private Integer             lineSpacing;
+    private Float               tileScale;
 
-    private final Dimension size = new Dimension();
-    private Dimension canvasSize;
-    private Point screenOrigin;
-    private Integer xoffset;
-    private Integer yoffset;
-    private Integer startRow;
-    private Integer startColumn;
+    private final Dimension     size = new Dimension();
+    private Dimension           canvasSize;
+    private Point               screenOrigin;
+    private Integer             xoffset;
+    private Integer             yoffset;
+    private Integer             startRow;
+    private Integer             startColumn;
+    
+    private Color               foreground = Color.WHITE;
 
-    private final Integer rowCount;
-    private final Integer columnCount;
+    private final Integer       rowCount;
+    private final Integer       columnCount;
 
-    private final Point topLeftActive;
-    private final Point bottomRightActive;
+    private final Point         topLeftActive;
+    private final Point         bottomRightActive;
 
-    private final Point topLeftProcessed;
-    private final Point bottomRightProcessed;
+    private final Point         topLeftProcessed;
+    private final Point         bottomRightProcessed;
 
-    private final DeadUnit deadUnit;
+    private final DeadUnit      deadUnit;
 
     /**
      * Constructor
@@ -84,6 +84,7 @@ public class Grid
     /*
     * GETTERS AND SETTERS
      */
+    
     public final void setScreenOrigin(Point origin)
     {
         screenOrigin = origin;
@@ -146,10 +147,15 @@ public class Grid
     {
         canvasSize = size;
     }
+    
+    public final void setForeground(Color value)
+    {
+        foreground = value;
+    }
 
     /*
     * RENDERING AND UI CODE
-     */
+    */
     public void setUnit(Point point)
     {
         point.x += xoffset;
@@ -183,15 +189,9 @@ public class Grid
         rows = Integer.min(height / sideLength + 1, rowCount);
         cols = Integer.min(width / sideLength + 1, columnCount);
 
-        /*
-        g.setColor(Color.RED);
-        g.setStroke(new BasicStroke(5));
-        g.drawLine(topLeftActive.x * lineSpacing, topLeftActive.y * lineSpacing,
-                bottomRightActive.x * lineSpacing, bottomRightActive.y * lineSpacing);
-*/
         // Draw the grid
         g.setStroke(new BasicStroke(1));
-        g.setColor(Color.WHITE);
+        g.setColor(foreground);
         // rows
         for (int c = 0; c <= rows; c++)
         {
@@ -347,9 +347,9 @@ public class Grid
     private void nextTurnStateComputationStep()
     {
         boolean noUnitFound = true;
-        for (int row = topLeftActive.y; row < bottomRightActive.y; row++)
+        for (int row = topLeftActive.y; row <= bottomRightActive.y; row++)
         {
-            for (int col = topLeftActive.x; col < bottomRightActive.x; col++)
+            for (int col = topLeftActive.x; col <= bottomRightActive.x; col++)
             {
                 UnitInterface current = board.get(row, col);
                 if (current == null)
@@ -383,9 +383,9 @@ public class Grid
 
     private void reproductionStep()
     {
-        for (int row = topLeftActive.y; row < bottomRightActive.y; row++)
+        for (int row = topLeftActive.y; row <= bottomRightActive.y; row++)
         {
-            for (int col = topLeftActive.x; col < bottomRightActive.x; col++)
+            for (int col = topLeftActive.x; col <= bottomRightActive.x; col++)
             {
                 if (board.get(row, col) != null)
                 {
@@ -409,9 +409,9 @@ public class Grid
 
     private void cleanupStep()
     {
-        for (int row = topLeftActive.y; row < bottomRightActive.y; row++)
+        for (int row = topLeftActive.y; row <= bottomRightActive.y; row++)
         {
-            for (int col = topLeftActive.x; col < bottomRightActive.x; col++)
+            for (int col = topLeftActive.x; col <= bottomRightActive.x; col++)
             {
                 UnitInterface current = board.get(row, col);
                 if (current != null)
