@@ -3,8 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.giuseppelamalfa.gameofliferemastered.gamelogic;
+package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.GameLogicException;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.UnitInterface;
 import com.giuseppelamalfa.gameofliferemastered.utils.Selector;
 import java.util.HashSet;
 import java.util.Set;
@@ -17,28 +19,28 @@ public abstract class Unit implements UnitInterface
 {
 
     // ALL FIELDS MARKED WITH * MUST BE INITIALIZED IN ALL SUBCLASSES
-    protected State currentState;   // *
-    protected State nextTurnState;  // *
+    // REFER TO THE Cell CLASS FOR AN EXAMPLE OF CORRECT USAGE
+    protected State             currentState;
+    protected State             nextTurnState;
 
-    protected Species species;        // *
-    protected Set<Species> friendlySpecies;
-    protected Set<Species> hostileSpecies;
+    protected Species           species;                //*
+    protected Set<Species>      friendlySpecies;        //* add friendly species
+    protected Set<Species>      hostileSpecies;         //* add hostile species
 
-    protected Integer health;         // *
-    protected boolean healthChanged;
+    protected Integer           health;                 //*
+    protected boolean           healthChanged;
 
-    protected Selector<Integer> friendlyCountSelector;
-    protected Selector<Integer> hostileCountSelector;
-    protected Selector<Integer> reproductionSelector;
+    protected Selector<Integer> friendlyCountSelector;  //*
+    protected Selector<Integer> hostileCountSelector;   //*
+    protected Selector<Integer> reproductionSelector;   //*
 
     protected Unit()
     {
         healthChanged = false;
 
-        // default population and hostility parameters
         friendlySpecies = new HashSet<>();
         hostileSpecies = new HashSet<>();
-
+        
         currentState = State.INVALID;
         nextTurnState = State.ALIVE;
     }

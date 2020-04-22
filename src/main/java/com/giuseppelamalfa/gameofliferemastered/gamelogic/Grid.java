@@ -257,7 +257,6 @@ public class Grid
         correctProcessRegion();
 
         turn = turn + 1;
-        //System.out.println("Turn " + turn);
     }
 
     private void moveProcessBoundaryToInclude(Integer row, Integer col)

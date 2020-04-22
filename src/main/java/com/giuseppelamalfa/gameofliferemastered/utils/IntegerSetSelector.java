@@ -5,6 +5,7 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.utils;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -13,17 +14,18 @@ import java.util.Set;
  */
 public class IntegerSetSelector implements Selector<Integer>
 {
-    public final Set<Integer> acceptedValues;
+    public final Set<Integer> acceptedValues = new HashSet<>();
     
-    public IntegerSetSelector(Set<Integer> set)
-    {
-        acceptedValues = set;
-    }
-    
+    public IntegerSetSelector(){}
     
     @Override
     public boolean test(Integer value)
     {
         return acceptedValues.contains(value);
+    }
+    
+    public void add(Integer value)
+    {
+        acceptedValues.add(value);
     }
 }

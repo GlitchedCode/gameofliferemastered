@@ -5,6 +5,8 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic;
 
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
+import com.giuseppelamalfa.gameofliferemastered.utils.Selector;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,7 +29,7 @@ public class DeadUnit implements UnitInterface
         HashMap<Species, Integer> reproductionCounters = new HashMap<>();
         // Contains the required amount of units of a given species to 
         // give birth to a new unit of that species.
-        HashMap<Species, Integer> reproductionValues = new HashMap<>();
+        HashMap<Species, Selector<Integer> > reproductionSelectors = new HashMap<>();
         reproductionCounters.put(Species.INVALID, 0);
         bornUnit = null;
         for (int i = 0; i < 8; i++)
@@ -56,12 +58,13 @@ public class DeadUnit implements UnitInterface
             else
             {
                 reproductionCounters.put(species, 1);
-                reproductionValues.put(species, current.getMinimumFriendlyUnits() + 1);
+                reproductionSelectors.put(species, current.getReproductionSelector());
             }
         }
         
         Species candidate = Species.INVALID;
-        
+        int candidateCount = 0;
+
         // Choose the candidate species to generate based on the reproduction
         // counters taken above and thei order in the Species enum
         for (Species current : reproductionCounters.keySet())
@@ -69,21 +72,22 @@ public class DeadUnit implements UnitInterface
             if (current == Species.INVALID) continue;
             
             int currentCount = reproductionCounters.get(current);
-            int candidateCount = reproductionCounters.get(candidate);
-            int reproductionRequisite = reproductionValues.get(current);
+            Selector<Integer> selector = reproductionSelectors.get(current);
             
             if (currentCount == candidateCount)
             {
                 if (current.ordinal() < candidate.ordinal() &
-                        currentCount == reproductionRequisite)
+                        selector.test(currentCount))
                 {
                     candidate = current;
+                    candidateCount = currentCount;
                 }
             }
             else if (currentCount > candidateCount &
-                    currentCount == reproductionRequisite)
+                    selector.test(currentCount))
             {
                 candidate = current;
+                candidateCount = currentCount;
             }
         }
         
@@ -127,26 +131,26 @@ public class DeadUnit implements UnitInterface
     // overrides
     
     @Override
-    public boolean      reproduce(Integer a) {return false;}
+    public boolean              reproduce(Integer a) {return false;}
     @Override
-    public boolean      attack(Integer a) {return false;}
+    public boolean              attack(Integer a) {return false;}
     @Override
-    public void         independentAction() {}
+    public void                 independentAction() {}
     @Override
-    public State        getNextTurnState() {return State.INVALID; }
+    public State                getNextTurnState() {return State.INVALID; }
     @Override
-    public State        getCurrentState() { return State.INVALID; }
+    public State                getCurrentState() { return State.INVALID; }
     @Override
-    public Species      getSpecies() { return Species.INVALID; }
+    public Species              getSpecies() { return Species.INVALID; }
     @Override
-    public Set<Species> getFriendlySpecies() { return new HashSet<>(); }
+    public Set<Species>         getFriendlySpecies() { return new HashSet<>(); }
     @Override
-    public Set<Species> getHostileSpecies() { return new HashSet<>(); }
+    public Set<Species>         getHostileSpecies() { return new HashSet<>(); }
     @Override
-    public Integer      getMinimumFriendlyUnits() { return 9; }
+    public Selector<Integer>    getReproductionSelector() { return null; }
     @Override
-    public Integer      getHealth() { return 0; }
+    public Integer              getHealth() { return 0; }
     @Override
-    public void         incrementHealth(Integer increment) { }
+    public void                 incrementHealth(Integer increment) { }
 
 }
