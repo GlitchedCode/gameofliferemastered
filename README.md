@@ -1,4 +1,4 @@
-![this is where the screenshot is supposed to be](https://github.com/GlitchedCode/gameofliferemastered/blob/master/screenshot.png "Game of Life: Remastered")
+![this is where the screenshot is supposed to be](https://user-images.githubusercontent.com/13611953/80109997-7c89ca80-857e-11ea-8fe5-742a09430723.png "Game of Life: Remastered")
 
 # Game of Life: Remastered
 My OOP university project, Game of Life: Remastered is a reimagined version of the [*Life*](https://en.wikipedia.org/wiki/Conway's_Game_of_Life) cellular automaton originally invented by John Horton Conway.
