@@ -10,7 +10,7 @@ package com.giuseppelamalfa.gameofliferemastered.utils;
  * @author glitchedcode
  * @param <T> Type to be tested
  */
-public interface Selector<T>
+public interface Rule<T>
 {
     public boolean test(T value);
 }

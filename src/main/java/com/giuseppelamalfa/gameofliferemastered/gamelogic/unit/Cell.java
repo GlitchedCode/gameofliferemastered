@@ -3,11 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.giuseppelamalfa.gameofliferemastered.gamelogic;
+package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
-import com.giuseppelamalfa.gameofliferemastered.utils.IntegerRangeSelector;
-import com.giuseppelamalfa.gameofliferemastered.utils.IntegerSetSelector;
+import com.giuseppelamalfa.gameofliferemastered.utils.IntegerRangeRule;
+import com.giuseppelamalfa.gameofliferemastered.utils.IntegerSetRule;
 
 /**
  *
@@ -22,10 +22,10 @@ public class Cell extends Unit {
         health = 1;
         friendlySpecies.add(species);
         
-        friendlyCountSelector = new IntegerRangeSelector(2, 3);
-        hostileCountSelector = new IntegerRangeSelector(0, 9);
+        friendlyCountSelector = new IntegerRangeRule(2, 3);
+        hostileCountSelector = new IntegerRangeRule(0, 9);
         
-        var selector = new IntegerSetSelector();
+        var selector = new IntegerSetRule();
         selector.add(3);
         reproductionSelector = selector;
     }

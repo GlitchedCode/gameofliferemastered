@@ -5,8 +5,10 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic;
 
-import com.giuseppelamalfa.gameofliferemastered.utils.Selector;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.DeadUnit;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Cell;
 import java.util.Set;
+import com.giuseppelamalfa.gameofliferemastered.utils.Rule;
 
 /**
  *
@@ -30,16 +32,14 @@ public abstract interface UnitInterface
         
         public final void enter(UnitInterface unit)
         {
-            if ( stateImplementationInterface == null )
-                return;
-            stateImplementationInterface.enter(unit);
+            if ( stateImplementationInterface != null )
+                stateImplementationInterface.enter(unit);
         }
         
         public final void exit(UnitInterface unit)
         {
-            if ( stateImplementationInterface == null )
-                return;
-            stateImplementationInterface.exit(unit);
+            if ( stateImplementationInterface != null )
+                stateImplementationInterface.exit(unit);
         }
         
         public final boolean attackModifier(boolean speciesResult, Integer adjacencyPosition)
@@ -60,9 +60,8 @@ public abstract interface UnitInterface
         
         public final void independentAction(UnitInterface unit)
         {
-            if ( stateImplementationInterface == null)
-                return;
-            stateImplementationInterface.independentAction(unit);
+            if ( stateImplementationInterface != null)
+                stateImplementationInterface.independentAction(unit);
         }
     }
     
@@ -107,7 +106,7 @@ public abstract interface UnitInterface
     public Species              getSpecies();
     public Set<Species>         getFriendlySpecies();
     public Set<Species>         getHostileSpecies();
-    public Selector<Integer>    getReproductionSelector();
+    public Rule<Integer>    getReproductionSelector();
     public Integer              getHealth();
     public void                 incrementHealth(Integer increment);
 }

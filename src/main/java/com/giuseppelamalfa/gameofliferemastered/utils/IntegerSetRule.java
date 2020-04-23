@@ -12,11 +12,11 @@ import java.util.Set;
  *
  * @author glitchedcode
  */
-public class IntegerSetSelector implements Selector<Integer>
+public class IntegerSetRule implements Rule<Integer>
 {
     public final Set<Integer> acceptedValues = new HashSet<>();
     
-    public IntegerSetSelector(){}
+    public IntegerSetRule(){}
     
     @Override
     public boolean test(Integer value)

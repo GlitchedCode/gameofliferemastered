@@ -9,12 +9,12 @@ package com.giuseppelamalfa.gameofliferemastered.utils;
  *
  * @author glitchedcode
  */
-public class IntegerRangeSelector implements Selector<Integer>
+public class IntegerRangeRule implements Rule<Integer>
 {
     private final Integer min;
     private final Integer max;
     
-    public IntegerRangeSelector(Integer min, Integer max)
+    public IntegerRangeRule(Integer min, Integer max)
     {
         this.min = min;
         this.max = max;

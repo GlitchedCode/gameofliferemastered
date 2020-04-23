@@ -5,10 +5,9 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic;
 
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.DeadUnit;
 import com.giuseppelamalfa.gameofliferemastered.ImageManager;
 import com.giuseppelamalfa.gameofliferemastered.utils.TwoDimensionalContainer;
-import java.awt.BasicStroke;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -30,18 +29,13 @@ public class Grid
     private Integer             turn;
     private Integer             sideLength;
     private Integer             lineSpacing;
-    private Float               tileScale;
 
     private final Dimension     size = new Dimension();
-    private Dimension           canvasSize;
-    private Point               screenOrigin;
     private Integer             xoffset;
     private Integer             yoffset;
     private Integer             startRow;
     private Integer             startColumn;
     
-    private Color               foreground = Color.WHITE;
-
     private final Integer       rowCount;
     private final Integer       columnCount;
 
@@ -83,17 +77,8 @@ public class Grid
 
     /*
     * GETTERS AND SETTERS
-     */
+    */
     
-    public final void setScreenOrigin(Point origin)
-    {
-        screenOrigin = origin;
-        yoffset = screenOrigin.y % (lineSpacing);
-        xoffset = screenOrigin.x % (lineSpacing);
-        startRow = screenOrigin.y / lineSpacing;
-        startColumn = screenOrigin.x / lineSpacing;
-    }
-
     /**
      * @return the number of the board's columns
      */
@@ -117,6 +102,11 @@ public class Grid
     {
         return turn;
     }
+    
+    public UnitInterface getUnit(int row, int col)
+    {
+        return board.get(row, col);
+    }
 
     /**
      * Sets side length for all units and sets grid width and height
@@ -126,11 +116,8 @@ public class Grid
      */
     public final void setSideLength(Integer value)
     {
-        sideLength = Integer.min(64, Integer.max(8, value));
-        lineSpacing = sideLength + 1;
-        size.width = lineSpacing * columnCount + 1;
-        size.height = lineSpacing * rowCount + 1;
-        tileScale = sideLength / 8.0f;
+        size.width = (value + 1) * columnCount + 1;
+        size.height = (value + 1) * rowCount + 1;
     }
 
     public final Integer getSideLength()
@@ -143,27 +130,11 @@ public class Grid
         return size;
     }
 
-    public final void setCanvasSize(Dimension size)
-    {
-        canvasSize = size;
-    }
-    
-    public final void setForeground(Color value)
-    {
-        foreground = value;
-    }
-
     /*
     * RENDERING AND UI CODE
     */
-    public void setUnit(Point point)
+    public void setUnit(int row, int col, UnitInterface unit)
     {
-        point.x += xoffset;
-        point.y += yoffset;
-
-        int row = point.y / lineSpacing + startRow;
-        int col = point.x / lineSpacing + startColumn;
-        UnitInterface unit = new Cell();
         unit.update();
         setToPosition(row, col, unit);
         correctProcessRegion();
@@ -174,70 +145,7 @@ public class Grid
         board.clear();
     }
 
-    /**
-     * Draws all the units to the screen
-     *
-     * @param g Graphics instance passed by a GridCanvas instance
-     * @param obs observer object
-     */
-    public void draw(Graphics2D g, ImageObserver obs)
-    {
-        int rows, cols;
-        int height = Integer.min(canvasSize.height, size.height);
-        int width = Integer.min(canvasSize.width, size.width);
-
-        rows = Integer.min(height / sideLength + 1, rowCount);
-        cols = Integer.min(width / sideLength + 1, columnCount);
-
-        // Draw the grid
-        g.setStroke(new BasicStroke(1));
-        g.setColor(foreground);
-        // rows
-        for (int c = 0; c <= rows; c++)
-        {
-            int ypos = c * (lineSpacing) - yoffset;
-            g.drawLine(0, ypos, width - 1, ypos);
-        }
-
-        // columns
-        for (int c = 0; c <= cols; c++)
-        {
-            int xpos = c * (lineSpacing) - xoffset;
-            g.drawLine(xpos, 0, xpos, height - 1);
-        }
-
-        // Draw the units
-        int endRow = startRow + rows;
-        int endColumn = startColumn + cols;
-        int drawnRows = endRow - startRow;
-        int drawnColumns = endColumn - startColumn;
-
-        for (int r = 0; r < drawnRows; r++) // rows
-        {
-            for (int c = 0; c < drawnColumns; c++) // columns
-            {
-
-                int row = r + startRow;
-                int col = c + startColumn;
-
-                UnitInterface unit = board.get(row, col);
-                if (unit == null)
-                {
-                    continue;
-                }
-
-                int xpos = c * (lineSpacing) - xoffset + 1;
-                int ypos = r * (lineSpacing) - yoffset + 1;
-                AffineTransform xform = new AffineTransform();
-                xform.translate(xpos, ypos);
-                xform.scale(tileScale, tileScale);
-
-                drawUnit(g, xform, obs, unit);
-            }
-        }
-    }
-
-    private void drawUnit(Graphics2D g, AffineTransform xform, ImageObserver obs, UnitInterface unit)
+    public void drawUnit(Graphics2D g, AffineTransform xform, ImageObserver obs, UnitInterface unit)
     {
         Image img = tileManager.getImage(unit.getSpecies().getTextureCode());
         g.drawImage(img, xform, obs);
@@ -245,7 +153,7 @@ public class Grid
 
     /*
     * GAME LOGIC CODE
-     */
+    */
     /**
      * Advances the game state to the next turn
      */
