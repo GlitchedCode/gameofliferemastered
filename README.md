@@ -4,7 +4,7 @@
 My OOP university project, Game of Life: Remastered is a reimagined version of the [*Life*](https://en.wikipedia.org/wiki/Conway's_Game_of_Life) cellular automaton originally invented by John Horton Conway.
 For this project I mainly aim to expand the original ruleset and add new types of units, while still having the game behave **exactly as the original**, as long as only the original Cells are on the board.
 
-The game supports all desktop systems (I hope), and needs Java 8 Runtime Environment to run. For more info about how to play and modify the game, [check the wiki]().
+The game supports all desktop systems (I hope), and needs Java 8 Runtime Environment to run. For more info about how to play and modify the game, [check the wiki](git clone https://github.com/pwndbg/pwndbg).
 
 
 
