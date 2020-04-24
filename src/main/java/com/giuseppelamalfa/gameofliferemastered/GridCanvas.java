@@ -9,6 +9,7 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.UnitInterface;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Cell;
 import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -224,8 +225,20 @@ public final class GridCanvas extends JPanel implements MouseListener, MouseMoti
     }
 
     @Override
+    public void repaint()
+    {
+        synchronized (this)
+        {
+            super.repaint();
+        }
+    }
+    
+    @Override
     public void paintComponent(Graphics g)
     {
+        if (grid == null)
+            return;
+        
         Graphics2D g2 = (Graphics2D) g;
         Dimension size = getSize();
         g.setColor(getBackground());
@@ -234,8 +247,8 @@ public final class GridCanvas extends JPanel implements MouseListener, MouseMoti
         int rows, cols;
         int gridRows = grid.getRowCount(), gridCols = grid.getColumnCount();
         Dimension gridSize = grid.getSize();
-        int height = Integer.min(size.height, size.height);
-        int width = Integer.min(size.width, size.width);
+        int height = Integer.min(size.height, gridSize.height);
+        int width = Integer.min(size.width, gridSize.width);
 
         rows = Integer.min(height / sideLength + 1, gridRows);
         cols = Integer.min(width / sideLength + 1, gridCols);
@@ -263,8 +276,11 @@ public final class GridCanvas extends JPanel implements MouseListener, MouseMoti
         int drawnRows = endRow - startRow;
         int drawnColumns = endColumn - startColumn;
         
-        if (grid == null)
-            return;
+        g2.setStroke(new BasicStroke(2));
+        
+        
+        Point topLeft = grid.getTopLeftActive();
+        Point bottomRight = grid.getBottomRightActive();
         
         for (int r = 0; r < drawnRows; r++) // rows
         {
@@ -274,14 +290,31 @@ public final class GridCanvas extends JPanel implements MouseListener, MouseMoti
                 int row = r + startRow;
                 int col = c + startColumn;
 
+                int xpos = c * (lineSpacing) - xoffset + 1;
+                int ypos = r * (lineSpacing) - yoffset + 1;
+                
+                if (row == topLeft.y && col == topLeft.x)
+                {
+                    g2.setColor(Color.RED);
+                    g.drawLine(0, ypos, width - 1, ypos);
+                    g.drawLine(xpos, 0, xpos, height - 1);
+                    g.drawOval(xpos - 5, ypos - 5, 10, 10);
+                }
+                else if (row == bottomRight.y && col == bottomRight.x)
+                {
+                    g2.setColor(Color.BLUE);
+                    g.drawLine(0, ypos + lineSpacing, width - 1, ypos + lineSpacing);                    
+                    g.drawLine(xpos + lineSpacing, 0, xpos + lineSpacing, height - 1);
+                    g.drawOval(xpos + lineSpacing - 5, ypos + lineSpacing - 5, 10, 10);
+                }
+                
                 UnitInterface unit = grid.getUnit(row, col);
                 if (unit == null)
                 {
                     continue;
                 }
 
-                int xpos = c * (lineSpacing) - xoffset + 1;
-                int ypos = r * (lineSpacing) - yoffset + 1;
+                
                 AffineTransform xform = new AffineTransform();
                 xform.translate(xpos, ypos);
                 xform.scale(tileScale, tileScale);

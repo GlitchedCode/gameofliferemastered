@@ -6,8 +6,8 @@
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
-import com.giuseppelamalfa.gameofliferemastered.utils.IntegerRangeRule;
-import com.giuseppelamalfa.gameofliferemastered.utils.IntegerSetRule;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.IntegerRangeRule;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.IntegerSetRule;
 
 /**
  *

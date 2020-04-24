@@ -3,13 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.giuseppelamalfa.gameofliferemastered.utils;
+package com.giuseppelamalfa.gameofliferemastered.gamelogic.rule;
+
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.RuleInterface;
 
 /**
  *
  * @author glitchedcode
  */
-public class IntegerRangeRule implements Rule<Integer>
+public class IntegerRangeRule implements RuleInterface<Integer>
 {
     private final Integer min;
     private final Integer max;

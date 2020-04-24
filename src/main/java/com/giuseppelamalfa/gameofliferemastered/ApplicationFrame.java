@@ -5,10 +5,10 @@
  */
 package com.giuseppelamalfa.gameofliferemastered;
 
+import com.giuseppelamalfa.gameofliferemastered.utils.ImageManager;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid;
 import javax.swing.ImageIcon;
 import java.net.URL;
-import java.util.Timer;
 
 /**
  *
@@ -21,12 +21,6 @@ public class ApplicationFrame extends javax.swing.JFrame{
     
     static ImageIcon                icon;
     
-    private Timer                   timer;
-    private boolean                 autoplay = false;
-
-    
-    
-    
     /*
     * JFRAME CODE
     */
@@ -37,10 +31,9 @@ public class ApplicationFrame extends javax.swing.JFrame{
      */
     public ApplicationFrame() throws Exception{
         tileManager = new ImageManager("tiles.json");
-        grid = new Grid(200, 300, tileManager);
+        grid = new Grid(20, 20, tileManager);
         URL resource = getClass().getClassLoader().getResource("Tiles/tile_0083.png");
         icon = new ImageIcon(resource);
-        timer = new Timer();
         
         initComponents();
         

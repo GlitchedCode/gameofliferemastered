@@ -8,7 +8,6 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.DeadUnit;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Cell;
 import java.util.Set;
-import com.giuseppelamalfa.gameofliferemastered.utils.Rule;
 
 /**
  *
@@ -106,7 +105,7 @@ public abstract interface UnitInterface
     public Species              getSpecies();
     public Set<Species>         getFriendlySpecies();
     public Set<Species>         getHostileSpecies();
-    public Rule<Integer>    getReproductionSelector();
+    public RuleInterface<Integer>    getReproductionSelector();
     public Integer              getHealth();
     public void                 incrementHealth(Integer increment);
 }

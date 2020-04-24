@@ -11,7 +11,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-import com.giuseppelamalfa.gameofliferemastered.utils.Rule;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.RuleInterface;
 
 /**
  *
@@ -30,7 +30,7 @@ public class DeadUnit implements UnitInterface
         HashMap<Species, Integer> reproductionCounters = new HashMap<>();
         // Contains the required amount of units of a given species to 
         // give birth to a new unit of that species.
-        HashMap<Species, Rule<Integer> > reproductionSelectors = new HashMap<>();
+        HashMap<Species, RuleInterface<Integer> > reproductionSelectors = new HashMap<>();
         reproductionCounters.put(Species.INVALID, 0);
         bornUnit = null;
         for (int i = 0; i < 8; i++)
@@ -73,7 +73,7 @@ public class DeadUnit implements UnitInterface
             if (current == Species.INVALID) continue;
             
             int currentCount = reproductionCounters.get(current);
-            Rule<Integer> selector = reproductionSelectors.get(current);
+            RuleInterface<Integer> selector = reproductionSelectors.get(current);
             
             if (currentCount == candidateCount)
             {
@@ -148,7 +148,7 @@ public class DeadUnit implements UnitInterface
     @Override
     public Set<Species>         getHostileSpecies() { return new HashSet<>(); }
     @Override
-    public Rule<Integer>    getReproductionSelector() { return null; }
+    public RuleInterface<Integer>    getReproductionSelector() { return null; }
     @Override
     public Integer              getHealth() { return 0; }
     @Override

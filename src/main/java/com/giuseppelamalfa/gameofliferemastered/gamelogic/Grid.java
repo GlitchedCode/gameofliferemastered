@@ -6,7 +6,7 @@
 package com.giuseppelamalfa.gameofliferemastered.gamelogic;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.DeadUnit;
-import com.giuseppelamalfa.gameofliferemastered.ImageManager;
+import com.giuseppelamalfa.gameofliferemastered.utils.ImageManager;
 import com.giuseppelamalfa.gameofliferemastered.utils.TwoDimensionalContainer;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -28,13 +28,8 @@ public class Grid
 
     private Integer             turn;
     private Integer             sideLength;
-    private Integer             lineSpacing;
 
     private final Dimension     size = new Dimension();
-    private Integer             xoffset;
-    private Integer             yoffset;
-    private Integer             startRow;
-    private Integer             startColumn;
     
     private final Integer       rowCount;
     private final Integer       columnCount;
@@ -129,6 +124,16 @@ public class Grid
     {
         return size;
     }
+    
+    public final Point getTopLeftActive()
+    {
+        return topLeftActive;
+    }
+    
+    public final Point getBottomRightActive()
+    {
+        return bottomRightActive;
+    }
 
     /*
     * RENDERING AND UI CODE
@@ -163,7 +168,7 @@ public class Grid
         reproductionStep();
         cleanupStep();
         correctProcessRegion();
-
+        
         turn = turn + 1;
     }
 
@@ -194,8 +199,8 @@ public class Grid
         topLeftActive.move(Integer.max(topLeftProcessed.x - 1, 0),
                 Integer.max(topLeftProcessed.y - 1, 0));
 
-        bottomRightActive.move(Integer.min(bottomRightProcessed.x + 2, columnCount),
-                Integer.min(bottomRightProcessed.y + 2, rowCount));
+        bottomRightActive.move(Integer.min(bottomRightProcessed.x + 1   , columnCount),
+                Integer.min(bottomRightProcessed.y + 1, rowCount));
     }
 
     /**
@@ -225,11 +230,7 @@ public class Grid
         //top row
         for (int i = 0; i < 3; i++)
         {
-            UnitInterface unit = null;
-            if (col + i >= topLeftActive.x)
-            {
-                unit = board.get(row - 1, col + i - 1);
-            }
+            UnitInterface unit = board.get(row - 1, col + i - 1);
             ret[i] = unit;
         }
 
@@ -240,11 +241,7 @@ public class Grid
         //bottom row
         for (int i = 0; i < 3; i++)
         {
-            UnitInterface unit = null;
-            if (col + i >= topLeftActive.x)
-            {
-                unit = board.get(row + 1, col - i + 1);
-            }
+            UnitInterface unit = board.get(row + 1, col - i + 1);
             ret[i + 4] = unit;
         }
         // if there is no unit, just leave null
@@ -276,14 +273,11 @@ public class Grid
                 // process more units
                 else
                 {
-                    moveProcessBoundaryToInclude(col, row);
+                    moveProcessBoundaryToInclude(row, col);
                 }
 
                 UnitInterface[] adjacentUnits = getUnitsAdjacentToPosition(row, col);
-                //System.out.println(Arrays.toString(adjacentUnits));
-
                 current.computeNextTurn(adjacentUnits);
-
             }
         }
     }

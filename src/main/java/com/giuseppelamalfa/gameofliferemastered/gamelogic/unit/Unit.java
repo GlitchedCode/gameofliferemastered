@@ -9,7 +9,7 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.GameLogicException;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.UnitInterface;
 import java.util.HashSet;
 import java.util.Set;
-import com.giuseppelamalfa.gameofliferemastered.utils.Rule;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.RuleInterface;
 
 /**
  *
@@ -30,9 +30,9 @@ public abstract class Unit implements UnitInterface
     protected Integer           health;                 //*
     protected boolean           healthChanged;
 
-    protected Rule<Integer> friendlyCountSelector;  //*
-    protected Rule<Integer> hostileCountSelector;   //*
-    protected Rule<Integer> reproductionSelector;   //*
+    protected RuleInterface<Integer> friendlyCountSelector;  //*
+    protected RuleInterface<Integer> hostileCountSelector;   //*
+    protected RuleInterface<Integer> reproductionSelector;   //*
 
     protected Unit()
     {
@@ -247,7 +247,7 @@ public abstract class Unit implements UnitInterface
      * @return lower bound of friendly units adjacent to this unit
      */
     @Override
-    public final Rule<Integer> getReproductionSelector()
+    public final RuleInterface<Integer> getReproductionSelector()
     {
         return reproductionSelector;
     }
