@@ -12,21 +12,21 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.IntegerSetRule;
  *
  * @author glitchedcode
  */
-public class Cell extends Unit {
-    
-    public Cell()
+public class Snake extends Unit
+{
+    public Snake()
     {
         super();
-        species = Species.CELL;
+        
+        species = Species.SNAKE;
         health = 1;
         friendlySpecies.add(species);
         
-        friendlyCountSelector = new IntegerRangeRule(2, 3);
-        hostileCountSelector = new IntegerRangeRule(0, 9);
-        
+        friendlyCountSelector = new IntegerRangeRule(1,2);
         var selector = new IntegerSetRule();
-        selector.add(3);
-        reproductionSelector = selector;
+        selector.add(1);
+        hostileCountSelector = selector;
+        
+        reproductionSelector = new IntegerRangeRule(2, 3);
     }
-    
 }

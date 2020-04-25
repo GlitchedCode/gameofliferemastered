@@ -7,6 +7,7 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.DeadUnit;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Cell;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Snake;
 import java.util.Set;
 
 /**
@@ -66,7 +67,7 @@ public abstract interface UnitInterface
     
     enum Species
     {
-        SNAKE("snake", DeadUnit.class),
+        SNAKE("snake", Snake.class),
         CELL("cell", Cell.class),
         INVALID("", DeadUnit.class);
         
