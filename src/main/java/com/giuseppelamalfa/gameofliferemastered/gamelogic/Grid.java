@@ -24,23 +24,27 @@ public class Grid
 {
 
     private final TwoDimensionalContainer<UnitInterface> board;
+    private final TwoDimensionalContainer<Boolean> sectorFlags;
     private final ImageManager tileManager;
 
-    private Integer             turn;
-    private Integer             sideLength;
+    private Integer turn;
+    private Integer sideLength;
 
-    private final Dimension     size = new Dimension();
-    
-    private final Integer       rowCount;
-    private final Integer       columnCount;
+    private final Dimension size = new Dimension();
 
-    private final Point         topLeftActive;
-    private final Point         bottomRightActive;
+    private final Integer rowCount;
+    private final Integer columnCount;
+    private final Integer sectorSideLength = 32;
+    private final Integer sectorRowCount;
+    private final Integer sectorColumnCount;
 
-    private final Point         topLeftProcessed;
-    private final Point         bottomRightProcessed;
+    private final Point topLeftActive;
+    private final Point bottomRightActive;
 
-    private final DeadUnit      deadUnit;
+    private final Point topLeftProcessed;
+    private final Point bottomRightProcessed;
+
+    private final DeadUnit deadUnit;
 
     /**
      * Constructor
@@ -54,9 +58,13 @@ public class Grid
     {
         rowCount = rows;
         columnCount = cols;
+        sectorRowCount = (rows / sectorSideLength) + 1;
+        sectorColumnCount = (cols / sectorSideLength) + 1;
 
         this.tileManager = tileManager;
         board = new TwoDimensionalContainer<>(rows, cols);
+        sectorFlags = new TwoDimensionalContainer<>(sectorRowCount, sectorColumnCount);
+        initSelectorFlags();
         deadUnit = new DeadUnit();
 
         topLeftActive = new Point(0, 0);
@@ -70,10 +78,20 @@ public class Grid
         turn = 0;
     }
 
+    private void initSelectorFlags()
+    {
+        for (int r = 0; r < sectorRowCount; r++)
+        {
+            for (int c = 0; c < sectorColumnCount; c++)
+            {
+                sectorFlags.put(r, c, false);
+            }
+        }
+    }
+
     /*
     * GETTERS AND SETTERS
-    */
-    
+     */
     /**
      * @return the number of the board's columns
      */
@@ -97,7 +115,7 @@ public class Grid
     {
         return turn;
     }
-    
+
     public UnitInterface getUnit(int row, int col)
     {
         return board.get(row, col);
@@ -124,12 +142,12 @@ public class Grid
     {
         return size;
     }
-    
+
     public final Point getTopLeftActive()
     {
         return topLeftActive;
     }
-    
+
     public final Point getBottomRightActive()
     {
         return bottomRightActive;
@@ -137,7 +155,7 @@ public class Grid
 
     /*
     * RENDERING AND UI CODE
-    */
+     */
     public void setUnit(int row, int col, UnitInterface unit)
     {
         unit.update();
@@ -158,48 +176,95 @@ public class Grid
 
     /*
     * GAME LOGIC CODE
-    */
+     */
+    private boolean surroundingSectorsActive(int sectorRow, int sectorColumn)
+    {
+        boolean ret = false;
+
+        for (int r = sectorRow - 1; r < sectorRow + 1; r++)
+        {
+            if ( r < 0 | r >= sectorRowCount )
+            {
+                continue;
+            }
+
+            for (int c = sectorColumn - 1; c < sectorColumn + 1; c++)
+            {
+                if ( c < 0 | c >= sectorColumnCount )
+                {
+                    continue;
+                }
+
+                ret = ret | sectorFlags.get(r, c);
+            }
+        }
+
+        return ret;
+    }
+
     /**
      * Advances the game state to the next turn
+     * @throws java.lang.Exception
      */
-    public void computeNextTurn()
+    public void computeNextTurn() throws Exception
     {
-        nextTurnStateComputationStep();
-        reproductionStep();
+        for (int sectorRow = 0; sectorRow < sectorRowCount; sectorRow++)
+        {
+            for (int sectorColumn = 0; sectorColumn < sectorColumnCount; sectorColumn++)
+            {
+                if ( !surroundingSectorsActive(sectorRow, sectorColumn) )
+                {
+                    continue;
+                }
+
+                Point topLeftBoundary = getSectorTopLeftBoundary(sectorRow, sectorColumn);
+                Point bottomRightBoundary = getSectorBottomRightBoundary(sectorRow, sectorColumn);
+
+                /*.x = Integer.max(topLeftBoundary.x, topLeftActive.x);
+                topLeftBoundary.y = Integer.max(topLeftBoundary.y, topLeftActive.y);
+                bottomRightBoundary.x = Integer.min(bottomRightBoundary.x, bottomRightActive.x);
+                bottomRightBoundary.y = Integer.min(bottomRightBoundary.y, bottomRightActive.y);
+                */
+                boolean active = nextTurnStateComputationStep(topLeftBoundary, bottomRightBoundary);
+                active = active | reproductionStep(topLeftBoundary, bottomRightBoundary);
+
+                sectorFlags.put(sectorRow, sectorColumn, active);
+            }
+        }
+
         cleanupStep();
         correctProcessRegion();
-        
-        turn = turn + 1;
+        turn += 1;
     }
 
     private void moveProcessBoundaryToInclude(Integer row, Integer col)
     {
-        if (row < topLeftProcessed.y)
+        if ( row < topLeftProcessed.y )
         {
             topLeftProcessed.y = row;
         }
-        else if (row > bottomRightProcessed.y)
+        else if ( row > bottomRightProcessed.y )
         {
             bottomRightProcessed.y = row;
         }
 
-        if (col < topLeftProcessed.x)
+        if ( col < topLeftProcessed.x )
         {
             topLeftProcessed.x = col;
         }
-        else if (col > bottomRightProcessed.x)
+        else if ( col > bottomRightProcessed.x )
         {
             bottomRightProcessed.x = col;
         }
 
     }
-    
+
     private void correctProcessRegion()
     {
         topLeftActive.move(Integer.max(topLeftProcessed.x - 1, 0),
                 Integer.max(topLeftProcessed.y - 1, 0));
 
-        bottomRightActive.move(Integer.min(bottomRightProcessed.x + 1   , columnCount),
+        bottomRightActive.move(Integer.min(bottomRightProcessed.x + 1, columnCount),
                 Integer.min(bottomRightProcessed.y + 1, rowCount));
     }
 
@@ -212,15 +277,29 @@ public class Grid
      */
     public final void setToPosition(Integer row, Integer col, UnitInterface unit)
     {
-        if (board.get(row, col) == null)
+        if ( board.get(row, col) == null )
         {
             board.put(row, col, unit);
             moveProcessBoundaryToInclude(row, col);
+            sectorFlags.put(row, col, true);
         }
         else
         {
             board.remove(row, col);
         }
+    }
+
+    private Point getSectorTopLeftBoundary(int sectorRow, int sectorColumn)
+    {
+        return new Point(sectorColumn * sectorSideLength, sectorRow * sectorSideLength);
+    }
+
+    private Point getSectorBottomRightBoundary(int sectorRow, int sectorColumn)
+    {
+        int row = Integer.max(rowCount, (sectorRow + 1) * sectorSideLength - 1);
+        int col = Integer.max(columnCount, (sectorColumn + 1) * sectorSideLength - 1);
+
+        return new Point(col, row);
     }
 
     private UnitInterface[] getUnitsAdjacentToPosition(Integer row, Integer col)
@@ -248,22 +327,24 @@ public class Grid
         return ret;
     }
 
-    private void nextTurnStateComputationStep()
+    private boolean nextTurnStateComputationStep(Point topLeftBoundary, Point bottomRightBoundary) throws GameLogicException
     {
         boolean noUnitFound = true;
-        for (int row = topLeftActive.y; row <= bottomRightActive.y; row++)
+        boolean aliveNextTurn = false;
+
+        for (int row = topLeftBoundary.y; row <= bottomRightBoundary.y; row++)
         {
-            for (int col = topLeftActive.x; col <= bottomRightActive.x; col++)
+            for (int col = topLeftBoundary.x; col <= bottomRightBoundary.x; col++)
             {
                 UnitInterface current = board.get(row, col);
-                if (current == null)
+                if ( current == null )
                 {
                     continue;
                 }
 
                 // Set the board's processing rectangle to only contain the first
                 // live unit found
-                if (noUnitFound)
+                if ( noUnitFound )
                 {
                     topLeftProcessed.move(col, row);
                     bottomRightProcessed.move(col, row);
@@ -278,17 +359,20 @@ public class Grid
 
                 UnitInterface[] adjacentUnits = getUnitsAdjacentToPosition(row, col);
                 current.computeNextTurn(adjacentUnits);
+                aliveNextTurn = current.getNextTurnState() == UnitInterface.State.ALIVE;
             }
         }
+        return aliveNextTurn;
     }
 
-    private void reproductionStep()
+    private boolean reproductionStep(Point topLeftBoundary, Point bottomRightBoundary)
     {
-        for (int row = topLeftActive.y; row <= bottomRightActive.y; row++)
+        boolean aliveNextTurn = false;
+        for (int row = topLeftBoundary.y; row <= bottomRightBoundary.y; row++)
         {
-            for (int col = topLeftActive.x; col <= bottomRightActive.x; col++)
+            for (int col = topLeftBoundary.x; col <= bottomRightBoundary.x; col++)
             {
-                if (board.get(row, col) != null)
+                if ( board.get(row, col) != null )
                 {
                     continue;
                 }
@@ -299,13 +383,15 @@ public class Grid
                 UnitInterface bornUnit = deadUnit.getBornUnit();
                 deadUnit.update();
 
-                if (bornUnit != null)
+                if ( bornUnit != null )
                 {
+                    aliveNextTurn = true;
                     setToPosition(row, col, bornUnit);
                     moveProcessBoundaryToInclude(row, col);
                 }
             }
         }
+        return aliveNextTurn;
     }
 
     private void cleanupStep()
@@ -315,10 +401,10 @@ public class Grid
             for (int col = topLeftActive.x; col <= bottomRightActive.x; col++)
             {
                 UnitInterface current = board.get(row, col);
-                if (current != null)
+                if ( current != null )
                 {
                     current.update();
-                    if (current.getCurrentState() == UnitInterface.State.DEAD)
+                    if ( current.getCurrentState() == UnitInterface.State.DEAD )
                     {
                         board.remove(row, col);
                     }

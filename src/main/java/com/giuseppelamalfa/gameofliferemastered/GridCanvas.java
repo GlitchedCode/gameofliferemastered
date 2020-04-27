@@ -8,6 +8,7 @@ package com.giuseppelamalfa.gameofliferemastered;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.UnitInterface;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Cell;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Snake;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -23,6 +24,8 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.AffineTransform;
 import java.util.Timer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JPanel;
 
 /**
@@ -73,7 +76,14 @@ public final class GridCanvas extends JPanel implements MouseListener, MouseMoti
             }
             if (button == MouseEvent.BUTTON3)
             {
-                grid.computeNextTurn();
+                try
+                {
+                    grid.computeNextTurn();
+                }
+                catch (Exception ex)
+                {
+                    Logger.getLogger(GridCanvas.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
     }

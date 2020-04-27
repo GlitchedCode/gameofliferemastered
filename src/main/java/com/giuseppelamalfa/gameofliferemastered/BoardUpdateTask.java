@@ -7,6 +7,8 @@ package com.giuseppelamalfa.gameofliferemastered;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid;
 import java.util.TimerTask;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JPanel;
 
 /**
@@ -34,7 +36,14 @@ public class BoardUpdateTask extends TimerTask
     {
         synchronized (grid)
         {
-            grid.computeNextTurn();
+            try
+            {
+                grid.computeNextTurn();
+            }
+            catch (Exception ex)
+            {
+                Logger.getLogger(BoardUpdateTask.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
 

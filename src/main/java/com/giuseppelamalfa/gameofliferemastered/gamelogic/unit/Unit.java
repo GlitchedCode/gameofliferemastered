@@ -20,15 +20,15 @@ public abstract class Unit implements UnitInterface
 
     // ALL FIELDS MARKED WITH * MUST BE INITIALIZED IN ALL SUBCLASSES
     // REFER TO THE Cell CLASS FOR AN EXAMPLE OF CORRECT USAGE
-    protected State             currentState;
-    protected State             nextTurnState;
+    protected State             currentState = State.INVALID;
+    protected State             nextTurnState = State.ALIVE;
 
     protected Species           species;                //*
     protected Set<Species>      friendlySpecies;        //* add friendly species
     protected Set<Species>      hostileSpecies;         //* add hostile species
 
     protected Integer           health;                 //*
-    protected boolean           healthChanged;
+    protected boolean           healthChanged = false;
 
     protected RuleInterface<Integer> friendlyCountSelector;  //*
     protected RuleInterface<Integer> hostileCountSelector;   //*
@@ -36,13 +36,8 @@ public abstract class Unit implements UnitInterface
 
     protected Unit()
     {
-        healthChanged = false;
-
         friendlySpecies = new HashSet<>();
         hostileSpecies = new HashSet<>();
-        
-        currentState = State.INVALID;
-        nextTurnState = State.ALIVE;
     }
 
     /**

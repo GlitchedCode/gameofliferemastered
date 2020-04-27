@@ -22,11 +22,14 @@ public class Snake extends Unit
         health = 1;
         friendlySpecies.add(species);
         
-        friendlyCountSelector = new IntegerRangeRule(1,2);
+        friendlyCountSelector = new IntegerRangeRule(2,5);
         var selector = new IntegerSetRule();
         selector.add(1);
-        hostileCountSelector = selector;
+        hostileCountSelector = new IntegerRangeRule(0, 9);
         
-        reproductionSelector = new IntegerRangeRule(2, 3);
+        selector = new IntegerSetRule();
+        selector.add(4);
+        selector.add(5);
+        reproductionSelector = selector;
     }
 }
