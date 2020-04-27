@@ -273,6 +273,7 @@ public abstract class Unit implements UnitInterface
     {
         String ret = species.toString();
         ret += "@" + hashCode();
+        ret += " " + currentState.toString();
         return ret;
     }
 }

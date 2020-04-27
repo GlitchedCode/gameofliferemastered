@@ -8,7 +8,6 @@ package com.giuseppelamalfa.gameofliferemastered;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.UnitInterface;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Cell;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Snake;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -27,6 +26,7 @@ import java.util.Timer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JPanel;
+import javax.swing.ToolTipManager;
 
 /**
  *
@@ -86,8 +86,39 @@ public final class GridCanvas extends JPanel implements MouseListener, MouseMoti
                 }
             }
         }
-    }
+        }
 
+    @Override
+    public void mouseMoved(MouseEvent me)
+    {
+        synchronized (grid)
+        {
+            Point point = me.getPoint();
+            point.x += xoffset;
+            point.y += yoffset;
+
+            int row = point.y / lineSpacing + startRow;
+            int col = point.x / lineSpacing + startColumn;
+            
+            int sectorRow = row / grid.getSectorSideLength();
+            int sectorCol = col / grid.getSectorSideLength();
+            
+            String text = "<html>Position: (" + col + ", " + row + 
+                    ")<br>Sector: (" + sectorCol + ", " + sectorRow + ")";
+            
+            UnitInterface unit = grid.getUnit(row, col);
+            
+            if (unit != null)
+            {
+                text += "<br>" + unit.toString();
+            }
+            
+            text += "</html>";
+            
+            setToolTipText(text);
+        }
+    }
+    
     @Override
     public void mousePressed(MouseEvent me)
     {
@@ -146,11 +177,6 @@ public final class GridCanvas extends JPanel implements MouseListener, MouseMoti
 
     @Override
     public void mouseExited(MouseEvent me)
-    {
-    }
-
-    @Override
-    public void mouseMoved(MouseEvent me)
     {
     }
 
@@ -372,5 +398,6 @@ public final class GridCanvas extends JPanel implements MouseListener, MouseMoti
         addMouseWheelListener(this);
         addKeyListener(this);
         timer.schedule(new BoardRenderTask(this), 0, 18);
+        ToolTipManager.sharedInstance().setInitialDelay(0);
     }
 }

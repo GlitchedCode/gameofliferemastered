@@ -14,6 +14,7 @@ import java.awt.Image;
 import java.awt.Point;
 import java.awt.geom.AffineTransform;
 import java.awt.image.ImageObserver;
+import java.util.Arrays;
 
 /**
  * Class for handling all of game logic and rendering all units to the grid
@@ -32,17 +33,17 @@ public class Grid
 
     private final Dimension size = new Dimension();
 
-    private final Integer rowCount;
-    private final Integer columnCount;
-    private final Integer sectorSideLength = 32;
-    private final Integer sectorRowCount;
-    private final Integer sectorColumnCount;
+    private final Integer   rowCount;
+    private final Integer   columnCount;
+    private final Integer   sectorSideLength = 16;
+    private final Integer   sectorRowCount;
+    private final Integer   sectorColumnCount;
 
-    private final Point topLeftActive;
-    private final Point bottomRightActive;
-
-    private final Point topLeftProcessed;
-    private final Point bottomRightProcessed;
+    private boolean         unitFoundThisTurn = false;
+    private final Point     topLeftActive;
+    private final Point     bottomRightActive;
+    private final Point     topLeftProcessed;
+    private final Point     bottomRightProcessed;
 
     private final DeadUnit deadUnit;
 
@@ -133,6 +134,11 @@ public class Grid
         size.height = (value + 1) * rowCount + 1;
     }
 
+    public final Integer getSectorSideLength()
+    {
+        return sectorSideLength;
+    }
+    
     public final Integer getSideLength()
     {
         return sideLength;
@@ -152,7 +158,7 @@ public class Grid
     {
         return bottomRightActive;
     }
-
+    
     /*
     * RENDERING AND UI CODE
      */
@@ -194,11 +200,11 @@ public class Grid
                 {
                     continue;
                 }
-
+                
                 ret = ret | sectorFlags.get(r, c);
             }
         }
-
+        
         return ret;
     }
 
@@ -208,6 +214,8 @@ public class Grid
      */
     public void computeNextTurn() throws Exception
     {
+        unitFoundThisTurn = false;
+
         for (int sectorRow = 0; sectorRow < sectorRowCount; sectorRow++)
         {
             for (int sectorColumn = 0; sectorColumn < sectorColumnCount; sectorColumn++)
@@ -220,11 +228,11 @@ public class Grid
                 Point topLeftBoundary = getSectorTopLeftBoundary(sectorRow, sectorColumn);
                 Point bottomRightBoundary = getSectorBottomRightBoundary(sectorRow, sectorColumn);
 
-                /*.x = Integer.max(topLeftBoundary.x, topLeftActive.x);
+                topLeftBoundary.x = Integer.max(topLeftBoundary.x, topLeftActive.x);
                 topLeftBoundary.y = Integer.max(topLeftBoundary.y, topLeftActive.y);
                 bottomRightBoundary.x = Integer.min(bottomRightBoundary.x, bottomRightActive.x);
                 bottomRightBoundary.y = Integer.min(bottomRightBoundary.y, bottomRightActive.y);
-                */
+
                 boolean active = nextTurnStateComputationStep(topLeftBoundary, bottomRightBoundary);
                 active = active | reproductionStep(topLeftBoundary, bottomRightBoundary);
 
@@ -235,10 +243,20 @@ public class Grid
         cleanupStep();
         correctProcessRegion();
         turn += 1;
+        
+        System.out.println("Turn " + turn);
     }
 
     private void moveProcessBoundaryToInclude(Integer row, Integer col)
     {
+        if (!unitFoundThisTurn)
+        {
+            topLeftProcessed.move(col, row);
+            bottomRightProcessed.move(col, row);
+            unitFoundThisTurn = true;
+            return;
+        }
+        
         if ( row < topLeftProcessed.y )
         {
             topLeftProcessed.y = row;
@@ -281,7 +299,7 @@ public class Grid
         {
             board.put(row, col, unit);
             moveProcessBoundaryToInclude(row, col);
-            sectorFlags.put(row, col, true);
+            sectorFlags.put(row / sectorSideLength, col / sectorSideLength, true);
         }
         else
         {
@@ -329,7 +347,10 @@ public class Grid
 
     private boolean nextTurnStateComputationStep(Point topLeftBoundary, Point bottomRightBoundary) throws GameLogicException
     {
-        boolean noUnitFound = true;
+        
+        System.out.println(topLeftBoundary);
+        System.out.println(bottomRightBoundary);
+
         boolean aliveNextTurn = false;
 
         for (int row = topLeftBoundary.y; row <= bottomRightBoundary.y; row++)
@@ -342,26 +363,19 @@ public class Grid
                     continue;
                 }
 
-                // Set the board's processing rectangle to only contain the first
-                // live unit found
-                if ( noUnitFound )
-                {
-                    topLeftProcessed.move(col, row);
-                    bottomRightProcessed.move(col, row);
-                    noUnitFound = false;
-                }
-                // Expand the board's processing area accordingly as we
-                // process more units
-                else
-                {
-                    moveProcessBoundaryToInclude(row, col);
-                }
-
                 UnitInterface[] adjacentUnits = getUnitsAdjacentToPosition(row, col);
                 current.computeNextTurn(adjacentUnits);
-                aliveNextTurn = current.getNextTurnState() == UnitInterface.State.ALIVE;
+                
+                // Expand the board's processing area accordingly as we
+                // process more units
+                if (current.getNextTurnState() == UnitInterface.State.ALIVE)
+                {
+                    moveProcessBoundaryToInclude(row, col);
+                    aliveNextTurn = true;
+                }
             }
         }
+        
         return aliveNextTurn;
     }
 
@@ -379,6 +393,8 @@ public class Grid
 
                 UnitInterface[] adjacentUnits = getUnitsAdjacentToPosition(row, col);
 
+                System.out.println("" + col + " " + row + " " + Arrays.toString(adjacentUnits));
+                
                 deadUnit.computeNextTurn(adjacentUnits);
                 UnitInterface bornUnit = deadUnit.getBornUnit();
                 deadUnit.update();
