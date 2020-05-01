@@ -5,6 +5,9 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic;
 
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.DeadUnit;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Cell;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Snake;
 import java.util.Set;
 
 /**
@@ -16,14 +19,55 @@ public abstract interface UnitInterface
     
     enum State
     {
-        INVALID,
-        DEAD,
-        ALIVE
+        INVALID(null),
+        DEAD(null),
+        ALIVE(null);
+        
+        private final StateInterface stateImplementationInterface;
+        
+        private State(StateInterface iface)
+        {
+            stateImplementationInterface = iface;
+        }
+        
+        public final void enter(UnitInterface unit)
+        {
+            if ( stateImplementationInterface != null )
+                stateImplementationInterface.enter(unit);
+        }
+        
+        public final void exit(UnitInterface unit)
+        {
+            if ( stateImplementationInterface != null )
+                stateImplementationInterface.exit(unit);
+        }
+        
+        public final boolean attackModifier(boolean speciesResult, Integer adjacencyPosition)
+        {
+            if ( stateImplementationInterface != null)
+                return stateImplementationInterface.attackModifier(speciesResult, adjacencyPosition);
+            else
+                return speciesResult;
+        }
+
+        public final boolean reproductionModifier(boolean speciesResult, Integer adjacencyPosition)
+        {
+            if ( stateImplementationInterface != null )
+                return stateImplementationInterface.reproductionModifier(speciesResult, adjacencyPosition);
+            else
+                return speciesResult;
+        }
+        
+        public final void independentAction(UnitInterface unit)
+        {
+            if ( stateImplementationInterface != null)
+                stateImplementationInterface.independentAction(unit);
+        }
     }
     
     enum Species
     {
-        SNAKE("snake", DeadUnit.class),
+        SNAKE("snake", Snake.class),
         CELL("cell", Cell.class),
         INVALID("", DeadUnit.class);
         
@@ -52,17 +96,18 @@ public abstract interface UnitInterface
         return (adjacencyPosition + 4) % 8;
     }
     
-    public void         computeNextTurn(UnitInterface[] adjacentUnits);
-    public void         update();
-    public boolean      reproduce(Integer adjacencyPosition);
-    public boolean      attack(Integer adjacencyPosition);
-    public void         passiveAction();
-    public State        getNextTurnState() throws GameLogicException;
-    public State        getCurrentState();
-    public Species      getSpecies();
-    public Set<Species> getFriendlySpecies();
-    public Set<Species> getHostileSpecies();
-    public Integer      getMinimumFriendlyUnits();
-    public Integer      getHealth();
-    public void         incrementHealth(Integer increment);
+    public void                 computeNextTurn(UnitInterface[] adjacentUnits);
+    public void                 update();
+    public boolean              isAlive();
+    public boolean              reproduce(Integer adjacencyPosition);
+    public boolean              attack(Integer adjacencyPosition);
+    public void                 independentAction();
+    public State                getNextTurnState() throws GameLogicException;
+    public State                getCurrentState();
+    public Species              getSpecies();
+    public Set<Species>         getFriendlySpecies();
+    public Set<Species>         getHostileSpecies();
+    public RuleInterface<Integer>    getReproductionSelector();
+    public Integer              getHealth();
+    public void                 incrementHealth(Integer increment);
 }

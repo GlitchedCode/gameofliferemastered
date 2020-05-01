@@ -5,6 +5,8 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic;
 
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
+
 /**
  *
  * @author glitchedcode

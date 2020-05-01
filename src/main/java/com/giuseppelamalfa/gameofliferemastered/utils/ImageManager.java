@@ -3,16 +3,20 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.giuseppelamalfa.gameofliferemastered;
+package com.giuseppelamalfa.gameofliferemastered.utils;
 
+import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
+import java.awt.image.FilteredImageSource;
+import java.awt.image.ImageFilter;
+import java.awt.image.ImageProducer;
+import java.awt.image.RGBImageFilter;
 import java.io.BufferedReader;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.file.Files;
 import java.util.HashMap;
 
 import javax.imageio.ImageIO;
@@ -30,7 +34,9 @@ public class ImageManager{
     private boolean                 initialized = false;
     
     private String                                  imagePathTemplate;
-    private final HashMap<String, BufferedImage>    imageMap = new HashMap<>();
+    private final HashMap<String, Image>    imageMap = new HashMap<>();
+    
+    private int                     colorKey = 0xff222323;
     
     // Read the images.json file to get the data we need to store
     // and retrieve the images
@@ -48,7 +54,6 @@ public class ImageManager{
                 JSONStringBuilder.append(line);
             }
             imageData = new JSONObject(JSONStringBuilder.toString());
-            
             imagePathTemplate = imageData.getString("pathTemplate");
         }
         catch (IOException e)
@@ -79,7 +84,19 @@ public class ImageManager{
             InputStream imageStream = this.getClass().getClassLoader().getResourceAsStream(path);
             try
             {
-                imageMap.put(nameString, ImageIO.read(imageStream));
+                BufferedImage img = ImageIO.read(imageStream);
+                ImageFilter filter = new RGBImageFilter()
+                {
+                    @Override
+                    public final int filterRGB(int x, int y, int rgb)
+                    {
+                        if(rgb == colorKey)
+                            return rgb & 0x00FFFFFF;
+                        return rgb;
+                    }
+                };
+                ImageProducer ip = new FilteredImageSource(img.getSource(), filter);
+                imageMap.put(nameString, Toolkit.getDefaultToolkit().createImage(ip));
             }
             catch (IOException e)
             {
@@ -105,7 +122,7 @@ public class ImageManager{
         return initialized;
     }
     
-    public BufferedImage getImage(String name)
+    public Image getImage(String name)
     {
         return imageMap.get(name);
     }
