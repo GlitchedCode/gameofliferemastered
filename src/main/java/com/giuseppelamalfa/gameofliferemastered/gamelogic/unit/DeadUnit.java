@@ -65,6 +65,8 @@ public class DeadUnit implements UnitInterface
         
         Species candidate = Species.INVALID;
         int candidateCount = 0;
+        
+        //System.out.println(reproductionCounters.get(Species.CELL));
 
         // Choose the candidate species to generate based on the reproduction
         // counters taken above and thei order in the Species enum
@@ -127,6 +129,12 @@ public class DeadUnit implements UnitInterface
     public void update()
     {
         bornUnit = null;
+    }
+    
+    @Override
+    public boolean isAlive()
+    {
+        return false;
     }
     
     // overrides

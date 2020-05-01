@@ -98,6 +98,7 @@ public abstract interface UnitInterface
     
     public void                 computeNextTurn(UnitInterface[] adjacentUnits);
     public void                 update();
+    public boolean              isAlive();
     public boolean              reproduce(Integer adjacencyPosition);
     public boolean              attack(Integer adjacencyPosition);
     public void                 independentAction();

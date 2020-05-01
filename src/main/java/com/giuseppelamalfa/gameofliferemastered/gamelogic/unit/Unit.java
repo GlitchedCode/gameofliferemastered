@@ -20,15 +20,15 @@ public abstract class Unit implements UnitInterface
 
     // ALL FIELDS MARKED WITH * MUST BE INITIALIZED IN ALL SUBCLASSES
     // REFER TO THE Cell CLASS FOR AN EXAMPLE OF CORRECT USAGE
-    protected State             currentState = State.INVALID;
-    protected State             nextTurnState = State.ALIVE;
+    protected State currentState = State.INVALID;
+    protected State nextTurnState = State.ALIVE;
 
-    protected Species           species;                //*
-    protected Set<Species>      friendlySpecies;        //* add friendly species
-    protected Set<Species>      hostileSpecies;         //* add hostile species
+    protected Species species;                //*
+    protected Set<Species> friendlySpecies;        //* add friendly species
+    protected Set<Species> hostileSpecies;         //* add hostile species
 
-    protected Integer           health;                 //*
-    protected boolean           healthChanged = false;
+    protected Integer health;                 //*
+    protected boolean healthChanged = false;
 
     protected RuleInterface<Integer> friendlyCountSelector;  //*
     protected RuleInterface<Integer> hostileCountSelector;   //*
@@ -55,6 +55,10 @@ public abstract class Unit implements UnitInterface
         {
             UnitInterface current = adjacentUnits[i];
             if ( current == null )
+            {
+                continue;
+            }
+            if ( !current.isAlive() )
             {
                 continue;
             }
@@ -130,7 +134,7 @@ public abstract class Unit implements UnitInterface
     @Override
     public void update()
     {
-        if (currentState != nextTurnState)
+        if ( currentState != nextTurnState )
         {
             currentState.exit(this);
             currentState = nextTurnState;
@@ -138,6 +142,12 @@ public abstract class Unit implements UnitInterface
             nextTurnState = State.INVALID;
         }
         healthChanged = false;
+    }
+
+    @Override
+    public boolean isAlive()
+    {
+        return currentState != State.DEAD & currentState != State.INVALID;
     }
 
     /**
@@ -150,8 +160,7 @@ public abstract class Unit implements UnitInterface
     @Override
     public boolean reproduce(Integer adjacencyPostition)
     {
-        boolean ret = currentState != State.DEAD & currentState != State.INVALID;
-        return currentState.reproductionModifier(ret, adjacencyPostition);
+        return currentState.reproductionModifier(isAlive(), adjacencyPostition);
     }
 
     /**
@@ -164,8 +173,7 @@ public abstract class Unit implements UnitInterface
     @Override
     public boolean attack(Integer adjacencyPosition)
     {
-        boolean temp = currentState != State.DEAD & currentState != State.INVALID;
-        return currentState.attackModifier(temp, adjacencyPosition);
+        return currentState.attackModifier(isAlive(), adjacencyPosition);
     }
 
     /**

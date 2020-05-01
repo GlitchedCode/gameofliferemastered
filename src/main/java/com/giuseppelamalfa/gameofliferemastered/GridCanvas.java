@@ -398,6 +398,6 @@ public final class GridCanvas extends JPanel implements MouseListener, MouseMoti
         addMouseWheelListener(this);
         addKeyListener(this);
         timer.schedule(new BoardRenderTask(this), 0, 18);
-        ToolTipManager.sharedInstance().setInitialDelay(0);
+        ToolTipManager.sharedInstance().setInitialDelay(150);
     }
 }

@@ -31,7 +31,7 @@ public class ApplicationFrame extends javax.swing.JFrame{
      */
     public ApplicationFrame() throws Exception{
         tileManager = new ImageManager("tiles.json");
-        grid = new Grid(100, 100, tileManager);
+        grid = new Grid(200, 300, tileManager);
         URL resource = getClass().getClassLoader().getResource("Tiles/tile_0083.png");
         icon = new ImageIcon(resource);
         

@@ -33,17 +33,17 @@ public class Grid
 
     private final Dimension size = new Dimension();
 
-    private final Integer   rowCount;
-    private final Integer   columnCount;
-    private final Integer   sectorSideLength = 16;
-    private final Integer   sectorRowCount;
-    private final Integer   sectorColumnCount;
+    private final Integer rowCount;
+    private final Integer columnCount;
+    private final Integer sectorSideLength = 32;
+    private final Integer sectorRowCount;
+    private final Integer sectorColumnCount;
 
-    private boolean         unitFoundThisTurn = false;
-    private final Point     topLeftActive;
-    private final Point     bottomRightActive;
-    private final Point     topLeftProcessed;
-    private final Point     bottomRightProcessed;
+    private boolean unitFoundThisTurn = false;
+    private final Point topLeftActive;
+    private final Point bottomRightActive;
+    private final Point topLeftProcessed;
+    private final Point bottomRightProcessed;
 
     private final DeadUnit deadUnit;
 
@@ -138,7 +138,7 @@ public class Grid
     {
         return sectorSideLength;
     }
-    
+
     public final Integer getSideLength()
     {
         return sideLength;
@@ -158,7 +158,7 @@ public class Grid
     {
         return bottomRightActive;
     }
-    
+
     /*
     * RENDERING AND UI CODE
      */
@@ -187,29 +187,30 @@ public class Grid
     {
         boolean ret = false;
 
-        for (int r = sectorRow - 1; r < sectorRow + 1; r++)
+        for (int r = sectorRow - 1; r <= sectorRow + 1; r++)
         {
             if ( r < 0 | r >= sectorRowCount )
             {
                 continue;
             }
 
-            for (int c = sectorColumn - 1; c < sectorColumn + 1; c++)
+            for (int c = sectorColumn - 1; c <= sectorColumn + 1; c++)
             {
                 if ( c < 0 | c >= sectorColumnCount )
                 {
                     continue;
                 }
-                
+
                 ret = ret | sectorFlags.get(r, c);
             }
         }
-        
+
         return ret;
     }
 
     /**
      * Advances the game state to the next turn
+     *
      * @throws java.lang.Exception
      */
     public void computeNextTurn() throws Exception
@@ -220,6 +221,7 @@ public class Grid
         {
             for (int sectorColumn = 0; sectorColumn < sectorColumnCount; sectorColumn++)
             {
+
                 if ( !surroundingSectorsActive(sectorRow, sectorColumn) )
                 {
                     continue;
@@ -232,7 +234,13 @@ public class Grid
                 topLeftBoundary.y = Integer.max(topLeftBoundary.y, topLeftActive.y);
                 bottomRightBoundary.x = Integer.min(bottomRightBoundary.x, bottomRightActive.x);
                 bottomRightBoundary.y = Integer.min(bottomRightBoundary.y, bottomRightActive.y);
+                /*
+                System.out.println("sector " + sectorColumn + " " + sectorRow);
 
+                System.out.println(topLeftBoundary);
+                System.out.println(bottomRightBoundary);
+                 */
+                
                 boolean active = nextTurnStateComputationStep(topLeftBoundary, bottomRightBoundary);
                 active = active | reproductionStep(topLeftBoundary, bottomRightBoundary);
 
@@ -243,20 +251,20 @@ public class Grid
         cleanupStep();
         correctProcessRegion();
         turn += 1;
-        
+
         System.out.println("Turn " + turn);
     }
 
     private void moveProcessBoundaryToInclude(Integer row, Integer col)
     {
-        if (!unitFoundThisTurn)
+        if ( !unitFoundThisTurn )
         {
             topLeftProcessed.move(col, row);
             bottomRightProcessed.move(col, row);
             unitFoundThisTurn = true;
             return;
         }
-        
+
         if ( row < topLeftProcessed.y )
         {
             topLeftProcessed.y = row;
@@ -314,8 +322,8 @@ public class Grid
 
     private Point getSectorBottomRightBoundary(int sectorRow, int sectorColumn)
     {
-        int row = Integer.max(rowCount, (sectorRow + 1) * sectorSideLength - 1);
-        int col = Integer.max(columnCount, (sectorColumn + 1) * sectorSideLength - 1);
+        int row = Integer.min(rowCount, (sectorRow + 1) * sectorSideLength - 1);
+        int col = Integer.min(columnCount, (sectorColumn + 1) * sectorSideLength - 1);
 
         return new Point(col, row);
     }
@@ -347,10 +355,6 @@ public class Grid
 
     private boolean nextTurnStateComputationStep(Point topLeftBoundary, Point bottomRightBoundary) throws GameLogicException
     {
-        
-        System.out.println(topLeftBoundary);
-        System.out.println(bottomRightBoundary);
-
         boolean aliveNextTurn = false;
 
         for (int row = topLeftBoundary.y; row <= bottomRightBoundary.y; row++)
@@ -363,19 +367,21 @@ public class Grid
                     continue;
                 }
 
-                UnitInterface[] adjacentUnits = getUnitsAdjacentToPosition(row, col);
-                current.computeNextTurn(adjacentUnits);
                 
+                UnitInterface[] adjacentUnits = getUnitsAdjacentToPosition(row, col);
+                System.out.println("" + col + " " + row + " " + Arrays.toString(adjacentUnits));
+                current.computeNextTurn(adjacentUnits);
+
                 // Expand the board's processing area accordingly as we
                 // process more units
-                if (current.getNextTurnState() == UnitInterface.State.ALIVE)
+                if ( current.getNextTurnState() == UnitInterface.State.ALIVE )
                 {
                     moveProcessBoundaryToInclude(row, col);
                     aliveNextTurn = true;
                 }
             }
         }
-        
+
         return aliveNextTurn;
     }
 
@@ -386,21 +392,24 @@ public class Grid
         {
             for (int col = topLeftBoundary.x; col <= bottomRightBoundary.x; col++)
             {
-                if ( board.get(row, col) != null )
+                UnitInterface unit = board.get(row, col);
+                if ( unit != null )
                 {
-                    continue;
+                    if ( unit.getCurrentState() == UnitInterface.State.ALIVE )
+                    {
+                        continue;
+                    }
                 }
 
                 UnitInterface[] adjacentUnits = getUnitsAdjacentToPosition(row, col);
 
-                System.out.println("" + col + " " + row + " " + Arrays.toString(adjacentUnits));
-                
                 deadUnit.computeNextTurn(adjacentUnits);
                 UnitInterface bornUnit = deadUnit.getBornUnit();
                 deadUnit.update();
 
                 if ( bornUnit != null )
                 {
+                    //System.out.println("" + col + " " + row + " " + Arrays.toString(adjacentUnits));
                     aliveNextTurn = true;
                     setToPosition(row, col, bornUnit);
                     moveProcessBoundaryToInclude(row, col);
