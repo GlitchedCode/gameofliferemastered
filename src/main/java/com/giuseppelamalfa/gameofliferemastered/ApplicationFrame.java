@@ -5,12 +5,10 @@
  */
 package com.giuseppelamalfa.gameofliferemastered;
 
+import com.giuseppelamalfa.gameofliferemastered.utils.ImageManager;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import javax.swing.ImageIcon;
 import java.net.URL;
-import java.util.Timer;
 
 /**
  *
@@ -22,12 +20,6 @@ public class ApplicationFrame extends javax.swing.JFrame{
     private final ImageManager      tileManager;
     
     static ImageIcon                icon;
-    
-    private Timer                   timer;
-    private boolean                 autoplay = false;
-
-    
-    
     
     /*
     * JFRAME CODE
@@ -42,7 +34,6 @@ public class ApplicationFrame extends javax.swing.JFrame{
         grid = new Grid(200, 300, tileManager);
         URL resource = getClass().getClassLoader().getResource("Tiles/tile_0083.png");
         icon = new ImageIcon(resource);
-        timer = new Timer();
         
         initComponents();
         
@@ -72,6 +63,8 @@ public class ApplicationFrame extends javax.swing.JFrame{
         setPreferredSize(new java.awt.Dimension(800, 600));
         setSize(new java.awt.Dimension(800, 600));
 
+        gridCanvas.setBackground(new java.awt.Color(82, 82, 82));
+        gridCanvas.setForeground(new java.awt.Color(105, 105, 105));
         gridCanvas.addHierarchyBoundsListener(new java.awt.event.HierarchyBoundsListener()
         {
             public void ancestorMoved(java.awt.event.HierarchyEvent evt)

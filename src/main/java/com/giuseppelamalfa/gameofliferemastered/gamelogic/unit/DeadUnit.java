@@ -3,41 +3,34 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.giuseppelamalfa.gameofliferemastered.gamelogic;
+package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.UnitInterface;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.RuleInterface;
 
 /**
  *
  * @author glitchedcode
  */
-public class DeadUnit extends Unit 
+public class DeadUnit implements UnitInterface
 {
-    private UnitInterface bornUnit;
-    
-    public DeadUnit()
-    {
-        super();
-        species = Species.INVALID;
-        currentState = State.DEAD;
-        nextTurnState = State.INVALID;
-        minimumFriendly = -1;
-        health = 0;
-        
-        bornUnit = null;
-    }
+    private UnitInterface bornUnit = null;
     
     // This function implements rule #3: reproduction
     @Override
     @SuppressWarnings("unchecked")
-    protected void boardStep(UnitInterface[] adjacentUnits)
+    public void computeNextTurn(UnitInterface[] adjacentUnits)
     {        
         // Contains how many units of a given species are adjacent.
         HashMap<Species, Integer> reproductionCounters = new HashMap<>();
         // Contains the required amount of units of a given species to 
         // give birth to a new unit of that species.
-        HashMap<Species, Integer> reproductionValues = new HashMap<>();
+        HashMap<Species, RuleInterface<Integer> > reproductionSelectors = new HashMap<>();
         reproductionCounters.put(Species.INVALID, 0);
         bornUnit = null;
         for (int i = 0; i < 8; i++)
@@ -55,7 +48,7 @@ public class DeadUnit extends Unit
                 continue;
             }
             
-            species = current.getSpecies();
+            Species species = current.getSpecies();
             // Add new species to the map as we find them in
             // nearby cells
             if(reproductionCounters.keySet().contains(species))
@@ -66,12 +59,15 @@ public class DeadUnit extends Unit
             else
             {
                 reproductionCounters.put(species, 1);
-                reproductionValues.put(species, current.getMinimumFriendlyUnits() + 1);
+                reproductionSelectors.put(species, current.getReproductionSelector());
             }
         }
         
         Species candidate = Species.INVALID;
+        int candidateCount = 0;
         
+        //System.out.println(reproductionCounters.get(Species.CELL));
+
         // Choose the candidate species to generate based on the reproduction
         // counters taken above and thei order in the Species enum
         for (Species current : reproductionCounters.keySet())
@@ -79,21 +75,22 @@ public class DeadUnit extends Unit
             if (current == Species.INVALID) continue;
             
             int currentCount = reproductionCounters.get(current);
-            int candidateCount = reproductionCounters.get(candidate);
-            int reproductionRequisite = reproductionValues.get(current);
+            RuleInterface<Integer> selector = reproductionSelectors.get(current);
             
             if (currentCount == candidateCount)
             {
                 if (current.ordinal() < candidate.ordinal() &
-                        currentCount == reproductionRequisite)
+                        selector.test(currentCount))
                 {
                     candidate = current;
+                    candidateCount = currentCount;
                 }
             }
             else if (currentCount > candidateCount &
-                    currentCount == reproductionRequisite)
+                    selector.test(currentCount))
             {
                 candidate = current;
+                candidateCount = currentCount;
             }
         }
         
@@ -119,12 +116,6 @@ public class DeadUnit extends Unit
         
     }
     
-    @Override
-    protected void endStep()
-    {
-        // nothing
-    }
-    
     /**
      *
      * @return
@@ -139,10 +130,36 @@ public class DeadUnit extends Unit
     {
         bornUnit = null;
     }
-
+    
     @Override
-    public boolean reproduce(Integer adjacencyPosition)
+    public boolean isAlive()
     {
         return false;
     }
+    
+    // overrides
+    
+    @Override
+    public boolean              reproduce(Integer a) {return false;}
+    @Override
+    public boolean              attack(Integer a) {return false;}
+    @Override
+    public void                 independentAction() {}
+    @Override
+    public State                getNextTurnState() {return State.INVALID; }
+    @Override
+    public State                getCurrentState() { return State.INVALID; }
+    @Override
+    public Species              getSpecies() { return Species.INVALID; }
+    @Override
+    public Set<Species>         getFriendlySpecies() { return new HashSet<>(); }
+    @Override
+    public Set<Species>         getHostileSpecies() { return new HashSet<>(); }
+    @Override
+    public RuleInterface<Integer>    getReproductionSelector() { return null; }
+    @Override
+    public Integer              getHealth() { return 0; }
+    @Override
+    public void                 incrementHealth(Integer increment) { }
+
 }

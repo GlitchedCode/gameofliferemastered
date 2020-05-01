@@ -6,6 +6,9 @@
 package com.giuseppelamalfa.gameofliferemastered;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.UnitInterface;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Cell;
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -18,17 +21,21 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.awt.geom.AffineTransform;
 import java.util.Timer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JPanel;
+import javax.swing.ToolTipManager;
 
 /**
  *
  * @author glitchedcode
  */
-public class GridCanvas extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener, KeyListener
+public final class GridCanvas extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener, KeyListener
 {
 
-    private Integer sideLength = 32;
+    private int sideLength;
     private Grid grid;
 
     private Point screenOrigin;
@@ -38,6 +45,17 @@ public class GridCanvas extends JPanel implements MouseListener, MouseMotionList
     private final Timer timer = new Timer();
     private boolean autoplay = false;
     private BoardUpdateTask updateTask;
+    private int lineSpacing;
+    private float tileScale;
+    private int yoffset;
+    private int xoffset;
+    private int startRow;
+    private int startColumn;
+    
+    public GridCanvas()
+    {
+        setSideLength(32);
+    }
 
     /*
     * MOUSE INPUT HANDLING
@@ -50,7 +68,7 @@ public class GridCanvas extends JPanel implements MouseListener, MouseMotionList
             int button = me.getButton();
             if (button == MouseEvent.BUTTON1)
             {
-                grid.setUnit(me.getPoint());
+                setUnit(me.getPoint());
             }
             if (button == MouseEvent.BUTTON2)
             {
@@ -58,11 +76,49 @@ public class GridCanvas extends JPanel implements MouseListener, MouseMotionList
             }
             if (button == MouseEvent.BUTTON3)
             {
-                grid.computeNextTurn();
+                try
+                {
+                    grid.computeNextTurn();
+                }
+                catch (Exception ex)
+                {
+                    Logger.getLogger(GridCanvas.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
-    }
+        }
 
+    @Override
+    public void mouseMoved(MouseEvent me)
+    {
+        synchronized (grid)
+        {
+            Point point = me.getPoint();
+            point.x += xoffset;
+            point.y += yoffset;
+
+            int row = point.y / lineSpacing + startRow;
+            int col = point.x / lineSpacing + startColumn;
+            
+            int sectorRow = row / grid.getSectorSideLength();
+            int sectorCol = col / grid.getSectorSideLength();
+            
+            String text = "<html>Position: (" + col + ", " + row + 
+                    ")<br>Sector: (" + sectorCol + ", " + sectorRow + ")";
+            
+            UnitInterface unit = grid.getUnit(row, col);
+            
+            if (unit != null)
+            {
+                text += "<br>" + unit.toString();
+            }
+            
+            text += "</html>";
+            
+            setToolTipText(text);
+        }
+    }
+    
     @Override
     public void mousePressed(MouseEvent me)
     {
@@ -103,7 +159,7 @@ public class GridCanvas extends JPanel implements MouseListener, MouseMotionList
             int rotation = me.getWheelRotation();
             synchronized (grid)
             {
-                setSideLength(grid.getSideLength() - (rotation * 4));
+                setSideLength(sideLength - (rotation * 4));
             }
         }
     }
@@ -124,11 +180,18 @@ public class GridCanvas extends JPanel implements MouseListener, MouseMotionList
     {
     }
 
-    @Override
-    public void mouseMoved(MouseEvent me)
+    private void setUnit(Point point)
     {
-    }
+        point.x += xoffset;
+        point.y += yoffset;
 
+        int row = point.y / lineSpacing + startRow;
+        int col = point.x / lineSpacing + startColumn;
+        
+        if (grid != null)
+            grid.setUnit(row, col, new Cell());
+    }
+    
     /*
     * KEYBOARD EVENT LOGIC
      */
@@ -185,8 +248,11 @@ public class GridCanvas extends JPanel implements MouseListener, MouseMotionList
         int maxY = Integer.max(gridSize.height - size.height, 0);
         screenOrigin.x = Integer.min(maxX, Integer.max(screenOrigin.x, 0));
         screenOrigin.y = Integer.min(maxY, Integer.max(screenOrigin.y, 0));
-        grid.setScreenOrigin(screenOrigin);
-
+        
+        yoffset = screenOrigin.y % (lineSpacing);
+        xoffset = screenOrigin.x % (lineSpacing);
+        startRow = screenOrigin.y / lineSpacing;
+        startColumn = screenOrigin.x / lineSpacing;
     }
 
     public void resetScreenOrigin()
@@ -195,14 +261,102 @@ public class GridCanvas extends JPanel implements MouseListener, MouseMotionList
     }
 
     @Override
+    public void repaint()
+    {
+        synchronized (this)
+        {
+            super.repaint();
+        }
+    }
+    
+    @Override
     public void paintComponent(Graphics g)
     {
+        if (grid == null)
+            return;
+        
+        Graphics2D g2 = (Graphics2D) g;
         Dimension size = getSize();
-        g.setColor(Color.BLACK);
+        g.setColor(getBackground());
         g.fillRect(0, 0, size.width, size.height);
-        if (grid != null)
+        
+        int rows, cols;
+        int gridRows = grid.getRowCount(), gridCols = grid.getColumnCount();
+        Dimension gridSize = grid.getSize();
+        int height = Integer.min(size.height, gridSize.height);
+        int width = Integer.min(size.width, gridSize.width);
+
+        rows = Integer.min(height / sideLength + 1, gridRows);
+        cols = Integer.min(width / sideLength + 1, gridCols);
+
+        // Draw the grid
+        g2.setStroke(new BasicStroke(1));
+        g2.setColor(getForeground());
+        // rows
+        for (int c = 0; c <= rows; c++)
         {
-            grid.draw((Graphics2D) g, this);
+            int ypos = c * (lineSpacing) - yoffset;
+            g.drawLine(0, ypos, width - 1, ypos);
+        }
+
+        // columns
+        for (int c = 0; c <= cols; c++)
+        {
+            int xpos = c * (lineSpacing) - xoffset;
+            g.drawLine(xpos, 0, xpos, height - 1);
+        }
+                
+        // Draw the units
+        int endRow = startRow + rows;
+        int endColumn = startColumn + cols;
+        int drawnRows = endRow - startRow;
+        int drawnColumns = endColumn - startColumn;
+        
+        g2.setStroke(new BasicStroke(2));
+        
+        
+        Point topLeft = grid.getTopLeftActive();
+        Point bottomRight = grid.getBottomRightActive();
+        
+        for (int r = 0; r < drawnRows; r++) // rows
+        {
+            for (int c = 0; c < drawnColumns; c++) // columns
+            {
+
+                int row = r + startRow;
+                int col = c + startColumn;
+
+                int xpos = c * (lineSpacing) - xoffset + 1;
+                int ypos = r * (lineSpacing) - yoffset + 1;
+                
+                if (row == topLeft.y && col == topLeft.x)
+                {
+                    g2.setColor(Color.RED);
+                    g.drawLine(0, ypos, width - 1, ypos);
+                    g.drawLine(xpos, 0, xpos, height - 1);
+                    g.drawOval(xpos - 5, ypos - 5, 10, 10);
+                }
+                else if (row == bottomRight.y && col == bottomRight.x)
+                {
+                    g2.setColor(Color.BLUE);
+                    g.drawLine(0, ypos + lineSpacing, width - 1, ypos + lineSpacing);                    
+                    g.drawLine(xpos + lineSpacing, 0, xpos + lineSpacing, height - 1);
+                    g.drawOval(xpos + lineSpacing - 5, ypos + lineSpacing - 5, 10, 10);
+                }
+                
+                UnitInterface unit = grid.getUnit(row, col);
+                if (unit == null)
+                {
+                    continue;
+                }
+
+                
+                AffineTransform xform = new AffineTransform();
+                xform.translate(xpos, ypos);
+                xform.scale(tileScale, tileScale);
+
+                grid.drawUnit(g2, xform, this, unit);
+            }
         }
     }
 
@@ -221,16 +375,20 @@ public class GridCanvas extends JPanel implements MouseListener, MouseMotionList
      */
     public void setSideLength(Integer value)
     {
-        sideLength = value;
-        grid.setSideLength(value);
-        setScreenOrigin(screenOrigin);
+        sideLength = Integer.min(64, Integer.max(8, value));
+        lineSpacing = sideLength + 1;
+        if (grid != null)
+        {
+            grid.setSideLength(sideLength);
+            setScreenOrigin(screenOrigin);
+        }
+        tileScale = sideLength / 8.0f;
     }
 
     @Override
     public void setSize(Dimension size)
     {
         super.setSize(size);
-        grid.setCanvasSize(size);
     }
 
     public void init()
@@ -240,5 +398,6 @@ public class GridCanvas extends JPanel implements MouseListener, MouseMotionList
         addMouseWheelListener(this);
         addKeyListener(this);
         timer.schedule(new BoardRenderTask(this), 0, 18);
+        ToolTipManager.sharedInstance().setInitialDelay(150);
     }
 }
