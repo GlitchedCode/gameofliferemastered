@@ -8,6 +8,7 @@ package com.giuseppelamalfa.gameofliferemastered;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.UnitInterface;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Cell;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Snake;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -189,7 +190,7 @@ public final class GridCanvas extends JPanel implements MouseListener, MouseMoti
         int col = point.x / lineSpacing + startColumn;
         
         if (grid != null)
-            grid.setUnit(row, col, new Cell());
+            grid.setUnit(row, col, new Snake());
     }
     
     /*

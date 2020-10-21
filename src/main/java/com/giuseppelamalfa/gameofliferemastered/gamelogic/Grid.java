@@ -252,7 +252,7 @@ public class Grid
         correctProcessRegion();
         turn += 1;
 
-        System.out.println("Turn " + turn);
+        //System.out.println("Turn " + turn);
     }
 
     private void moveProcessBoundaryToInclude(Integer row, Integer col)
@@ -369,7 +369,7 @@ public class Grid
 
                 
                 UnitInterface[] adjacentUnits = getUnitsAdjacentToPosition(row, col);
-                System.out.println("" + col + " " + row + " " + Arrays.toString(adjacentUnits));
+                //System.out.println("" + col + " " + row + " " + Arrays.toString(adjacentUnits));
                 current.computeNextTurn(adjacentUnits);
 
                 // Expand the board's processing area accordingly as we
