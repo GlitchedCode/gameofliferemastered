@@ -3,11 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.giuseppelamalfa.gameofliferemastered.gamelogic;
+package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.DeadUnit;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Cell;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Snake;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.GameLogicException;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.state.*;
 import java.util.Set;
 
 /**
@@ -21,7 +21,8 @@ public abstract interface UnitInterface
     {
         INVALID(null),
         DEAD(null),
-        ALIVE(null);
+        ALIVE(null),
+        ALIVE_AGING(new AgingStateInterface());
         
         private final StateInterface stateImplementationInterface;
         

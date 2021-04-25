@@ -6,7 +6,7 @@
 package com.giuseppelamalfa.gameofliferemastered;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.UnitInterface;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Cell;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Snake;
 import java.awt.BasicStroke;

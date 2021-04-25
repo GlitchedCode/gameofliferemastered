@@ -5,7 +5,6 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.rule;
 
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.RuleInterface;
 import java.util.HashSet;
 import java.util.Set;
 

@@ -6,10 +6,9 @@
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.GameLogicException;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.UnitInterface;
 import java.util.HashSet;
 import java.util.Set;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.RuleInterface;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
 
 /**
  *
@@ -112,7 +111,7 @@ public abstract class Unit implements UnitInterface
         }
         else
         {
-            nextTurnState = State.ALIVE;
+            nextTurnState = currentState;
         }
     }
 

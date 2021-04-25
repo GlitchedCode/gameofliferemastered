@@ -5,6 +5,7 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic;
 
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.DeadUnit;
 import com.giuseppelamalfa.gameofliferemastered.utils.ImageManager;
 import com.giuseppelamalfa.gameofliferemastered.utils.TwoDimensionalContainer;
@@ -374,7 +375,7 @@ public class Grid
 
                 // Expand the board's processing area accordingly as we
                 // process more units
-                if ( current.getNextTurnState() == UnitInterface.State.ALIVE )
+                if ( current.getNextTurnState() != UnitInterface.State.DEAD )
                 {
                     moveProcessBoundaryToInclude(row, col);
                     aliveNextTurn = true;

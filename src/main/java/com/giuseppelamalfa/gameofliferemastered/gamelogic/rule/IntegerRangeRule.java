@@ -5,8 +5,6 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.rule;
 
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.RuleInterface;
-
 /**
  *
  * @author glitchedcode

@@ -5,13 +5,12 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.UnitInterface;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.RuleInterface;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
 
 /**
  *

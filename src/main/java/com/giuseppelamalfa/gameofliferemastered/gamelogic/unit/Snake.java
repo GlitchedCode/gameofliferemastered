@@ -19,7 +19,7 @@ public class Snake extends Unit
         super();
         
         species = Species.SNAKE;
-        health = 1;
+        health = 7;
         friendlySpecies.add(species);
         
         friendlyCountSelector = new IntegerRangeRule(1,5);
@@ -31,5 +31,12 @@ public class Snake extends Unit
         selector.add(3);
         //selector.add(6);
         reproductionSelector = selector;
+        
+        nextTurnState = State.ALIVE_AGING;
+    }
+    
+    public void computeNextTurn()
+    {
+        
     }
 }
