@@ -9,12 +9,13 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.GameLogicException;
 import java.util.HashSet;
 import java.util.Set;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
+import java.io.Serializable;
 
 /**
  *
  * @author glitchedcode
  */
-public abstract class Unit implements UnitInterface
+public abstract class Unit implements UnitInterface, Serializable
 {
 
     // ALL FIELDS MARKED WITH * MUST BE INITIALIZED IN ALL SUBCLASSES

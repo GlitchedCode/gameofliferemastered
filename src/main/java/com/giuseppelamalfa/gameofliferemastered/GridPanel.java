@@ -5,15 +5,17 @@
  */
 package com.giuseppelamalfa.gameofliferemastered;
 
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.GridPanelInterface;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Cell;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Snake;
+import com.giuseppelamalfa.gameofliferemastered.utils.ImageManager;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -23,6 +25,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.AffineTransform;
+import java.awt.image.ImageObserver;
 import java.util.Timer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,13 +36,15 @@ import javax.swing.ToolTipManager;
  *
  * @author glitchedcode
  */
-public final class GridCanvas extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener, KeyListener
+public final class GridPanel extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener, KeyListener
 {
 
     private int sideLength;
-    private Grid grid;
+    private GridPanelInterface grid;
+    private ImageManager tileManager;
 
-    private Point screenOrigin;
+    private final Dimension gridSize = new Dimension();
+    private Point screenOrigin = new Point();
 
     private Point lastDragLocation = new Point();
 
@@ -53,8 +58,14 @@ public final class GridCanvas extends JPanel implements MouseListener, MouseMoti
     private int startRow;
     private int startColumn;
     
-    public GridCanvas()
+    public GridPanel()
     {
+        
+    }
+    
+    public GridPanel(ImageManager tileManager)
+    {
+        this.tileManager = tileManager;
         setSideLength(32);
     }
 
@@ -64,6 +75,7 @@ public final class GridCanvas extends JPanel implements MouseListener, MouseMoti
     @Override
     public void mouseClicked(MouseEvent me)
     {
+        //System.out.println("Grid panel clicked.");
         synchronized (grid)
         {
             int button = me.getButton();
@@ -71,10 +83,10 @@ public final class GridCanvas extends JPanel implements MouseListener, MouseMoti
             {
                 setUnit(me.getPoint());
             }
-            if (button == MouseEvent.BUTTON2)
+            /*if (button == MouseEvent.BUTTON2)
             {
                 grid.clearBoard();
-            }
+            }*/
             if (button == MouseEvent.BUTTON3)
             {
                 try
@@ -83,7 +95,7 @@ public final class GridCanvas extends JPanel implements MouseListener, MouseMoti
                 }
                 catch (Exception ex)
                 {
-                    Logger.getLogger(GridCanvas.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(GridPanel.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }
@@ -164,22 +176,14 @@ public final class GridCanvas extends JPanel implements MouseListener, MouseMoti
             }
         }
     }
-
     // don't need these
     @Override
-    public void mouseReleased(MouseEvent me)
-    {
+    public void mouseReleased(MouseEvent me) {
     }
-
     @Override
-    public void mouseEntered(MouseEvent me)
-    {
-    }
-
+    public void mouseEntered(MouseEvent me){}
     @Override
-    public void mouseExited(MouseEvent me)
-    {
-    }
+    public void mouseExited(MouseEvent me)    {    }
 
     private void setUnit(Point point)
     {
@@ -197,14 +201,10 @@ public final class GridCanvas extends JPanel implements MouseListener, MouseMoti
     * KEYBOARD EVENT LOGIC
      */
     @Override
-    public void keyPressed(KeyEvent e)
-    {
-    }
+    public void keyPressed(KeyEvent e)    {    }
 
     @Override
-    public void keyTyped(KeyEvent e)
-    {
-    }
+    public void keyTyped(KeyEvent e)    {    }
 
     @Override
     public void keyReleased(KeyEvent e)
@@ -230,11 +230,11 @@ public final class GridCanvas extends JPanel implements MouseListener, MouseMoti
         }
     }
 
-    public void setGrid(Grid grid)
+    public void setGrid(GridPanelInterface grid)
     {
         this.grid = grid;
-        grid.setSideLength(sideLength);
-        Dimension gridSize = grid.getSize();
+        setSideLength(sideLength);
+
         Dimension size = getSize();
         setScreenOrigin(new Point((gridSize.width - size.width) / 2,
                 (gridSize.height - size.height) / 2));
@@ -243,7 +243,6 @@ public final class GridCanvas extends JPanel implements MouseListener, MouseMoti
     public void setScreenOrigin(Point newOrigin)
     {
         screenOrigin = newOrigin;
-        Dimension gridSize = grid.getSize();
         Dimension size = getSize();
         int maxX = Integer.max(gridSize.width - size.width, 0);
         int maxY = Integer.max(gridSize.height - size.height, 0);
@@ -283,7 +282,7 @@ public final class GridCanvas extends JPanel implements MouseListener, MouseMoti
         
         int rows, cols;
         int gridRows = grid.getRowCount(), gridCols = grid.getColumnCount();
-        Dimension gridSize = grid.getSize();
+        Dimension gridSize = size;
         int height = Integer.min(size.height, gridSize.height);
         int width = Integer.min(size.width, gridSize.width);
 
@@ -316,49 +315,36 @@ public final class GridCanvas extends JPanel implements MouseListener, MouseMoti
         g2.setStroke(new BasicStroke(2));
         
         
-        Point topLeft = grid.getTopLeftActive();
-        Point bottomRight = grid.getBottomRightActive();
         
         for (int r = 0; r < drawnRows; r++) // rows
         {
             for (int c = 0; c < drawnColumns; c++) // columns
             {
-
                 int row = r + startRow;
                 int col = c + startColumn;
 
                 int xpos = c * (lineSpacing) - xoffset + 1;
                 int ypos = r * (lineSpacing) - yoffset + 1;
                 
-                if (row == topLeft.y && col == topLeft.x)
-                {
-                    g2.setColor(Color.RED);
-                    g.drawLine(0, ypos, width - 1, ypos);
-                    g.drawLine(xpos, 0, xpos, height - 1);
-                    g.drawOval(xpos - 5, ypos - 5, 10, 10);
-                }
-                else if (row == bottomRight.y && col == bottomRight.x)
-                {
-                    g2.setColor(Color.BLUE);
-                    g.drawLine(0, ypos + lineSpacing, width - 1, ypos + lineSpacing);                    
-                    g.drawLine(xpos + lineSpacing, 0, xpos + lineSpacing, height - 1);
-                    g.drawOval(xpos + lineSpacing - 5, ypos + lineSpacing - 5, 10, 10);
-                }
-                
                 UnitInterface unit = grid.getUnit(row, col);
                 if (unit == null)
                 {
                     continue;
                 }
-
                 
                 AffineTransform xform = new AffineTransform();
                 xform.translate(xpos, ypos);
                 xform.scale(tileScale, tileScale);
 
-                grid.drawUnit(g2, xform, this, unit);
+                drawUnit(g2, xform, this, unit);
             }
         }
+    }
+    
+    public void drawUnit(Graphics2D g, AffineTransform xform, ImageObserver obs, UnitInterface unit)
+    {
+        Image img = tileManager.getImage(unit.getSpecies().getTextureCode());
+        g.drawImage(img, xform, obs);
     }
 
     /**
@@ -380,16 +366,11 @@ public final class GridCanvas extends JPanel implements MouseListener, MouseMoti
         lineSpacing = sideLength + 1;
         if (grid != null)
         {
-            grid.setSideLength(sideLength);
+            gridSize.width = (value + 1) * grid.getColumnCount() + 1;
+            gridSize.height = (value + 1) * grid.getRowCount() + 1;
             setScreenOrigin(screenOrigin);
         }
         tileScale = sideLength / 8.0f;
-    }
-
-    @Override
-    public void setSize(Dimension size)
-    {
-        super.setSize(size);
     }
 
     public void init()

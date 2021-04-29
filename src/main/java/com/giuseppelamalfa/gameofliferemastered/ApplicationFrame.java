@@ -7,19 +7,27 @@ package com.giuseppelamalfa.gameofliferemastered;
 
 import com.giuseppelamalfa.gameofliferemastered.utils.ImageManager;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import javax.swing.ImageIcon;
+import javax.swing.JLayeredPane;
 import java.net.URL;
+import java.awt.Color;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.ServerSocket;
 
 /**
  *
  * @author glitchedcode
  */
-public class ApplicationFrame extends javax.swing.JFrame{
+public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
 
     private final Grid              grid;
     private final ImageManager      tileManager;
     
     static ImageIcon                icon;
+    boolean                         isInMenu = true;
     
     /*
     * JFRAME CODE
@@ -31,7 +39,7 @@ public class ApplicationFrame extends javax.swing.JFrame{
      */
     public ApplicationFrame() throws Exception{
         tileManager = new ImageManager("tiles.json");
-        grid = new Grid(200, 300, tileManager);
+        grid = new Grid(200, 300);
         URL resource = getClass().getClassLoader().getResource("Tiles/tile_0083.png");
         icon = new ImageIcon(resource);
         
@@ -50,67 +58,261 @@ public class ApplicationFrame extends javax.swing.JFrame{
      */
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents()
-    {
+    private void initComponents() {
 
-        gridCanvas = new com.giuseppelamalfa.gameofliferemastered.GridCanvas();
+        jLayeredPane = new javax.swing.JLayeredPane();
+        gridPanel = gridPanel = new com.giuseppelamalfa.gameofliferemastered.GridPanel(tileManager);
+        menuPanel = new com.giuseppelamalfa.gameofliferemastered.MenuPanel();
+        titleLabel = new javax.swing.JLabel();
+        hostPortNumer = new javax.swing.JTextField();
+        serverAddress = new javax.swing.JTextField();
+        serverPortNumber = new javax.swing.JTextField();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        maxPlayerCount = new javax.swing.JTextField();
+        hostGameButton = new javax.swing.JButton();
+        joinGameButton = new javax.swing.JButton();
+        jButton1 = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        statusLog = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("The game of Life: Remastered");
         setBackground(java.awt.Color.black);
         setIconImage(icon.getImage());
         setMinimumSize(new java.awt.Dimension(800, 600));
-        setPreferredSize(new java.awt.Dimension(800, 600));
-        setSize(new java.awt.Dimension(800, 600));
+        setPreferredSize(new java.awt.Dimension(1280, 720));
+        setSize(new java.awt.Dimension(1280, 720));
 
-        gridCanvas.setBackground(new java.awt.Color(82, 82, 82));
-        gridCanvas.setForeground(new java.awt.Color(105, 105, 105));
-        gridCanvas.addHierarchyBoundsListener(new java.awt.event.HierarchyBoundsListener()
-        {
-            public void ancestorMoved(java.awt.event.HierarchyEvent evt)
-            {
-            }
-            public void ancestorResized(java.awt.event.HierarchyEvent evt)
-            {
-                gridCanvasAncestorResized(evt);
+        gridPanel.setBackground(new java.awt.Color(61, 63, 65));
+        gridPanel.setForeground(new java.awt.Color(186, 186, 186));
+
+        javax.swing.GroupLayout gridPanelLayout = new javax.swing.GroupLayout(gridPanel);
+        gridPanel.setLayout(gridPanelLayout);
+        gridPanelLayout.setHorizontalGroup(
+            gridPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 1282, Short.MAX_VALUE)
+        );
+        gridPanelLayout.setVerticalGroup(
+            gridPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 722, Short.MAX_VALUE)
+        );
+
+        menuPanel.setOpaque(false);
+
+        titleLabel.setFont(new java.awt.Font("sansserif", 0, 48)); // NOI18N
+        titleLabel.setForeground(new java.awt.Color(255, 255, 255));
+        titleLabel.setText("The Game of Life: Remastered");
+        titleLabel.setToolTipText("");
+
+        hostPortNumer.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
+        hostPortNumer.setText("33333");
+        hostPortNumer.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                hostPortNumerActionPerformed(evt);
             }
         });
 
-        javax.swing.GroupLayout gridCanvasLayout = new javax.swing.GroupLayout(gridCanvas);
-        gridCanvas.setLayout(gridCanvasLayout);
-        gridCanvasLayout.setHorizontalGroup(
-            gridCanvasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 833, Short.MAX_VALUE)
+        serverAddress.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
+        serverAddress.setText("255.255.255.255");
+        serverAddress.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                serverAddressActionPerformed(evt);
+            }
+        });
+
+        serverPortNumber.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
+        serverPortNumber.setText("33333");
+        serverPortNumber.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                serverPortNumberActionPerformed(evt);
+            }
+        });
+
+        jLabel1.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel1.setText("Host Game");
+
+        jLabel2.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
+        jLabel2.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel2.setText("Port:");
+
+        jLabel3.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
+        jLabel3.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel3.setText("Join Game");
+
+        jLabel4.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
+        jLabel4.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel4.setText("Max Players:");
+
+        maxPlayerCount.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
+        maxPlayerCount.setText("8");
+        maxPlayerCount.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                maxPlayerCountActionPerformed(evt);
+            }
+        });
+
+        hostGameButton.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
+        hostGameButton.setText("Start Server");
+
+        joinGameButton.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
+        joinGameButton.setText("Connect");
+
+        jButton1.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
+        jButton1.setText("Return to game");
+        jButton1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jButton1MouseClicked(evt);
+            }
+        });
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
+        statusLog.setEditable(false);
+        statusLog.setColumns(20);
+        statusLog.setRows(5);
+        jScrollPane1.setViewportView(statusLog);
+        try{
+            URL url = new URL("http://checkip.amazonaws.com/");
+            BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
+            statusLog.append(br.readLine());
+        }catch(Exception e){}
+
+        javax.swing.GroupLayout menuPanelLayout = new javax.swing.GroupLayout(menuPanel);
+        menuPanel.setLayout(menuPanelLayout);
+        menuPanelLayout.setHorizontalGroup(
+            menuPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(menuPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(menuPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 610, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(titleLabel)
+                    .addGroup(menuPanelLayout.createSequentialGroup()
+                        .addGroup(menuPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel1)
+                            .addComponent(jLabel3))
+                        .addGap(40, 40, 40)
+                        .addGroup(menuPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, menuPanelLayout.createSequentialGroup()
+                                .addComponent(serverAddress)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(serverPortNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(menuPanelLayout.createSequentialGroup()
+                                .addComponent(jLabel2)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(hostPortNumer, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jLabel4)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(maxPlayerCount, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(60, 60, 60)
+                        .addGroup(menuPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(hostGameButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(joinGameButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addComponent(jButton1))
+                .addContainerGap(542, Short.MAX_VALUE))
         );
-        gridCanvasLayout.setVerticalGroup(
-            gridCanvasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 600, Short.MAX_VALUE)
+        menuPanelLayout.setVerticalGroup(
+            menuPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(menuPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(titleLabel)
+                .addGap(177, 177, 177)
+                .addGroup(menuPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(hostPortNumer, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel1)
+                    .addComponent(jLabel2)
+                    .addComponent(jLabel4)
+                    .addComponent(maxPlayerCount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(hostGameButton))
+                .addGap(18, 18, 18)
+                .addGroup(menuPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(serverAddress, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(serverPortNumber, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel3)
+                    .addComponent(joinGameButton))
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jButton1)
+                .addContainerGap(173, Short.MAX_VALUE))
         );
+
+        jLayeredPane.setLayer(gridPanel, javax.swing.JLayeredPane.PALETTE_LAYER);
+        jLayeredPane.setLayer(menuPanel, javax.swing.JLayeredPane.MODAL_LAYER);
+
+        javax.swing.GroupLayout jLayeredPaneLayout = new javax.swing.GroupLayout(jLayeredPane);
+        jLayeredPane.setLayout(jLayeredPaneLayout);
+        jLayeredPaneLayout.setHorizontalGroup(
+            jLayeredPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(menuPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(jLayeredPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(gridPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jLayeredPaneLayout.setVerticalGroup(
+            jLayeredPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(menuPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(jLayeredPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(gridPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        gridPanel.init();
+        gridPanel.setGrid(grid);
+        addKeyListener(gridPanel);
+        menuPanel.getAccessibleContext().setAccessibleParent(menuPanel);
+        menuPanel.setBackground(new Color(0,0,0,127));
+        addKeyListener(menuPanel);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(gridCanvas, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jLayeredPane, javax.swing.GroupLayout.Alignment.TRAILING)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(gridCanvas, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jLayeredPane, javax.swing.GroupLayout.Alignment.TRAILING)
         );
-
-        gridCanvas.init();
-        addKeyListener(gridCanvas);
-        gridCanvas.setGrid(grid);
-        gridCanvas.resetScreenOrigin();
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void gridCanvasAncestorResized(java.awt.event.HierarchyEvent evt) {//GEN-FIRST:event_gridCanvasAncestorResized
-        gridCanvas.setSize(getContentPane().getSize());
-        gridCanvas.resetScreenOrigin();
-        gridCanvas.repaint();
+        gridPanel.setSize(getContentPane().getSize());
+        gridPanel.resetScreenOrigin();
+        gridPanel.repaint();
     }//GEN-LAST:event_gridCanvasAncestorResized
+
+    private void hostPortNumerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hostPortNumerActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_hostPortNumerActionPerformed
+
+    private void serverPortNumberActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_serverPortNumberActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_serverPortNumberActionPerformed
+
+    private void serverAddressActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_serverAddressActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_serverAddressActionPerformed
+
+    private void maxPlayerCountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_maxPlayerCountActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_maxPlayerCountActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MouseClicked
+        // TODO add your handling code here:
+        swapCanvas();
+    }//GEN-LAST:event_jButton1MouseClicked
 
     /**
      * @param args the command line arguments
@@ -137,7 +339,9 @@ public class ApplicationFrame extends javax.swing.JFrame{
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(() -> {
             try {
+                ServerSocket socket = new ServerSocket(3333);
                 ApplicationFrame frame = new ApplicationFrame();
+                frame.addKeyListener(frame);
                 frame.setVisible(true);
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -145,8 +349,69 @@ public class ApplicationFrame extends javax.swing.JFrame{
             }
         });
     }
+    
+    /**
+     * Invoked when a key has been typed.
+     * See the class description for {@link KeyEvent} for a definition of
+     * a key typed event.
+     * @param e the event to be processed
+     */
+    public void keyTyped(KeyEvent e) {}
+
+    /**
+     * Invoked when a key has been pressed.
+     * See the class description for {@link KeyEvent} for a definition of
+     * a key pressed event.
+     * @param e the event to be processed
+     */
+    public void keyPressed(KeyEvent e) {}
+
+    /**
+     * Invoked when a key has been released.
+     * See the class description for {@link KeyEvent} for a definition of
+     * a key released event.
+     * @param e the event to be processed
+     */
+    public void keyReleased(KeyEvent e) {  
+        if(e.getKeyCode() == KeyEvent.VK_ESCAPE)
+        {    
+            swapCanvas();
+        }
+    }
+    
+    private void swapCanvas()
+    {
+        if(isInMenu)
+        {
+            jLayeredPane.setLayer(menuPanel, JLayeredPane.DEFAULT_LAYER);
+            //gridPanel.requestFocus();
+        }
+        else
+        {
+            jLayeredPane.setLayer(menuPanel, JLayeredPane.MODAL_LAYER);
+            //menuPanel.requestFocus();
+        }
+        requestFocus();
+        isInMenu = !isInMenu;
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private com.giuseppelamalfa.gameofliferemastered.GridCanvas gridCanvas;
+    private com.giuseppelamalfa.gameofliferemastered.GridPanel gridPanel;
+    private javax.swing.JButton hostGameButton;
+    private javax.swing.JTextField hostPortNumer;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLayeredPane jLayeredPane;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JButton joinGameButton;
+    private javax.swing.JTextField maxPlayerCount;
+    private com.giuseppelamalfa.gameofliferemastered.MenuPanel menuPanel;
+    private javax.swing.JTextField serverAddress;
+    private javax.swing.JTextField serverPortNumber;
+    private javax.swing.JTextArea statusLog;
+    private javax.swing.JLabel titleLabel;
     // End of variables declaration//GEN-END:variables
 }

@@ -5,34 +5,24 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic;
 
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.DeadUnit;
-import com.giuseppelamalfa.gameofliferemastered.utils.ImageManager;
-import com.giuseppelamalfa.gameofliferemastered.utils.TwoDimensionalContainer;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Image;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.*;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.*;
+import com.giuseppelamalfa.gameofliferemastered.utils.*;
+import com.giuseppelamalfa.gameofliferemastered.*;
 import java.awt.Point;
-import java.awt.geom.AffineTransform;
-import java.awt.image.ImageObserver;
-import java.util.Arrays;
-
+import java.io.Serializable;
 /**
  * Class for handling all of game logic and rendering all units to the grid
  *
  * @author glitchedcode
  */
-public class Grid
+public class Grid implements GridPanelInterface, Serializable
 {
-
     private final TwoDimensionalContainer<UnitInterface> board;
     private final TwoDimensionalContainer<Boolean> sectorFlags;
-    private final ImageManager tileManager;
 
     private Integer turn;
     private Integer sideLength;
-
-    private final Dimension size = new Dimension();
 
     private final Integer rowCount;
     private final Integer columnCount;
@@ -53,17 +43,14 @@ public class Grid
      *
      * @param rows Number of rows
      * @param cols Number of columns
-     * @param tileManager ImageManager object that stores game tiles
      * @throws Exception
      */
-    public Grid(Integer rows, Integer cols, ImageManager tileManager) throws Exception
-    {
+    public Grid(Integer rows, Integer cols) throws Exception    {
         rowCount = rows;
         columnCount = cols;
         sectorRowCount = (rows / sectorSideLength) + 1;
         sectorColumnCount = (cols / sectorSideLength) + 1;
 
-        this.tileManager = tileManager;
         board = new TwoDimensionalContainer<>(rows, cols);
         sectorFlags = new TwoDimensionalContainer<>(sectorRowCount, sectorColumnCount);
         initSelectorFlags();
@@ -74,14 +61,17 @@ public class Grid
 
         topLeftProcessed = new Point(topLeftActive);
         bottomRightProcessed = new Point(bottomRightActive);
-
-        setSideLength(32);
-
+        
         turn = 0;
     }
 
-    private void initSelectorFlags()
-    {
+    public void         initializeGridPanel(GridPanel panel) {}
+    public void         synchronize() {}
+    public Integer      getCurrentTurn() {return turn;}
+    public boolean      isSimulationRunning() {return true;}
+    public boolean      isSimulationStarted() {return true;}
+
+    private void initSelectorFlags()    {
         for (int r = 0; r < sectorRowCount; r++)
         {
             for (int c = 0; c < sectorColumnCount; c++)
@@ -97,61 +87,33 @@ public class Grid
     /**
      * @return the number of the board's columns
      */
-    public Integer getRowCount()
-    {
+    public Integer getRowCount()    {
         return rowCount;
     }
 
     /**
      * @return the number of the board's columns
      */
-    public Integer getColumnCount()
-    {
+    public Integer getColumnCount()    {
         return columnCount;
     }
 
     /**
      * @return the current in game turn
      */
-    public Integer getTurn()
-    {
+    public Integer getTurn()    {
         return turn;
     }
 
-    public UnitInterface getUnit(int row, int col)
-    {
+    public UnitInterface getUnit(int row, int col)    {
         return board.get(row, col);
     }
 
-    /**
-     * Sets side length for all units and sets grid width and height
-     * accordingly, taking into account that the grid's lines are 1 pixel wide
-     *
-     * @param value
-     */
-    public final void setSideLength(Integer value)
-    {
-        size.width = (value + 1) * columnCount + 1;
-        size.height = (value + 1) * rowCount + 1;
-    }
-
-    public final Integer getSectorSideLength()
-    {
+    public final Integer getSectorSideLength()    {
         return sectorSideLength;
     }
 
-    public final Integer getSideLength()
-    {
-        return sideLength;
-    }
-
-    public final Dimension getSize()
-    {
-        return size;
-    }
-
-    public final Point getTopLeftActive()
-    {
+    public final Point getTopLeftActive()    {
         return topLeftActive;
     }
 
@@ -173,12 +135,6 @@ public class Grid
     public void clearBoard()
     {
         board.clear();
-    }
-
-    public void drawUnit(Graphics2D g, AffineTransform xform, ImageObserver obs, UnitInterface unit)
-    {
-        Image img = tileManager.getImage(unit.getSpecies().getTextureCode());
-        g.drawImage(img, xform, obs);
     }
 
     /*
