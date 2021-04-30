@@ -97,18 +97,18 @@ public abstract interface UnitInterface
         return (adjacencyPosition + 4) % 8;
     }
     
-    public void                 computeNextTurn(UnitInterface[] adjacentUnits);
-    public void                 update();
-    public boolean              isAlive();
-    public boolean              reproduce(Integer adjacencyPosition);
-    public boolean              attack(Integer adjacencyPosition);
-    public void                 independentAction();
-    public State                getNextTurnState() throws GameLogicException;
-    public State                getCurrentState();
-    public Species              getSpecies();
-    public Set<Species>         getFriendlySpecies();
-    public Set<Species>         getHostileSpecies();
-    public RuleInterface<Integer>    getReproductionSelector();
-    public Integer              getHealth();
-    public void                 incrementHealth(Integer increment);
+    public void                     computeNextTurn(UnitInterface[] adjacentUnits);
+    public void                     update();
+    public boolean                  isAlive();
+    public boolean                  reproduce(Integer adjacencyPosition);
+    public boolean                  attack(Integer adjacencyPosition);
+    public void                     independentAction();
+    public State                    getNextTurnState() throws GameLogicException;
+    public State                    getCurrentState();
+    public Species                  getSpecies();
+    public Set<Species>             getFriendlySpecies();
+    public Set<Species>             getHostileSpecies();
+    public RuleInterface<Integer>   getReproductionSelector();
+    public Integer                  getHealth();
+    public void                     incrementHealth(Integer increment);
 }

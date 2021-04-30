@@ -5,18 +5,20 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
+import java.io.Serializable;
 
 /**
  *
  * @author glitchedcode
  */
-public class DeadUnit implements UnitInterface
+public class DeadUnit implements UnitInterface, Serializable, Cloneable
 {
     private UnitInterface bornUnit = null;
     
@@ -161,4 +163,13 @@ public class DeadUnit implements UnitInterface
     @Override
     public void                 incrementHealth(Integer increment) { }
 
+    @Override
+    public Object clone() {
+        try {
+            return (DeadUnit) super.clone();
+        } catch (CloneNotSupportedException e) {
+            System.out.println("com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.DeadUnit.clone() failed idk");
+            return this;
+        }
+    }
 }

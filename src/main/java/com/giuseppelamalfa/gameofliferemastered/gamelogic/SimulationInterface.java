@@ -5,12 +5,15 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic;
 import com.giuseppelamalfa.gameofliferemastered.GridPanel;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.requests.InvalidRequestException;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
+import java.io.IOException;
+import java.net.Socket;
 /**
  *
  * @author glitchedcode
  */
-public interface GridPanelInterface {
+public interface SimulationInterface {
     
     boolean         isSimulationStarted();
     boolean         isSimulationRunning();
@@ -25,6 +28,8 @@ public interface GridPanelInterface {
     
     void            computeNextTurn() throws Exception;
     
+    void            handleRequest(Object requestObject, Socket client) throws IOException, InvalidRequestException;
+
     void            synchronize();
     void            initializeGridPanel(GridPanel panel);
 }

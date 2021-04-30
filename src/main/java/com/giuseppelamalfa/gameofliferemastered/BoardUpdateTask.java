@@ -5,11 +5,11 @@
  */
 package com.giuseppelamalfa.gameofliferemastered;
 
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.GridPanelInterface;
 import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JPanel;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.SimulationInterface;
 
 /**
  *
@@ -18,12 +18,12 @@ import javax.swing.JPanel;
 public class BoardUpdateTask extends TimerTask
 {
 
-    private final GridPanelInterface grid;
+    private final SimulationInterface grid;
     private final JPanel canvas;
 
     private final long msInterval;
 
-    public BoardUpdateTask(GridPanelInterface grid, JPanel canvas)
+    public BoardUpdateTask(SimulationInterface grid, JPanel canvas)
     {
         super();
         this.grid = grid;

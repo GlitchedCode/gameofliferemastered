@@ -5,13 +5,14 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.utils;
 
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid;
 import java.util.HashMap;
 
 /**
  * @author glitchedcode
  * @param <T> Stored type
  */
-public class TwoDimensionalContainer<T> extends HashMap<Integer, HashMap<Integer, T>> {
+public class TwoDimensionalContainer<T> extends HashMap<Integer, HashMap<Integer, T>> implements Cloneable{
 
     private int rows;
     private int cols;
@@ -116,5 +117,11 @@ public class TwoDimensionalContainer<T> extends HashMap<Integer, HashMap<Integer
             ex.printStackTrace();
             System.exit(1);
         }
+    }
+    
+    @Override
+    @SuppressWarnings("unchecked")
+    public Object clone() {
+        return (TwoDimensionalContainer<T>) super.clone();
     }
 }

@@ -6,7 +6,7 @@
 package com.giuseppelamalfa.gameofliferemastered;
 
 import com.giuseppelamalfa.gameofliferemastered.utils.ImageManager;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.ImageIcon;
@@ -16,6 +16,7 @@ import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
+import javax.swing.JTextArea;
 
 /**
  *
@@ -26,7 +27,11 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
     private final Grid              grid;
     private final ImageManager      tileManager;
     
+    SimulationClient                client;
+    SimulationServer                server;
+    
     static ImageIcon                icon;
+    static JTextArea                mainStatusLog;
     boolean                         isInMenu = true;
     
     /*
@@ -44,6 +49,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
         icon = new ImageIcon(resource);
         
         initComponents();
+        mainStatusLog = statusLog;
         
         if (!tileManager.isInitialized())
         {
@@ -74,7 +80,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
         maxPlayerCount = new javax.swing.JTextField();
         hostGameButton = new javax.swing.JButton();
         joinGameButton = new javax.swing.JButton();
-        jButton1 = new javax.swing.JButton();
+        unpauseButton = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         statusLog = new javax.swing.JTextArea();
 
@@ -161,16 +167,16 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
         joinGameButton.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
         joinGameButton.setText("Connect");
 
-        jButton1.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
-        jButton1.setText("Return to game");
-        jButton1.addMouseListener(new java.awt.event.MouseAdapter() {
+        unpauseButton.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
+        unpauseButton.setText("Return to game");
+        unpauseButton.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jButton1MouseClicked(evt);
+                unpauseButtonMouseClicked(evt);
             }
         });
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        unpauseButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                unpauseButtonActionPerformed(evt);
             }
         });
 
@@ -178,11 +184,6 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
         statusLog.setColumns(20);
         statusLog.setRows(5);
         jScrollPane1.setViewportView(statusLog);
-        try{
-            URL url = new URL("http://checkip.amazonaws.com/");
-            BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
-            statusLog.append(br.readLine());
-        }catch(Exception e){}
 
         javax.swing.GroupLayout menuPanelLayout = new javax.swing.GroupLayout(menuPanel);
         menuPanel.setLayout(menuPanelLayout);
@@ -215,7 +216,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
                         .addGroup(menuPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(hostGameButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(joinGameButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                    .addComponent(jButton1))
+                    .addComponent(unpauseButton))
                 .addContainerGap(542, Short.MAX_VALUE))
         );
         menuPanelLayout.setVerticalGroup(
@@ -240,7 +241,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
                 .addGap(18, 18, 18)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jButton1)
+                .addComponent(unpauseButton)
                 .addContainerGap(173, Short.MAX_VALUE))
         );
 
@@ -290,30 +291,30 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
     }//GEN-LAST:event_gridCanvasAncestorResized
 
     private void hostPortNumerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hostPortNumerActionPerformed
-        // TODO add your handling code here:
     }//GEN-LAST:event_hostPortNumerActionPerformed
 
     private void serverPortNumberActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_serverPortNumberActionPerformed
-        // TODO add your handling code here:
     }//GEN-LAST:event_serverPortNumberActionPerformed
 
     private void serverAddressActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_serverAddressActionPerformed
-        // TODO add your handling code here:
     }//GEN-LAST:event_serverAddressActionPerformed
 
     private void maxPlayerCountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_maxPlayerCountActionPerformed
-        // TODO add your handling code here:
     }//GEN-LAST:event_maxPlayerCountActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void unpauseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_unpauseButtonActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_unpauseButtonActionPerformed
 
-    private void jButton1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MouseClicked
-        // TODO add your handling code here:
+    private void unpauseButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_unpauseButtonMouseClicked
         swapCanvas();
-    }//GEN-LAST:event_jButton1MouseClicked
+    }//GEN-LAST:event_unpauseButtonMouseClicked
 
+    public static void writeToStatusLog(String string)
+    {
+        mainStatusLog.append(string + "\n");
+    }
+    
     /**
      * @param args the command line arguments
      */
@@ -399,7 +400,6 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
     private com.giuseppelamalfa.gameofliferemastered.GridPanel gridPanel;
     private javax.swing.JButton hostGameButton;
     private javax.swing.JTextField hostPortNumer;
-    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -413,5 +413,6 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
     private javax.swing.JTextField serverPortNumber;
     private javax.swing.JTextArea statusLog;
     private javax.swing.JLabel titleLabel;
+    private javax.swing.JButton unpauseButton;
     // End of variables declaration//GEN-END:variables
 }

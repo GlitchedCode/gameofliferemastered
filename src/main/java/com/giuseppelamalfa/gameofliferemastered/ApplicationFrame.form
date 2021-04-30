@@ -148,7 +148,7 @@
                                   <Component id="joinGameButton" max="32767" attributes="0"/>
                               </Group>
                           </Group>
-                          <Component id="jButton1" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="unpauseButton" alignment="0" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace pref="542" max="32767" attributes="0"/>
                   </Group>
@@ -178,7 +178,7 @@
                       <EmptySpace type="separate" max="-2" attributes="0"/>
                       <Component id="jScrollPane1" min="-2" pref="177" max="-2" attributes="0"/>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                      <Component id="jButton1" min="-2" max="-2" attributes="0"/>
+                      <Component id="unpauseButton" min="-2" max="-2" attributes="0"/>
                       <EmptySpace pref="173" max="32767" attributes="0"/>
                   </Group>
               </Group>
@@ -301,7 +301,7 @@
                 <Property name="text" type="java.lang.String" value="Connect"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JButton" name="jButton1">
+            <Component class="javax.swing.JButton" name="unpauseButton">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="sansserif" size="18" style="0"/>
@@ -309,8 +309,8 @@
                 <Property name="text" type="java.lang.String" value="Return to game"/>
               </Properties>
               <Events>
-                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jButton1MouseClicked"/>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton1ActionPerformed"/>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="unpauseButtonMouseClicked"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="unpauseButtonActionPerformed"/>
               </Events>
             </Component>
             <Container class="javax.swing.JScrollPane" name="jScrollPane1">
@@ -326,9 +326,6 @@
                     <Property name="columns" type="int" value="20"/>
                     <Property name="rows" type="int" value="5"/>
                   </Properties>
-                  <AuxValues>
-                    <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="try{&#xa;    URL url = new URL(&quot;http://checkip.amazonaws.com/&quot;);&#xa;    BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));&#xa;    statusLog.append(br.readLine());&#xa;}catch(Exception e){}&#xa;"/>
-                  </AuxValues>
                 </Component>
               </SubComponents>
             </Container>

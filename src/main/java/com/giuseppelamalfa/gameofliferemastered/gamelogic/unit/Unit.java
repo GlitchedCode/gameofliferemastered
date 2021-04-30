@@ -6,6 +6,7 @@
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.GameLogicException;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid;
 import java.util.HashSet;
 import java.util.Set;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
@@ -15,7 +16,7 @@ import java.io.Serializable;
  *
  * @author glitchedcode
  */
-public abstract class Unit implements UnitInterface, Serializable
+public abstract class Unit implements UnitInterface, Serializable, Cloneable
 {
 
     // ALL FIELDS MARKED WITH * MUST BE INITIALIZED IN ALL SUBCLASSES
@@ -283,5 +284,15 @@ public abstract class Unit implements UnitInterface, Serializable
         ret += "@" + hashCode();
         ret += " " + currentState.toString();
         return ret;
+    }
+    
+    @Override
+    public Object clone() {
+        try {
+            return (Unit) super.clone();
+        } catch (CloneNotSupportedException e) {
+            System.out.println("com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit.clone()");
+            return this;
+        }
     }
 }

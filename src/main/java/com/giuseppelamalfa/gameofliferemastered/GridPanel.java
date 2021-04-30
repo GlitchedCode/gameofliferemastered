@@ -5,7 +5,7 @@
  */
 package com.giuseppelamalfa.gameofliferemastered;
 
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.GridPanelInterface;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Cell;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Snake;
@@ -26,11 +26,15 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.AffineTransform;
 import java.awt.image.ImageObserver;
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
+import java.io.StringReader;
 import java.util.Timer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JPanel;
 import javax.swing.ToolTipManager;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.SimulationInterface;
 
 /**
  *
@@ -40,7 +44,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
 {
 
     private int sideLength;
-    private GridPanelInterface grid;
+    private SimulationInterface grid;
     private ImageManager tileManager;
 
     private final Dimension gridSize = new Dimension();
@@ -83,11 +87,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
             {
                 setUnit(me.getPoint());
             }
-            /*if (button == MouseEvent.BUTTON2)
-            {
-                grid.clearBoard();
-            }*/
-            if (button == MouseEvent.BUTTON3)
+            else if (button == MouseEvent.BUTTON3)
             {
                 try
                 {
@@ -99,7 +99,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
                 }
             }
         }
-        }
+    }
 
     @Override
     public void mouseMoved(MouseEvent me)
@@ -230,7 +230,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
         }
     }
 
-    public void setGrid(GridPanelInterface grid)
+    public void setGrid(SimulationInterface grid)
     {
         this.grid = grid;
         setSideLength(sideLength);

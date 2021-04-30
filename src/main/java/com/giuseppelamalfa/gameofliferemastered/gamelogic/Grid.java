@@ -6,17 +6,17 @@
 package com.giuseppelamalfa.gameofliferemastered.gamelogic;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.*;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.*;
 import com.giuseppelamalfa.gameofliferemastered.utils.*;
 import com.giuseppelamalfa.gameofliferemastered.*;
 import java.awt.Point;
 import java.io.Serializable;
+import java.net.Socket;
 /**
  * Class for handling all of game logic and rendering all units to the grid
  *
  * @author glitchedcode
  */
-public class Grid implements GridPanelInterface, Serializable
+public class Grid implements SimulationInterface, Serializable, Cloneable
 {
     private final TwoDimensionalContainer<UnitInterface> board;
     private final TwoDimensionalContainer<Boolean> sectorFlags;
@@ -68,6 +68,7 @@ public class Grid implements GridPanelInterface, Serializable
     public void         initializeGridPanel(GridPanel panel) {}
     public void         synchronize() {}
     public Integer      getCurrentTurn() {return turn;}
+    public void         handleRequest(Object request, Socket output) {}
     public boolean      isSimulationRunning() {return true;}
     public boolean      isSimulationStarted() {return true;}
 
@@ -392,6 +393,16 @@ public class Grid implements GridPanelInterface, Serializable
                     }
                 }
             }
+        }
+    }
+    
+    @Override
+    public Object clone() {
+        try {
+            return (Grid) super.clone();
+        } catch (CloneNotSupportedException e) {
+            System.out.println("com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid.clone() failed idk");
+            return this;
         }
     }
 }
