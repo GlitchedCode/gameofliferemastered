@@ -95,7 +95,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
                 }
                 catch (Exception ex)
                 {
-                    Logger.getLogger(GridPanel.class.getName()).log(Level.SEVERE, null, ex);
+                    ex.printStackTrace();
                 }
             }
         }
@@ -223,20 +223,33 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
             }
             else
             {
-                updateTask = new BoardUpdateTask(grid, this);
+                updateTask = new BoardUpdateTask();
+                updateTask.grid = grid;
                 timer.schedule(updateTask, 0, updateTask.getMsInterval());
                 autoplay = true;
             }
         }
     }
 
+    public void setGrid(SimulationInterface grid, boolean resetOrigin)
+    {
+        this.grid = grid;
+        if(updateTask != null) updateTask.grid = grid;
+        setSideLength(sideLength);
+
+        Dimension size = getSize();
+        if(resetOrigin)
+            setScreenOrigin(new Point((gridSize.width - size.width) / 2,
+                (gridSize.height - size.height) / 2));
+    }
+    
     public void setGrid(SimulationInterface grid)
     {
         this.grid = grid;
         setSideLength(sideLength);
 
         Dimension size = getSize();
-        setScreenOrigin(new Point((gridSize.width - size.width) / 2,
+            setScreenOrigin(new Point((gridSize.width - size.width) / 2,
                 (gridSize.height - size.height) / 2));
     }
 

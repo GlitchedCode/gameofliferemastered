@@ -18,33 +18,28 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.SimulationInterface;
 public class BoardUpdateTask extends TimerTask
 {
 
-    private final SimulationInterface grid;
-    private final JPanel canvas;
+    public SimulationInterface grid;
 
     private final long msInterval;
 
-    public BoardUpdateTask(SimulationInterface grid, JPanel canvas)
+    public BoardUpdateTask()
     {
         super();
-        this.grid = grid;
-        this.canvas = canvas;
         msInterval = 150;
     }
-
+    
     @Override
     public void run()
     {
-        synchronized (grid)
-        {
+        if(grid == null) return;
             try
             {
                 grid.computeNextTurn();
             }
             catch (Exception ex)
             {
-                Logger.getLogger(BoardUpdateTask.class.getName()).log(Level.SEVERE, null, ex);
+                ex.printStackTrace();
             }
-        }
     }
 
     public long getMsInterval()

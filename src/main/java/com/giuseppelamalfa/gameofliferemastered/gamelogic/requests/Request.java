@@ -18,7 +18,6 @@ public abstract class Request implements Serializable {
         INVALID(null),
         SYNC(SyncRequest.class),
         DISCONNECT(DisconnectRequest.class),
-        GET_UNIT(null),
         SET_UNIT(null);
         
         public final Type requestObjectType;

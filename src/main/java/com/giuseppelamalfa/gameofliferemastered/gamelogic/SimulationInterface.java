@@ -32,4 +32,5 @@ public interface SimulationInterface {
 
     void            synchronize();
     void            initializeGridPanel(GridPanel panel);
+    void            close();
 }

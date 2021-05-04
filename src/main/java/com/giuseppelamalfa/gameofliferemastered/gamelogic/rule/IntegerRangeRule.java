@@ -5,11 +5,13 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.rule;
 
+import java.io.Serializable;
+
 /**
  *
  * @author glitchedcode
  */
-public class IntegerRangeRule implements RuleInterface<Integer>
+public class IntegerRangeRule implements RuleInterface<Integer>, Serializable
 {
     private final Integer min;
     private final Integer max;

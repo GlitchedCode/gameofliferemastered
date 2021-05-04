@@ -6,13 +6,16 @@
 package com.giuseppelamalfa.gameofliferemastered.utils;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid;
+import java.io.Serializable;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author glitchedcode
  * @param <T> Stored type
  */
-public class TwoDimensionalContainer<T> extends HashMap<Integer, HashMap<Integer, T>> implements Cloneable{
+public class TwoDimensionalContainer<T> extends HashMap<Integer, HashMap<Integer, T>> implements Cloneable, Serializable{
 
     private int rows;
     private int cols;
@@ -122,6 +125,17 @@ public class TwoDimensionalContainer<T> extends HashMap<Integer, HashMap<Integer
     @Override
     @SuppressWarnings("unchecked")
     public Object clone() {
-        return (TwoDimensionalContainer<T>) super.clone();
+        TwoDimensionalContainer<T> ret;
+        try {
+            ret = new TwoDimensionalContainer<>(rows, cols);
+            for(int r = 0; r < rows; r++)
+            for(int c = 0; c < cols; c++)
+                ret.put(r, c, get(r, c));
+        
+            return ret;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return null;
     }
 }

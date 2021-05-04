@@ -13,8 +13,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JLayeredPane;
 import java.net.URL;
 import java.awt.Color;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import javax.swing.JTextArea;
 
@@ -24,15 +22,18 @@ import javax.swing.JTextArea;
  */
 public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
 
-    private final Grid              grid;
-    private final ImageManager      tileManager;
+    private Integer                     rowCount = 50;
+    private Integer                     columnCount = 70;
     
-    SimulationClient                client;
-    SimulationServer                server;
+    private final SimulationInterface   grid;
+    private final ImageManager          tileManager;
     
-    static ImageIcon                icon;
-    static JTextArea                mainStatusLog;
-    boolean                         isInMenu = true;
+    SimulationClient                    client;
+    SimulationServer                    server;
+    
+    static ImageIcon                    icon;
+    static JTextArea                    mainStatusLog;
+    boolean                             isInMenu = true;
     
     /*
     * JFRAME CODE
@@ -44,7 +45,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
      */
     public ApplicationFrame() throws Exception{
         tileManager = new ImageManager("tiles.json");
-        grid = new Grid(200, 300);
+        grid = new Grid(rowCount, columnCount);
         URL resource = getClass().getClassLoader().getResource("Tiles/tile_0083.png");
         icon = new ImageIcon(resource);
         
@@ -68,6 +69,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
 
         jLayeredPane = new javax.swing.JLayeredPane();
         gridPanel = gridPanel = new com.giuseppelamalfa.gameofliferemastered.GridPanel(tileManager);
+        turnCounter = new javax.swing.JLabel();
         menuPanel = new com.giuseppelamalfa.gameofliferemastered.MenuPanel();
         titleLabel = new javax.swing.JLabel();
         hostPortNumer = new javax.swing.JTextField();
@@ -95,15 +97,25 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
         gridPanel.setBackground(new java.awt.Color(61, 63, 65));
         gridPanel.setForeground(new java.awt.Color(186, 186, 186));
 
+        turnCounter.setFont(new java.awt.Font("sansserif", 0, 24)); // NOI18N
+        turnCounter.setForeground(new java.awt.Color(255, 255, 255));
+        turnCounter.setText("Current Iteration: 0");
+
         javax.swing.GroupLayout gridPanelLayout = new javax.swing.GroupLayout(gridPanel);
         gridPanel.setLayout(gridPanelLayout);
         gridPanelLayout.setHorizontalGroup(
             gridPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 1282, Short.MAX_VALUE)
+            .addGroup(gridPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(turnCounter)
+                .addContainerGap(1231, Short.MAX_VALUE))
         );
         gridPanelLayout.setVerticalGroup(
             gridPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 722, Short.MAX_VALUE)
+            .addGroup(gridPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(turnCounter)
+                .addContainerGap(699, Short.MAX_VALUE))
         );
 
         menuPanel.setOpaque(false);
@@ -122,7 +134,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
         });
 
         serverAddress.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
-        serverAddress.setText("255.255.255.255");
+        serverAddress.setText("localhost");
         serverAddress.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 serverAddressActionPerformed(evt);
@@ -163,9 +175,19 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
 
         hostGameButton.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
         hostGameButton.setText("Start Server");
+        hostGameButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                StartServerHandler(evt);
+            }
+        });
 
         joinGameButton.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
         joinGameButton.setText("Connect");
+        joinGameButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                JoinGameHandler(evt);
+            }
+        });
 
         unpauseButton.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
         unpauseButton.setText("Return to game");
@@ -310,6 +332,78 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
         swapCanvas();
     }//GEN-LAST:event_unpauseButtonMouseClicked
 
+    private void StartServerHandler(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_StartServerHandler
+        if(client != null) return;
+        
+        if(server == null)
+        {
+            try{
+                server = new SimulationServer(Integer.parseInt(hostPortNumer.getText()), 
+                        Integer.parseInt(maxPlayerCount.getText()), rowCount, columnCount);
+            }catch(Exception e){
+                writeToStatusLog("Could not host server on port " + hostPortNumer.getText());
+                writeToStatusLog(e.toString());
+                server = null;
+            }
+            if(server != null)
+            {
+                hostGameButton.setText("Close Server");
+                hostPortNumer.setEditable(false);
+                maxPlayerCount.setEditable(false);
+                joinGameButton.setEnabled(false);
+                
+                gridPanel.setGrid(server);
+            }
+        }else{
+            writeToStatusLog("Closing server...");
+            server.close();
+            server = null;
+            hostPortNumer.setEditable(true);
+            maxPlayerCount.setEditable(true);
+            joinGameButton.setEnabled(true);
+            hostGameButton.setText("Start Server");
+            
+            gridPanel.setGrid(grid);
+        }
+    }//GEN-LAST:event_StartServerHandler
+
+    private void JoinGameHandler(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_JoinGameHandler
+        if(server != null) return;
+        
+        if(client == null)
+        {
+            try{
+                client = new SimulationClient(serverAddress.getText(), Integer.parseInt(serverPortNumber.getText()));
+            }catch (Exception e){
+                writeToStatusLog("Could not connect to server at address " 
+                        + serverAddress.getText() + ":" + serverPortNumber.getText());
+                writeToStatusLog(e.toString());
+                System.out.println(e);
+                client = null;
+            }
+            if (client != null)
+            {
+                client.initializeGridPanel(gridPanel);
+                joinGameButton.setText("Disconnect");
+                serverAddress.setEditable(false);
+                serverPortNumber.setEditable(false);
+                hostGameButton.setEnabled(false);
+                
+                gridPanel.setGrid(client);
+            }
+        }else{
+            writeToStatusLog("Disconnecting...");
+            client.close();
+            client = null;
+            serverAddress.setEditable(true);
+            serverPortNumber.setEditable(true);
+            hostGameButton.setEnabled(true);
+            joinGameButton.setText("Join Game");
+            
+            gridPanel.setGrid(grid);
+        }
+    }//GEN-LAST:event_JoinGameHandler
+
     public static void writeToStatusLog(String string)
     {
         mainStatusLog.append(string + "\n");
@@ -332,7 +426,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
                 }
             }
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(ApplicationFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            ex.printStackTrace();
         }
         //</editor-fold>
         //</editor-fold>
@@ -345,7 +439,6 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
                 frame.addKeyListener(frame);
                 frame.setVisible(true);
             } catch (Exception ex) {
-                ex.printStackTrace();
                 System.exit(1);
             }
         });
@@ -357,6 +450,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
      * a key typed event.
      * @param e the event to be processed
      */
+    @Override
     public void keyTyped(KeyEvent e) {}
 
     /**
@@ -365,6 +459,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
      * a key pressed event.
      * @param e the event to be processed
      */
+    @Override
     public void keyPressed(KeyEvent e) {}
 
     /**
@@ -373,6 +468,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
      * a key released event.
      * @param e the event to be processed
      */
+    @Override
     public void keyReleased(KeyEvent e) {  
         if(e.getKeyCode() == KeyEvent.VK_ESCAPE)
         {    
@@ -413,6 +509,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
     private javax.swing.JTextField serverPortNumber;
     private javax.swing.JTextArea statusLog;
     private javax.swing.JLabel titleLabel;
+    private javax.swing.JLabel turnCounter;
     private javax.swing.JButton unpauseButton;
     // End of variables declaration//GEN-END:variables
 }

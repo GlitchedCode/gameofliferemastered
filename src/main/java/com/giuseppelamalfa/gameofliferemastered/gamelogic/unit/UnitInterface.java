@@ -14,7 +14,7 @@ import java.util.Set;
  *
  * @author glitchedcode
  */
-public abstract interface UnitInterface 
+public abstract interface UnitInterface
 {
     
     enum State

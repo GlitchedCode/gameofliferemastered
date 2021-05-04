@@ -5,6 +5,7 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.rule;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -12,7 +13,7 @@ import java.util.Set;
  *
  * @author glitchedcode
  */
-public class IntegerSetRule implements RuleInterface<Integer>
+public class IntegerSetRule implements RuleInterface<Integer>, Serializable
 {
     public final Set<Integer> acceptedValues = new HashSet<>();
     

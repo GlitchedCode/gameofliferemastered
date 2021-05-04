@@ -18,7 +18,7 @@ import java.net.Socket;
  */
 public class Grid implements SimulationInterface, Serializable, Cloneable
 {
-    private final TwoDimensionalContainer<UnitInterface> board;
+    private TwoDimensionalContainer<UnitInterface> board;
     private final TwoDimensionalContainer<Boolean> sectorFlags;
 
     private Integer turn;
@@ -64,12 +64,33 @@ public class Grid implements SimulationInterface, Serializable, Cloneable
         
         turn = 0;
     }
-
+    
+    @Override
+    @SuppressWarnings("unchecked")
+    public Object clone() {
+        try {
+            Grid ret = (Grid) super.clone();
+            ret.board = (TwoDimensionalContainer<UnitInterface>)board.clone();
+            return ret;
+        } catch (CloneNotSupportedException e) {
+            System.out.println("com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid.clone() failed idk");
+            return this;
+        }
+    }
+    
+    @Override
     public void         initializeGridPanel(GridPanel panel) {}
+    @Override
     public void         synchronize() {}
+    @Override
+    public void         close() {}
+    @Override
     public Integer      getCurrentTurn() {return turn;}
+    @Override
     public void         handleRequest(Object request, Socket output) {}
+    @Override
     public boolean      isSimulationRunning() {return true;}
+    @Override
     public boolean      isSimulationStarted() {return true;}
 
     private void initSelectorFlags()    {
@@ -395,14 +416,5 @@ public class Grid implements SimulationInterface, Serializable, Cloneable
             }
         }
     }
-    
-    @Override
-    public Object clone() {
-        try {
-            return (Grid) super.clone();
-        } catch (CloneNotSupportedException e) {
-            System.out.println("com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid.clone() failed idk");
-            return this;
-        }
-    }
+   
 }

@@ -88,15 +88,36 @@
           <Layout>
             <DimensionLayout dim="0">
               <Group type="103" groupAlignment="0" attributes="0">
-                  <EmptySpace min="0" pref="1282" max="32767" attributes="0"/>
+                  <Group type="102" alignment="0" attributes="0">
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="turnCounter" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace pref="1231" max="32767" attributes="0"/>
+                  </Group>
               </Group>
             </DimensionLayout>
             <DimensionLayout dim="1">
               <Group type="103" groupAlignment="0" attributes="0">
-                  <EmptySpace min="0" pref="722" max="32767" attributes="0"/>
+                  <Group type="102" alignment="0" attributes="0">
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="turnCounter" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace pref="699" max="32767" attributes="0"/>
+                  </Group>
               </Group>
             </DimensionLayout>
           </Layout>
+          <SubComponents>
+            <Component class="javax.swing.JLabel" name="turnCounter">
+              <Properties>
+                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                  <Font name="sansserif" size="24" style="0"/>
+                </Property>
+                <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+                  <Color blue="ff" green="ff" red="ff" type="rgb"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="Current Iteration: 0"/>
+              </Properties>
+            </Component>
+          </SubComponents>
         </Container>
         <Container class="com.giuseppelamalfa.gameofliferemastered.MenuPanel" name="menuPanel">
           <Properties>
@@ -213,7 +234,7 @@
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="sansserif" size="18" style="0"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="255.255.255.255"/>
+                <Property name="text" type="java.lang.String" value="localhost"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="serverAddressActionPerformed"/>
@@ -292,6 +313,9 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Start Server"/>
               </Properties>
+              <Events>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="StartServerHandler"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JButton" name="joinGameButton">
               <Properties>
@@ -300,6 +324,9 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Connect"/>
               </Properties>
+              <Events>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="JoinGameHandler"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JButton" name="unpauseButton">
               <Properties>
