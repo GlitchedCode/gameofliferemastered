@@ -5,10 +5,22 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.requests;
 
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
+
 /**
  *
  * @author glitchedcode
  */
 public class SetUnitRequest extends Request {
+    public UnitInterface unit;
+    public int row;
+    public int col;
     
+    public SetUnitRequest(int row, int col, UnitInterface unit)
+    {
+        type = RequestType.SET_UNIT;
+        this.row = row;
+        this.col = col;
+        this.unit = unit;
+    }
 }

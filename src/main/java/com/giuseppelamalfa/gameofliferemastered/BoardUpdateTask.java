@@ -6,9 +6,6 @@
 package com.giuseppelamalfa.gameofliferemastered;
 
 import java.util.TimerTask;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.JPanel;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.SimulationInterface;
 
 /**
@@ -32,14 +29,15 @@ public class BoardUpdateTask extends TimerTask
     public void run()
     {
         if(grid == null) return;
-            try
-            {
-                grid.computeNextTurn();
-            }
-            catch (Exception ex)
-            {
-                ex.printStackTrace();
-            }
+        if(!grid.isSimulationRunning()) return;
+        try
+        {
+            grid.computeNextTurn();
+        }
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
+        }
     }
 
     public long getMsInterval()

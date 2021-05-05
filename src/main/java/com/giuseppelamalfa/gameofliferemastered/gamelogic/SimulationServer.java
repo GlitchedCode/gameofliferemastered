@@ -9,11 +9,8 @@ import com.giuseppelamalfa.gameofliferemastered.ApplicationFrame;
 import com.giuseppelamalfa.gameofliferemastered.GridPanel;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.requests.*;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
-import com.sun.tools.javac.util.Pair;
 import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -22,10 +19,30 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import sun.tools.java.ClassDefinition;
+import java.util.HashMap;
+
+class ClientData{
+    public Socket socket;
+    public ObjectOutputStream stream;
+    public int ID;
+    public String playerName;
+    
+    public ClientData(Socket socket, ObjectOutputStream stream, int ID)
+    {
+        this.socket = socket;
+        this.stream = stream;
+        this.ID = ID;
+        this.playerName = "Player" + ID;
+    }
+    
+    public ClientData(Socket socket, ObjectOutputStream stream, int ID, String playerName)
+    {
+        this.socket = socket;
+        this.stream = stream;
+        this.ID = ID;
+        this.playerName = playerName;
+    }
+}
 
 /**
  *
@@ -35,34 +52,35 @@ public class SimulationServer implements SimulationInterface{
     public static final Integer defaultPlayerCount = 4;
     public static final Integer maxPlayers = 8;
     
-    public static Integer syncTurnCount = 20;
+    public static Integer syncTurnCount = 200;
     public static Integer simulationPhaseLength = 60;
 
     boolean         isStarted = false;
     boolean         isRunning = false;
     
-    Integer         playerCount;
-    Integer         rowCount;
-    Integer         columnCount;
+    int             nextClientID = 0;
+    int             playerCount;
+    int             rowCount;
+    int             columnCount;
     Grid            currentGrid;
-    Grid            syncGrid;
+    Grid            syncGrid = new Grid(1,1);
     
     Object          gridLock = new Object();
     Thread          acceptConnectionThread;
     Thread          readClientInputThread;
     
-    ArrayList<Pair<Socket, ObjectOutputStream>>    connectedClients = new ArrayList<Pair<Socket, ObjectOutputStream>>();
+    HashMap<Integer, ClientData>    connectedClients = new HashMap<Integer, ClientData>();
     ServerSocket    serverSocket;
     String          serverIP;
-    Integer         portNumber;
-    
+    int         portNumber;    
+  
     public SimulationServer(Integer portNumber, Integer playerCount, 
-            Integer rowCount, Integer columnCount) throws IOException 
-    {
+            Integer rowCount, Integer columnCount) throws Exception {
+        
         init(portNumber, playerCount, rowCount, columnCount);        
     }
     
-    public void init(Integer portNumber, Integer playerCount, Integer rowCount, Integer columnCount) throws IOException {
+    public final void init(Integer portNumber, Integer plaeyrCount, Integer rowCount, Integer columnCount) throws IOException {
         if(playerCount < 2 | playerCount > maxPlayers)
             this.playerCount = defaultPlayerCount;
         else
@@ -90,33 +108,40 @@ public class SimulationServer implements SimulationInterface{
         acceptConnectionThread = new Thread(() -> {
             try{
                 while(true){
+                    int clientID = nextClientID;
                     Socket conn = serverSocket.accept();    
                     ObjectOutputStream stream = new ObjectOutputStream(conn.getOutputStream());
+                    nextClientID++;
 
                     if(connectedClients.size() + 1 < playerCount)
                     {    
-                        connectedClients.add(new Pair<Socket, ObjectOutputStream>(conn, stream));
-                        ApplicationFrame.writeToStatusLog(conn.getRemoteSocketAddress() + " joined the game.");
+                        ClientData newClient = new ClientData(conn, stream, clientID);
+                        connectedClients.put(clientID, newClient);
+                        
+                        ApplicationFrame.writeToStatusLog("Accepting connection from" + conn.getRemoteSocketAddress());
                         // Make a thread for each client connection. 
                         new Thread(() -> {
+                            ClientData data = newClient;
                             try{
                                 InputStream input = conn.getInputStream();
                                 ObjectInputStream objectInputStream = new ObjectInputStream(input);
                                 
                                 while(true)
-                                {
-                                    handleRequest(objectInputStream.readObject(), conn);
-                                }
+                                    handleRequest(objectInputStream.readObject(), data.ID);
                             }
+                            catch(EOFException e) {}
                             catch (InvalidRequestException | IOException | ClassNotFoundException e){
                                 System.err.println(e);
-                                connectedClients.remove(conn);
                             }
+                            connectedClients.remove(data.ID);
                             try{
                                 conn.close();
                             }catch(IOException e) {}
+                            
+                            ApplicationFrame.writeToStatusLog(data.playerName + " left the game.");
                         }).start();
                         
+                        stream.writeObject(new PauseRequest(isRunning));
                         stream.writeObject(new SyncRequest(currentGrid));
                     }
                     else {
@@ -130,6 +155,8 @@ public class SimulationServer implements SimulationInterface{
             }
         });
         acceptConnectionThread.start();
+        
+        isStarted = true;
     }
     
     @Override
@@ -138,13 +165,13 @@ public class SimulationServer implements SimulationInterface{
     public boolean          isSimulationRunning() { return isRunning; }
     
     @Override
-    public Integer          getRowCount() { return rowCount; }
+    public int              getRowCount() { return rowCount; }
     @Override
-    public Integer          getColumnCount() { return columnCount; }
+    public int              getColumnCount() { return columnCount; }
     @Override
-    public Integer          getSectorSideLength() { return currentGrid.getSectorSideLength(); }
+    public int              getSectorSideLength() { return currentGrid.getSectorSideLength(); }
     @Override
-    public Integer          getCurrentTurn() { return currentGrid.getCurrentTurn(); }
+    public int              getCurrentTurn() { return currentGrid.getCurrentTurn(); }
     
     @Override
     public UnitInterface    getUnit(int row, int col) { return currentGrid.getUnit(row, col); }
@@ -152,59 +179,79 @@ public class SimulationServer implements SimulationInterface{
     public void             setUnit(int row, int col, UnitInterface unit) { currentGrid.setUnit(row, col, unit); }
     
     @Override
-    public synchronized void computeNextTurn() throws Exception { 
-        currentGrid.computeNextTurn();
-        if(currentGrid.getTurn() % syncTurnCount == 0)
-            synchronize();
+    public void computeNextTurn() throws Exception { 
+        synchronized(currentGrid){
+            currentGrid.computeNextTurn();
+            if(currentGrid.getCurrentTurn() % syncTurnCount == 0)
+                synchronize();
+        }
     }
     
     @Override
     public synchronized void synchronize() {
-            SyncRequest syncRequest = new SyncRequest((Grid)currentGrid.clone());
-            System.out.println(getCurrentTurn());
-            try{
-                for(int i = 0; i < connectedClients.size(); i++)
-                    connectedClients.get(i).snd.writeObject(syncRequest);
-            }catch(Exception e) {
-                System.out.println(e);
-            }
+        if(syncGrid.equals(currentGrid)) return;
+        
+        syncGrid = (Grid)currentGrid.clone();
+        SyncRequest syncRequest = new SyncRequest(syncGrid);
+        try{
+            for(Integer key : connectedClients.keySet())
+                connectedClients.get(key).stream.writeObject(syncRequest);
+        }catch(Exception e) {
+            System.out.println(e);
+        }
 
     }
     
     public synchronized void synchronize(ObjectOutputStream output) {
         syncGrid = (Grid)currentGrid.clone();
-        SyncRequest syncRequest = new SyncRequest(syncGrid);
         try{
-            output.writeObject(syncRequest);
+            output.writeObject(new SyncRequest(syncGrid));
         }catch(Exception e){
             System.out.println(e);
         }
         
     }
-
     @Override
     public void             initializeGridPanel(GridPanel panel) {}
+    
     @Override
-    public synchronized void handleRequest(Object requestObject, Socket client) throws IOException, InvalidRequestException {
+    public void             setRunning(boolean val) {
+        isRunning = val;
+        PauseRequest req = new PauseRequest(val);
+        try{
+            for (Integer key : connectedClients.keySet()) {
+                connectedClients.get(key).stream.writeObject(req);
+            }
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+        
+        synchronize();
+    }
+    
+    @Override
+    public synchronized void handleRequest(Object requestObject, int clientID) throws IOException, InvalidRequestException {
         Request tmp = (Request)requestObject;
+        ClientData data;
+        if (clientID >= 0)
+            data = connectedClients.get(clientID);
+        else data = null;
         switch(tmp.getType())   
         {
             case SYNC:
-                for(int i = 0; i < connectedClients.size(); i++)
-                    if(connectedClients.get(i).fst == client){
-                        synchronize(connectedClients.get(i).snd);
-                        break;
-                    }
+                if (data != null) synchronize(data.stream);
                 break;
             case DISCONNECT:
+                if (data == null) break;
                 DisconnectRequest disconnect = (DisconnectRequest)tmp;
-                ApplicationFrame.writeToStatusLog(client.getRemoteSocketAddress() + " disconnected: " + disconnect.message);
-                for(int i = 0; i < connectedClients.size(); i++)
-                    if(connectedClients.get(i).fst == client){
-                        connectedClients.remove(i);
-                        break;
-                    }
-                client.close();
+                ApplicationFrame.writeToStatusLog(data.socket.getRemoteSocketAddress() + " disconnected: " + disconnect.message);
+                connectedClients.remove(clientID);
+                data.socket.close();
+                break;
+            case SET_UNIT:
+                if (data == null) break;
+                SetUnitRequest request = (SetUnitRequest)tmp;
+                setUnit(request.row, request.col, request.unit);
                 break;
         }
     }
@@ -214,11 +261,13 @@ public class SimulationServer implements SimulationInterface{
     {
         try {
             for(int i = 0; i < connectedClients.size(); i++)
-                connectedClients.get(i).fst.close();
+                connectedClients.get(i).socket.close();
             serverSocket.close();  
         }
         catch(Exception e) {
             System.out.println(e);
         }
+        
+        isStarted = false;
     }
 }

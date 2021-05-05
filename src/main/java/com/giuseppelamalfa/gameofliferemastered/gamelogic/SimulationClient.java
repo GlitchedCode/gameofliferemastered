@@ -6,6 +6,7 @@
 package com.giuseppelamalfa.gameofliferemastered.gamelogic;
 
 import com.giuseppelamalfa.gameofliferemastered.ApplicationFrame;
+import com.giuseppelamalfa.gameofliferemastered.BoardUpdateTask;
 import com.giuseppelamalfa.gameofliferemastered.GridPanel;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.requests.*;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
@@ -14,6 +15,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.net.SocketException;
+import java.util.Timer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -23,23 +28,23 @@ public class SimulationClient implements SimulationInterface {
     boolean isStarted = false;
     boolean isRunning = false;
     
-    Integer playerCount;
-    Integer rowCount = 1;
-    Integer columnCount = 1;
+    int playerCount;
+    int rowCount = 1;
+    int columnCount = 1;
     Grid currentGrid;
-    Grid syncGrid;
+    Grid syncGrid = new Grid(1,1);
 
     GridPanel panel;
     Socket clientSocket;
     ObjectOutputStream outputStream;
     String host;
-    Integer portNumber;
+    int portNumber;
     
-    public SimulationClient(String host, Integer portNumber) throws IOException, Exception {
+    public SimulationClient(String host, int portNumber) throws IOException, Exception {
         init(host,portNumber);
     }
     
-    public void init(String host, Integer portNumber) throws IOException, Exception{
+    public void init(String host, int portNumber) throws IOException, Exception{
         clientSocket = new Socket(host, portNumber);
         outputStream = new ObjectOutputStream(clientSocket.getOutputStream());
 
@@ -50,10 +55,12 @@ public class SimulationClient implements SimulationInterface {
                     ObjectInputStream input = new ObjectInputStream(clientSocket.getInputStream());
 
                     while(true){
-                        handleRequest(input.readObject(), clientSocket);
+                        handleRequest(input.readObject(), 0);
                     }
                 }
-                catch (EOFException e){}
+                catch (EOFException | SocketException e){
+                    
+                }
                 catch (InvalidRequestException | IOException | ClassNotFoundException e){
                     e.printStackTrace();
                     isRunning = false;
@@ -63,6 +70,7 @@ public class SimulationClient implements SimulationInterface {
         }).start();
         
         currentGrid = new Grid(1, 1);
+        isStarted = true;
     }
     
     @Override
@@ -71,13 +79,13 @@ public class SimulationClient implements SimulationInterface {
     public boolean          isSimulationRunning() { return isRunning; }
     
     @Override
-    public Integer          getRowCount() { return rowCount; }
+    public int              getRowCount() { return rowCount; }
     @Override
-    public Integer          getColumnCount() { return columnCount; }
+    public int              getColumnCount() { return columnCount; }
     @Override
-    public Integer          getSectorSideLength() { return currentGrid.getSectorSideLength(); }
+    public int              getSectorSideLength() { return currentGrid.getSectorSideLength(); }
     @Override
-    public Integer          getCurrentTurn() { return currentGrid.getCurrentTurn(); }
+    public int              getCurrentTurn() { return currentGrid.getCurrentTurn(); }
     
     @Override
     public UnitInterface    getUnit(int row, int col) { 
@@ -89,43 +97,63 @@ public class SimulationClient implements SimulationInterface {
     }
     
     @Override
-    public void             computeNextTurn() throws Exception { 
-        //synchronized(currentGrid){
-            currentGrid.computeNextTurn(); 
-            System.out.println(getCurrentTurn());
-        //}
+    public synchronized void computeNextTurn() throws Exception {
+        currentGrid.computeNextTurn(); 
+    }
+    
+    public void setRunning(boolean val) {
+        if(!val){
+            try {
+                outputStream.writeObject(new PauseRequest(true));
+            } catch (IOException ex) {
+                Logger.getLogger(SimulationClient.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
     
     @Override
-    public synchronized void handleRequest(Object requestObject, Socket server)
+    public void handleRequest(Object requestObject, int ID)
             throws IOException, InvalidRequestException {
         Request request = (Request)requestObject;
         
         switch(request.getType())
         {
             case SYNC:
-                syncGrid = ((SyncRequest)request).grid;
+                synchronized(syncGrid){
+                    syncGrid = ((SyncRequest)request).grid;
+                }
                 rowCount = syncGrid.getRowCount();
                 columnCount = syncGrid.getColumnCount();
                 Grid tmpGrid = (Grid)syncGrid.clone();
-                //synchronized(currentGrid) {
+                synchronized(currentGrid) {
                     currentGrid = tmpGrid;
-                    panel.setGrid(tmpGrid, false);
-                //}
-                System.out.println(getCurrentTurn());
+                }
                 break;
             case DISCONNECT:
                 String msg = ((DisconnectRequest)request).message;
-                ApplicationFrame.writeToStatusLog("Disconnected from " + server.getRemoteSocketAddress()
+                ApplicationFrame.writeToStatusLog("Disconnected from " + clientSocket.getRemoteSocketAddress()
                     + ": " + msg);
-                server.close();
+                clientSocket.close();
                 isRunning = false;
                 isStarted = false;
+                break;
+            case PAUSE:
+                isRunning = ((PauseRequest)request).running;
                 break;
         }
     }
     @Override
-    public void             synchronize() {}
+    public void             synchronize() {
+        if(isStarted)
+        {
+            SyncRequest req = new SyncRequest();
+            try {
+                outputStream.writeObject(req);
+            } catch (IOException ex) {
+                Logger.getLogger(SimulationClient.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
     @Override
     public void             initializeGridPanel(GridPanel panel) {
         this.panel = panel;
@@ -137,5 +165,7 @@ public class SimulationClient implements SimulationInterface {
         }catch(Exception e) {
             System.err.println("e");
         }
+        
+        isStarted = false;
     }
 }

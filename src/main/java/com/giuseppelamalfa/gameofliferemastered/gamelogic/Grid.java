@@ -8,9 +8,12 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.*;
 import com.giuseppelamalfa.gameofliferemastered.utils.*;
 import com.giuseppelamalfa.gameofliferemastered.*;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.requests.InvalidRequestException;
 import java.awt.Point;
+import java.io.IOException;
 import java.io.Serializable;
 import java.net.Socket;
+import java.util.Timer;
 /**
  * Class for handling all of game logic and rendering all units to the grid
  *
@@ -21,8 +24,9 @@ public class Grid implements SimulationInterface, Serializable, Cloneable
     private TwoDimensionalContainer<UnitInterface> board;
     private final TwoDimensionalContainer<Boolean> sectorFlags;
 
-    private Integer turn;
-    private Integer sideLength;
+    private boolean isRunning;
+    private int turn;
+    private int sideLength;
 
     private final Integer rowCount;
     private final Integer columnCount;
@@ -83,13 +87,15 @@ public class Grid implements SimulationInterface, Serializable, Cloneable
     @Override
     public void         synchronize() {}
     @Override
-    public void         close() {}
+    public void         close() { }
     @Override
-    public Integer      getCurrentTurn() {return turn;}
+    public int          getCurrentTurn() {return turn;}
     @Override
-    public void         handleRequest(Object request, Socket output) {}
+    public void         handleRequest(Object request, int ID) throws IOException, InvalidRequestException {}
     @Override
-    public boolean      isSimulationRunning() {return true;}
+    public void         setRunning(boolean val) {isRunning = val;}
+    @Override
+    public boolean      isSimulationRunning() {return isRunning;}
     @Override
     public boolean      isSimulationStarted() {return true;}
 
@@ -109,39 +115,23 @@ public class Grid implements SimulationInterface, Serializable, Cloneable
     /**
      * @return the number of the board's columns
      */
-    public Integer getRowCount()    {
+    public int getRowCount()    {
         return rowCount;
     }
 
     /**
      * @return the number of the board's columns
      */
-    public Integer getColumnCount()    {
+    public int getColumnCount()    {
         return columnCount;
-    }
-
-    /**
-     * @return the current in game turn
-     */
-    public Integer getTurn()    {
-        return turn;
     }
 
     public UnitInterface getUnit(int row, int col)    {
         return board.get(row, col);
     }
 
-    public final Integer getSectorSideLength()    {
+    public final int getSectorSideLength()    {
         return sectorSideLength;
-    }
-
-    public final Point getTopLeftActive()    {
-        return topLeftActive;
-    }
-
-    public final Point getBottomRightActive()
-    {
-        return bottomRightActive;
     }
 
     /*
@@ -192,7 +182,7 @@ public class Grid implements SimulationInterface, Serializable, Cloneable
      *
      * @throws java.lang.Exception
      */
-    public void computeNextTurn() throws Exception
+    public synchronized void computeNextTurn() throws Exception
     {
         unitFoundThisTurn = false;
 

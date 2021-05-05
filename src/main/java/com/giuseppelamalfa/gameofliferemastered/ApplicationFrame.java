@@ -347,6 +347,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
             }
             if(server != null)
             {
+                grid.setRunning(false);
                 hostGameButton.setText("Close Server");
                 hostPortNumer.setEditable(false);
                 maxPlayerCount.setEditable(false);
@@ -383,6 +384,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
             }
             if (client != null)
             {
+                grid.setRunning(false);
                 client.initializeGridPanel(gridPanel);
                 joinGameButton.setText("Disconnect");
                 serverAddress.setEditable(false);

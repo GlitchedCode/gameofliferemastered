@@ -18,17 +18,18 @@ public interface SimulationInterface {
     boolean         isSimulationStarted();
     boolean         isSimulationRunning();
     
-    Integer         getRowCount();
-    Integer         getColumnCount();
-    Integer         getSectorSideLength();
-    Integer         getCurrentTurn();
+    int             getRowCount();
+    int             getColumnCount();
+    int             getSectorSideLength();
+    int             getCurrentTurn();
     
     UnitInterface   getUnit(int row, int col);
     void            setUnit(int row, int col, UnitInterface unit);
     
     void            computeNextTurn() throws Exception;
     
-    void            handleRequest(Object requestObject, Socket client) throws IOException, InvalidRequestException;
+    void            setRunning(boolean val);
+    void            handleRequest(Object requestObject, int ID) throws IOException, InvalidRequestException;
 
     void            synchronize();
     void            initializeGridPanel(GridPanel panel);
