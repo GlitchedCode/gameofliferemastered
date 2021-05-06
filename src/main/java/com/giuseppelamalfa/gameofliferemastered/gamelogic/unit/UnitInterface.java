@@ -8,6 +8,7 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.GameLogicException;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.state.*;
+import java.io.Serializable;
 import java.util.Set;
 
 /**
@@ -17,7 +18,7 @@ import java.util.Set;
 public abstract interface UnitInterface
 {
     
-    enum State
+    enum State implements Serializable
     {
         INVALID(null),
         DEAD(null),

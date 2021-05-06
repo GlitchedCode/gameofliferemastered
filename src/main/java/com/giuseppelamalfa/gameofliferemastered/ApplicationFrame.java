@@ -22,8 +22,8 @@ import javax.swing.JTextArea;
  */
 public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
 
-    private Integer                     rowCount = 50;
-    private Integer                     columnCount = 70;
+    private Integer                     localRowCount = 50;
+    private Integer                     localColumnCount = 70;
     
     private final SimulationInterface   grid;
     private final ImageManager          tileManager;
@@ -45,7 +45,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
      */
     public ApplicationFrame() throws Exception{
         tileManager = new ImageManager("tiles.json");
-        grid = new Grid(rowCount, columnCount);
+        grid = new Grid(localRowCount, localColumnCount);
         URL resource = getClass().getClassLoader().getResource("Tiles/tile_0083.png");
         icon = new ImageIcon(resource);
         
@@ -339,7 +339,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
         {
             try{
                 server = new SimulationServer(Integer.parseInt(hostPortNumer.getText()), 
-                        Integer.parseInt(maxPlayerCount.getText()), rowCount, columnCount);
+                        Integer.parseInt(maxPlayerCount.getText()), localRowCount, localColumnCount);
             }catch(Exception e){
                 writeToStatusLog("Could not host server on port " + hostPortNumer.getText());
                 writeToStatusLog(e.toString());

@@ -18,14 +18,14 @@ import java.io.Serializable;
  *
  * @author glitchedcode
  */
-public class DeadUnit implements UnitInterface, Serializable, Cloneable
+public class DeadUnit extends Unit implements Serializable, Cloneable
 {
     private UnitInterface bornUnit = null;
     
     // This function implements rule #3: reproduction
     @Override
     @SuppressWarnings("unchecked")
-    public void computeNextTurn(UnitInterface[] adjacentUnits)
+    public void computeNextTurn(Unit[] adjacentUnits)
     {        
         // Contains how many units of a given species are adjacent.
         HashMap<Species, Integer> reproductionCounters = new HashMap<>();

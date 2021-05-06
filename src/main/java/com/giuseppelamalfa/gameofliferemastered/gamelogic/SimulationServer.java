@@ -9,6 +9,7 @@ import com.giuseppelamalfa.gameofliferemastered.ApplicationFrame;
 import com.giuseppelamalfa.gameofliferemastered.GridPanel;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.requests.*;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
+import com.giuseppelamalfa.gameofliferemastered.utils.PlayerData;
 import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.IOException;
@@ -20,19 +21,21 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 class ClientData{
     public Socket socket;
     public ObjectOutputStream stream;
     public int ID;
-    public String playerName;
+    public PlayerData playerData = new PlayerData();
     
     public ClientData(Socket socket, ObjectOutputStream stream, int ID)
     {
         this.socket = socket;
         this.stream = stream;
         this.ID = ID;
-        this.playerName = "Player" + ID;
+        this.playerData.playerName = "Player" + ID;
     }
     
     public ClientData(Socket socket, ObjectOutputStream stream, int ID, String playerName)
@@ -40,7 +43,7 @@ class ClientData{
         this.socket = socket;
         this.stream = stream;
         this.ID = ID;
-        this.playerName = playerName;
+        this.playerData.playerName = playerName;
     }
 }
 
@@ -49,8 +52,8 @@ class ClientData{
  * @author glitchedcode
  */
 public class SimulationServer implements SimulationInterface{
-    public static final Integer defaultPlayerCount = 4;
-    public static final Integer maxPlayers = 8;
+    public static final Integer DEFAULT_PLAYER_COUNT = 4;
+    public static final Integer MAX_PLAYER_COUNT = 8;
     
     public static Integer syncTurnCount = 200;
     public static Integer simulationPhaseLength = 60;
@@ -69,7 +72,7 @@ public class SimulationServer implements SimulationInterface{
     Thread          acceptConnectionThread;
     Thread          readClientInputThread;
     
-    HashMap<Integer, ClientData>    connectedClients = new HashMap<Integer, ClientData>();
+    HashMap<Integer, ClientData>    connectedClients = new HashMap<>();
     ServerSocket    serverSocket;
     String          serverIP;
     int         portNumber;    
@@ -80,9 +83,9 @@ public class SimulationServer implements SimulationInterface{
         init(portNumber, playerCount, rowCount, columnCount);        
     }
     
-    public final void init(Integer portNumber, Integer plaeyrCount, Integer rowCount, Integer columnCount) throws IOException {
-        if(playerCount < 2 | playerCount > maxPlayers)
-            this.playerCount = defaultPlayerCount;
+    public final void init(Integer portNumber, Integer playerCount, Integer rowCount, Integer columnCount) throws IOException {
+        if(playerCount < 2 | playerCount > MAX_PLAYER_COUNT)
+            this.playerCount = DEFAULT_PLAYER_COUNT;
         else
             this.playerCount = playerCount;
         
@@ -121,24 +124,24 @@ public class SimulationServer implements SimulationInterface{
                         ApplicationFrame.writeToStatusLog("Accepting connection from" + conn.getRemoteSocketAddress());
                         // Make a thread for each client connection. 
                         new Thread(() -> {
-                            ClientData data = newClient;
+                            ClientData clientData = newClient;
                             try{
                                 InputStream input = conn.getInputStream();
                                 ObjectInputStream objectInputStream = new ObjectInputStream(input);
                                 
                                 while(true)
-                                    handleRequest(objectInputStream.readObject(), data.ID);
+                                    handleRequest(objectInputStream.readObject(), clientData.ID);
                             }
                             catch(EOFException e) {}
                             catch (InvalidRequestException | IOException | ClassNotFoundException e){
                                 System.err.println(e);
                             }
-                            connectedClients.remove(data.ID);
+                            connectedClients.remove(clientData.ID);
                             try{
                                 conn.close();
                             }catch(IOException e) {}
                             
-                            ApplicationFrame.writeToStatusLog(data.playerName + " left the game.");
+                            ApplicationFrame.writeToStatusLog(clientData.playerData.playerName + " left the game.");
                         }).start();
                         
                         stream.writeObject(new PauseRequest(isRunning));
@@ -176,7 +179,16 @@ public class SimulationServer implements SimulationInterface{
     @Override
     public UnitInterface    getUnit(int row, int col) { return currentGrid.getUnit(row, col); }
     @Override
-    public void             setUnit(int row, int col, UnitInterface unit) { currentGrid.setUnit(row, col, unit); }
+    public void             setUnit(int row, int col, UnitInterface unit) {
+        SetUnitRequest req = new SetUnitRequest(row, col, unit);
+        try {
+            handleRequest(req, -1);
+        } catch (IOException ex) {
+            Logger.getLogger(SimulationServer.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InvalidRequestException ex) {
+            Logger.getLogger(SimulationServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
     
     @Override
     public void computeNextTurn() throws Exception { 
@@ -219,9 +231,8 @@ public class SimulationServer implements SimulationInterface{
         isRunning = val;
         PauseRequest req = new PauseRequest(val);
         try{
-            for (Integer key : connectedClients.keySet()) {
+            for (Integer key : connectedClients.keySet())
                 connectedClients.get(key).stream.writeObject(req);
-            }
         }catch(IOException e){
             e.printStackTrace();
         }
@@ -241,6 +252,12 @@ public class SimulationServer implements SimulationInterface{
             case SYNC:
                 if (data != null) synchronize(data.stream);
                 break;
+            case UPDATE_PLAYER_DATA:
+                if(data == null) break;
+                PlayerData playerData = ((UpdatePlayerDataRequest)tmp).playerData;
+                if(playerData.playerName != null)
+                    data.playerData.playerName = playerData.playerName;
+                break;
             case DISCONNECT:
                 if (data == null) break;
                 DisconnectRequest disconnect = (DisconnectRequest)tmp;
@@ -249,9 +266,12 @@ public class SimulationServer implements SimulationInterface{
                 data.socket.close();
                 break;
             case SET_UNIT:
-                if (data == null) break;
-                SetUnitRequest request = (SetUnitRequest)tmp;
-                setUnit(request.row, request.col, request.unit);
+                SetUnitRequest setUnit = (SetUnitRequest)tmp;
+                currentGrid.setUnit(setUnit.row, setUnit.col, setUnit.unit);
+                setUnit.unit = (UnitInterface)setUnit.unit.clone();
+                for (Integer key : connectedClients.keySet())
+                    if(key != clientID | clientID < 0)
+                        connectedClients.get(key).stream.writeObject(requestObject);
                 break;
         }
     }

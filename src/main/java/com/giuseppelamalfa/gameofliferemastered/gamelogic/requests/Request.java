@@ -17,7 +17,7 @@ public abstract class Request implements Serializable {
     public enum RequestType{
         INVALID(null),
         SYNC(SyncRequest.class),
-        UPDATE_PLAYERDATA(null),
+        UPDATE_PLAYER_DATA(UpdatePlayerDataRequest.class),
         DISCONNECT(DisconnectRequest.class),
         PAUSE(PauseRequest.class),
         SET_UNIT(SetUnitRequest.class);

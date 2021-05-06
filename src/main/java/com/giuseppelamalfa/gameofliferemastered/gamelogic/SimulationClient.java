@@ -94,6 +94,11 @@ public class SimulationClient implements SimulationInterface {
     @Override
     public void             setUnit(int row, int col, UnitInterface unit) { 
         currentGrid.setUnit(row, col, unit); 
+        try {
+            outputStream.writeObject(new SetUnitRequest(row, col, unit));
+        } catch (IOException ex) {
+            Logger.getLogger(SimulationClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     @Override
@@ -116,8 +121,7 @@ public class SimulationClient implements SimulationInterface {
             throws IOException, InvalidRequestException {
         Request request = (Request)requestObject;
         
-        switch(request.getType())
-        {
+        switch(request.getType()) {
             case SYNC:
                 synchronized(syncGrid){
                     syncGrid = ((SyncRequest)request).grid;
@@ -139,6 +143,10 @@ public class SimulationClient implements SimulationInterface {
                 break;
             case PAUSE:
                 isRunning = ((PauseRequest)request).running;
+                break;
+            case SET_UNIT:
+                SetUnitRequest setUnit = (SetUnitRequest)request;
+                currentGrid.setUnit(setUnit.row, setUnit.col, setUnit.unit);
                 break;
         }
     }
