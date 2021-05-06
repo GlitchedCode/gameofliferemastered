@@ -55,8 +55,8 @@ public class SimulationServer implements SimulationInterface{
     public static final Integer DEFAULT_PLAYER_COUNT = 4;
     public static final Integer MAX_PLAYER_COUNT = 8;
     
-    public static Integer syncTurnCount = 200;
-    public static Integer simulationPhaseLength = 60;
+    public static Integer syncTurnCount = 40;
+    public static Integer simulationPhaseLength = 80;
 
     boolean         isStarted = false;
     boolean         isRunning = false;
@@ -267,11 +267,10 @@ public class SimulationServer implements SimulationInterface{
                 break;
             case SET_UNIT:
                 SetUnitRequest setUnit = (SetUnitRequest)tmp;
-                currentGrid.setUnit(setUnit.row, setUnit.col, setUnit.unit);
-                setUnit.unit = (UnitInterface)setUnit.unit.clone();
                 for (Integer key : connectedClients.keySet())
                     if(key != clientID | clientID < 0)
                         connectedClients.get(key).stream.writeObject(requestObject);
+                currentGrid.setUnit(setUnit.row, setUnit.col, setUnit.unit);
                 break;
         }
     }

@@ -6,7 +6,7 @@
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,14 +18,14 @@ import java.io.Serializable;
  *
  * @author glitchedcode
  */
-public class DeadUnit extends Unit implements Serializable, Cloneable
+public class DeadUnit implements UnitInterface, Serializable, Cloneable
 {
     private UnitInterface bornUnit = null;
     
     // This function implements rule #3: reproduction
     @Override
     @SuppressWarnings("unchecked")
-    public void computeNextTurn(Unit[] adjacentUnits)
+    public void computeNextTurn(UnitInterface[] adjacentUnits)
     {        
         // Contains how many units of a given species are adjacent.
         HashMap<Species, Integer> reproductionCounters = new HashMap<>();
@@ -103,7 +103,7 @@ public class DeadUnit extends Unit implements Serializable, Cloneable
         
         // If we have exactly as many units are necessary for reproduction,
         // we instantiate a new unit and store it in bornUnit.
-        Class<Unit> unitClass;
+        Class<UnitInterface> unitClass;
         unitClass = candidate.getUnitClass();
         try
         {

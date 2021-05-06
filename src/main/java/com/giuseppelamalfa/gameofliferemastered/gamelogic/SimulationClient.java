@@ -93,12 +93,12 @@ public class SimulationClient implements SimulationInterface {
     }
     @Override
     public void             setUnit(int row, int col, UnitInterface unit) { 
-        currentGrid.setUnit(row, col, unit); 
         try {
             outputStream.writeObject(new SetUnitRequest(row, col, unit));
         } catch (IOException ex) {
             Logger.getLogger(SimulationClient.class.getName()).log(Level.SEVERE, null, ex);
         }
+        currentGrid.setUnit(row, col, unit); 
     }
     
     @Override
