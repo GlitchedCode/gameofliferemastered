@@ -7,6 +7,7 @@ package com.giuseppelamalfa.gameofliferemastered;
 
 import com.giuseppelamalfa.gameofliferemastered.utils.ImageManager;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.*;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.ImageIcon;
@@ -67,9 +68,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jLayeredPane = new javax.swing.JLayeredPane();
-        gridPanel = gridPanel = new com.giuseppelamalfa.gameofliferemastered.GridPanel(tileManager);
-        turnCounter = new javax.swing.JLabel();
+        outerLayeredPane = new javax.swing.JLayeredPane();
         menuPanel = new com.giuseppelamalfa.gameofliferemastered.MenuPanel();
         titleLabel = new javax.swing.JLabel();
         hostPortNumer = new javax.swing.JTextField();
@@ -85,6 +84,9 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
         unpauseButton = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         statusLog = new javax.swing.JTextArea();
+        gridPanel = gridPanel = new com.giuseppelamalfa.gameofliferemastered.GridPanel(tileManager);
+        unitPalette = new com.giuseppelamalfa.gameofliferemastered.UnitPalette();
+        gameStatusPanel1 = new com.giuseppelamalfa.gameofliferemastered.utils.GameStatusPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("The game of Life: Remastered");
@@ -93,30 +95,6 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
         setMinimumSize(new java.awt.Dimension(800, 600));
         setPreferredSize(new java.awt.Dimension(1280, 720));
         setSize(new java.awt.Dimension(1280, 720));
-
-        gridPanel.setBackground(new java.awt.Color(61, 63, 65));
-        gridPanel.setForeground(new java.awt.Color(186, 186, 186));
-
-        turnCounter.setFont(new java.awt.Font("sansserif", 0, 24)); // NOI18N
-        turnCounter.setForeground(new java.awt.Color(255, 255, 255));
-        turnCounter.setText("Current Iteration: 0");
-
-        javax.swing.GroupLayout gridPanelLayout = new javax.swing.GroupLayout(gridPanel);
-        gridPanel.setLayout(gridPanelLayout);
-        gridPanelLayout.setHorizontalGroup(
-            gridPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(gridPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(turnCounter)
-                .addContainerGap(1231, Short.MAX_VALUE))
-        );
-        gridPanelLayout.setVerticalGroup(
-            gridPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(gridPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(turnCounter)
-                .addContainerGap(699, Short.MAX_VALUE))
-        );
 
         menuPanel.setOpaque(false);
 
@@ -213,10 +191,10 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
             menuPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(menuPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(menuPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 610, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(titleLabel)
-                    .addGroup(menuPanelLayout.createSequentialGroup()
+                .addGroup(menuPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 610, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(titleLabel, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, menuPanelLayout.createSequentialGroup()
                         .addGroup(menuPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel1)
                             .addComponent(jLabel3))
@@ -238,8 +216,8 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
                         .addGroup(menuPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(hostGameButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(joinGameButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                    .addComponent(unpauseButton))
-                .addContainerGap(542, Short.MAX_VALUE))
+                    .addComponent(unpauseButton, javax.swing.GroupLayout.Alignment.LEADING))
+                .addContainerGap(1515, Short.MAX_VALUE))
         );
         menuPanelLayout.setVerticalGroup(
             menuPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -264,46 +242,90 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(unpauseButton)
-                .addContainerGap(173, Short.MAX_VALUE))
+                .addContainerGap(615, Short.MAX_VALUE))
         );
 
-        jLayeredPane.setLayer(gridPanel, javax.swing.JLayeredPane.PALETTE_LAYER);
-        jLayeredPane.setLayer(menuPanel, javax.swing.JLayeredPane.MODAL_LAYER);
+        gridPanel.setBackground(new java.awt.Color(61, 63, 65));
+        gridPanel.setForeground(new java.awt.Color(186, 186, 186));
 
-        javax.swing.GroupLayout jLayeredPaneLayout = new javax.swing.GroupLayout(jLayeredPane);
-        jLayeredPane.setLayout(jLayeredPaneLayout);
-        jLayeredPaneLayout.setHorizontalGroup(
-            jLayeredPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(menuPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addGroup(jLayeredPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        javax.swing.GroupLayout unitPaletteLayout = new javax.swing.GroupLayout(unitPalette);
+        unitPalette.setLayout(unitPaletteLayout);
+        unitPaletteLayout.setHorizontalGroup(
+            unitPaletteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 2267, Short.MAX_VALUE)
+        );
+        unitPaletteLayout.setVerticalGroup(
+            unitPaletteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 46, Short.MAX_VALUE)
+        );
+
+        javax.swing.GroupLayout gridPanelLayout = new javax.swing.GroupLayout(gridPanel);
+        gridPanel.setLayout(gridPanelLayout);
+        gridPanelLayout.setHorizontalGroup(
+            gridPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(unitPalette, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(gridPanelLayout.createSequentialGroup()
+                .addGap(135, 135, 135)
+                .addComponent(gameStatusPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(1799, Short.MAX_VALUE))
+        );
+        gridPanelLayout.setVerticalGroup(
+            gridPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(gridPanelLayout.createSequentialGroup()
+                .addGap(124, 124, 124)
+                .addComponent(gameStatusPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 1181, Short.MAX_VALUE)
+                .addComponent(unitPalette, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
+
+        unitPalette.init(tileManager);
+        try{
+            unitPalette.addPaletteItem(UnitInterface.Species.CELL, true);
+            unitPalette.addPaletteItem(UnitInterface.Species.SNAKE, true);
+        }catch(Exception e){ e.printStackTrace();}
+
+        outerLayeredPane.setLayer(menuPanel, javax.swing.JLayeredPane.MODAL_LAYER);
+        outerLayeredPane.setLayer(gridPanel, javax.swing.JLayeredPane.POPUP_LAYER);
+
+        javax.swing.GroupLayout outerLayeredPaneLayout = new javax.swing.GroupLayout(outerLayeredPane);
+        outerLayeredPane.setLayout(outerLayeredPaneLayout);
+        outerLayeredPaneLayout.setHorizontalGroup(
+            outerLayeredPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 2267, Short.MAX_VALUE)
+            .addGroup(outerLayeredPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(menuPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(outerLayeredPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addComponent(gridPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
-        jLayeredPaneLayout.setVerticalGroup(
-            jLayeredPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(menuPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addGroup(jLayeredPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addComponent(gridPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        outerLayeredPaneLayout.setVerticalGroup(
+            outerLayeredPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 1748, Short.MAX_VALUE)
+            .addGroup(outerLayeredPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(menuPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(outerLayeredPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(gridPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        gridPanel.init();
-        gridPanel.setGrid(grid);
-        addKeyListener(gridPanel);
         menuPanel.getAccessibleContext().setAccessibleParent(menuPanel);
         menuPanel.setBackground(new Color(0,0,0,127));
         addKeyListener(menuPanel);
+        gridPanel.init();
+        gridPanel.setGrid(grid);
+        addKeyListener(gridPanel);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jLayeredPane, javax.swing.GroupLayout.Alignment.TRAILING)
+            .addComponent(outerLayeredPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jLayeredPane, javax.swing.GroupLayout.Alignment.TRAILING)
+            .addComponent(outerLayeredPane, javax.swing.GroupLayout.Alignment.TRAILING)
         );
 
         pack();
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void gridCanvasAncestorResized(java.awt.event.HierarchyEvent evt) {//GEN-FIRST:event_gridCanvasAncestorResized
@@ -311,18 +333,6 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
         gridPanel.resetScreenOrigin();
         gridPanel.repaint();
     }//GEN-LAST:event_gridCanvasAncestorResized
-
-    private void hostPortNumerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hostPortNumerActionPerformed
-    }//GEN-LAST:event_hostPortNumerActionPerformed
-
-    private void serverPortNumberActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_serverPortNumberActionPerformed
-    }//GEN-LAST:event_serverPortNumberActionPerformed
-
-    private void serverAddressActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_serverAddressActionPerformed
-    }//GEN-LAST:event_serverAddressActionPerformed
-
-    private void maxPlayerCountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_maxPlayerCountActionPerformed
-    }//GEN-LAST:event_maxPlayerCountActionPerformed
 
     private void unpauseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_unpauseButtonActionPerformed
         // TODO add your handling code here:
@@ -332,52 +342,16 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
         swapCanvas();
     }//GEN-LAST:event_unpauseButtonMouseClicked
 
-    private void StartServerHandler(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_StartServerHandler
-        if(client != null) return;
-        
-        if(server == null)
-        {
-            try{
-                server = new SimulationServer(Integer.parseInt(hostPortNumer.getText()), 
-                        Integer.parseInt(maxPlayerCount.getText()), localRowCount, localColumnCount);
-            }catch(Exception e){
-                writeToStatusLog("Could not host server on port " + hostPortNumer.getText());
-                writeToStatusLog(e.toString());
-                server = null;
-            }
-            if(server != null)
-            {
-                grid.setRunning(false);
-                hostGameButton.setText("Close Server");
-                hostPortNumer.setEditable(false);
-                maxPlayerCount.setEditable(false);
-                joinGameButton.setEnabled(false);
-                
-                gridPanel.setGrid(server);
-            }
-        }else{
-            writeToStatusLog("Closing server...");
-            server.close();
-            server = null;
-            hostPortNumer.setEditable(true);
-            maxPlayerCount.setEditable(true);
-            joinGameButton.setEnabled(true);
-            hostGameButton.setText("Start Server");
-            
-            gridPanel.setGrid(grid);
-        }
-    }//GEN-LAST:event_StartServerHandler
-
     private void JoinGameHandler(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_JoinGameHandler
         if(server != null) return;
-        
+
         if(client == null)
         {
             try{
                 client = new SimulationClient(serverAddress.getText(), Integer.parseInt(serverPortNumber.getText()));
             }catch (Exception e){
-                writeToStatusLog("Could not connect to server at address " 
-                        + serverAddress.getText() + ":" + serverPortNumber.getText());
+                writeToStatusLog("Could not connect to server at address "
+                    + serverAddress.getText() + ":" + serverPortNumber.getText());
                 writeToStatusLog(e.toString());
                 System.out.println(e);
                 client = null;
@@ -390,7 +364,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
                 serverAddress.setEditable(false);
                 serverPortNumber.setEditable(false);
                 hostGameButton.setEnabled(false);
-                
+
                 gridPanel.setGrid(client);
             }
         }else{
@@ -401,10 +375,62 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
             serverPortNumber.setEditable(true);
             hostGameButton.setEnabled(true);
             joinGameButton.setText("Join Game");
-            
+
             gridPanel.setGrid(grid);
         }
     }//GEN-LAST:event_JoinGameHandler
+
+    private void StartServerHandler(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_StartServerHandler
+        if(client != null) return;
+
+        if(server == null)
+        {
+            try{
+                server = new SimulationServer(Integer.parseInt(hostPortNumer.getText()),
+                    Integer.parseInt(maxPlayerCount.getText()), localRowCount, localColumnCount);
+            }catch(Exception e){
+                writeToStatusLog("Could not host server on port " + hostPortNumer.getText());
+                writeToStatusLog(e.toString());
+                server = null;
+            }
+            if(server != null)
+            {
+                grid.setRunning(false);
+                hostGameButton.setText("Close Server");
+                hostPortNumer.setEditable(false);
+                maxPlayerCount.setEditable(false);
+                joinGameButton.setEnabled(false);
+
+                gridPanel.setGrid(server);
+            }
+        }else{
+            writeToStatusLog("Closing server...");
+            server.close();
+            server = null;
+            hostPortNumer.setEditable(true);
+            maxPlayerCount.setEditable(true);
+            joinGameButton.setEnabled(true);
+            hostGameButton.setText("Start Server");
+
+            gridPanel.setGrid(grid);
+        }
+    }//GEN-LAST:event_StartServerHandler
+
+    private void maxPlayerCountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_maxPlayerCountActionPerformed
+
+    }//GEN-LAST:event_maxPlayerCountActionPerformed
+
+    private void serverPortNumberActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_serverPortNumberActionPerformed
+
+    }//GEN-LAST:event_serverPortNumberActionPerformed
+
+    private void serverAddressActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_serverAddressActionPerformed
+
+    }//GEN-LAST:event_serverAddressActionPerformed
+
+    private void hostPortNumerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hostPortNumerActionPerformed
+
+    }//GEN-LAST:event_hostPortNumerActionPerformed
 
     public static void writeToStatusLog(String string)
     {
@@ -436,12 +462,11 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(() -> {
             try {
-                ServerSocket socket = new ServerSocket(3333);
                 ApplicationFrame frame = new ApplicationFrame();
                 frame.addKeyListener(frame);
                 frame.setVisible(true);
             } catch (Exception ex) {
-                System.exit(1);
+                ex.printStackTrace();
             }
         });
     }
@@ -482,12 +507,12 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
     {
         if(isInMenu)
         {
-            jLayeredPane.setLayer(menuPanel, JLayeredPane.DEFAULT_LAYER);
+            outerLayeredPane.setLayer(menuPanel, JLayeredPane.DEFAULT_LAYER);
             //gridPanel.requestFocus();
         }
         else
         {
-            jLayeredPane.setLayer(menuPanel, JLayeredPane.MODAL_LAYER);
+            outerLayeredPane.setLayer(menuPanel, JLayeredPane.MODAL_LAYER);
             //menuPanel.requestFocus();
         }
         requestFocus();
@@ -495,6 +520,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private com.giuseppelamalfa.gameofliferemastered.utils.GameStatusPanel gameStatusPanel1;
     private com.giuseppelamalfa.gameofliferemastered.GridPanel gridPanel;
     private javax.swing.JButton hostGameButton;
     private javax.swing.JTextField hostPortNumer;
@@ -502,16 +528,16 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JLayeredPane jLayeredPane;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JButton joinGameButton;
     private javax.swing.JTextField maxPlayerCount;
     private com.giuseppelamalfa.gameofliferemastered.MenuPanel menuPanel;
+    private javax.swing.JLayeredPane outerLayeredPane;
     private javax.swing.JTextField serverAddress;
     private javax.swing.JTextField serverPortNumber;
     private javax.swing.JTextArea statusLog;
     private javax.swing.JLabel titleLabel;
-    private javax.swing.JLabel turnCounter;
+    private com.giuseppelamalfa.gameofliferemastered.UnitPalette unitPalette;
     private javax.swing.JButton unpauseButton;
     // End of variables declaration//GEN-END:variables
 }

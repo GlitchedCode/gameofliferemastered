@@ -6,7 +6,6 @@
 package com.giuseppelamalfa.gameofliferemastered.gamelogic;
 
 import com.giuseppelamalfa.gameofliferemastered.ApplicationFrame;
-import com.giuseppelamalfa.gameofliferemastered.BoardUpdateTask;
 import com.giuseppelamalfa.gameofliferemastered.GridPanel;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.requests.*;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
@@ -16,7 +15,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.Timer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
