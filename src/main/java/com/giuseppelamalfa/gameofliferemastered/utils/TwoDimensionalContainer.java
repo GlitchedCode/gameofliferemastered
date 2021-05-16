@@ -5,11 +5,8 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.utils;
 
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid;
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author glitchedcode
@@ -19,6 +16,24 @@ public class TwoDimensionalContainer<T> extends HashMap<Integer, HashMap<Integer
 
     private int rows;
     private int cols;
+    
+    private boolean hasDefault = false;
+    private T defaultValue = null;
+    
+    // Initializes the ArrayList objects 
+    public TwoDimensionalContainer(int rows, int cols, T sparseDefault) throws Exception
+    {
+        super();        
+        if (rows < 0 | cols < 0) // sanity check
+        {
+            throw new Exception("Invalid size values for TwoDimensionalArrayList");
+        }
+        this.rows = rows;
+        this.cols = cols;
+        this.defaultValue = sparseDefault;
+        hasDefault = true;
+        resize(rows, cols);
+    }
     
     // Initializes the ArrayList objects 
     public TwoDimensionalContainer(int rows, int cols) throws Exception
@@ -32,6 +47,8 @@ public class TwoDimensionalContainer<T> extends HashMap<Integer, HashMap<Integer
         this.cols = cols;
         resize(rows, cols);
     }
+    
+    public boolean hasDefaultValue() { return hasDefault; }
     
     // Resets the minimum capacity for all the ArrayList objects
     public final void resize(int rows, int cols) throws Exception
@@ -73,6 +90,9 @@ public class TwoDimensionalContainer<T> extends HashMap<Integer, HashMap<Integer
                 super.put(i, new HashMap<>());
             }
         }
+        
+        this.rows = rows;
+        this.cols = cols;
     }
     
     // Gets element at (row, col) coordinates
@@ -85,6 +105,9 @@ public class TwoDimensionalContainer<T> extends HashMap<Integer, HashMap<Integer
                 return super.get(col).get(row);
             }
         }
+        
+        if(hasDefault)
+            return defaultValue;
         
         return null;
     }

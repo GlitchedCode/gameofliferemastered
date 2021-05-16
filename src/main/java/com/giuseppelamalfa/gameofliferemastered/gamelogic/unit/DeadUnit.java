@@ -5,8 +5,6 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,7 +13,6 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
 import java.io.Serializable;
 
 /**
- *
  * @author glitchedcode
  */
 public class DeadUnit implements UnitInterface, Serializable, Cloneable
@@ -139,7 +136,13 @@ public class DeadUnit implements UnitInterface, Serializable, Cloneable
     }
     
     // overrides
-    
+
+    @Override
+    public int                      getPlayerID() { return -1; }
+    @Override
+    public boolean                  isCompetitive() { return false; }
+    @Override
+    public void                     setCompetitive(boolean val) {}
     @Override
     public boolean              reproduce(Integer a) {return false;}
     @Override
@@ -161,7 +164,7 @@ public class DeadUnit implements UnitInterface, Serializable, Cloneable
     @Override
     public Integer              getHealth() { return 0; }
     @Override
-    public void                 incrementHealth(Integer increment) { }
+    public void                 incrementHealth(int increment) { }
 
     @Override
     public Object clone() {

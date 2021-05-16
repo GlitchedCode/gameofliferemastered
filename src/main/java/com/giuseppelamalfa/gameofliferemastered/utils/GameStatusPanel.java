@@ -5,15 +5,26 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.utils;
 
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.SimulationInterface;
+import com.giuseppelamalfa.gameofliferemastered.GridPanel;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationInterface;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 
 /**
  *
  * @author glitchedcode
  */
-public class GameStatusPanel extends javax.swing.JPanel {
+public class GameStatusPanel extends javax.swing.JPanel implements MouseListener, MouseMotionListener, MouseWheelListener {
 
+    GridPanel gridPanel;
+    
     /**
      * Creates new form GameStatusPanel
      */
@@ -23,6 +34,9 @@ public class GameStatusPanel extends javax.swing.JPanel {
         setBackground(col);
         jPanel1.setBackground(col);
         gameStatus.setBackground(col);
+        gameStatus.addMouseMotionListener(this);
+        gameStatus.addMouseWheelListener(this);
+        gameStatus.addMouseListener(this);
     }
 
     /**
@@ -47,25 +61,33 @@ public class GameStatusPanel extends javax.swing.JPanel {
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 311, Short.MAX_VALUE)
+            .addGap(0, 0, Short.MAX_VALUE)
         );
 
         turnCountLabel.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
+        turnCountLabel.setForeground(new java.awt.Color(255, 255, 255));
         turnCountLabel.setText("Turn: 99999");
 
         gameModeLabel.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
+        gameModeLabel.setForeground(new java.awt.Color(255, 255, 255));
         gameModeLabel.setText("Sandbox");
 
         gameStatus.setEditable(false);
         gameStatus.setColumns(20);
         gameStatus.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
+        gameStatus.setForeground(new java.awt.Color(255, 255, 255));
         gameStatus.setLineWrap(true);
         gameStatus.setRows(5);
         gameStatus.setText("wsssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
         gameStatus.setWrapStyleWord(true);
         gameStatus.setBorder(null);
         gameStatus.setFocusable(false);
+        gameStatus.setHighlighter(null);
+        gameStatus.setKeymap(null);
+        gameStatus.setName(""); // NOI18N
         gameStatus.setOpaque(false);
+        gameStatus.setRequestFocusEnabled(false);
+        gameStatus.setVerifyInputWhenFocusTarget(false);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -102,8 +124,61 @@ public class GameStatusPanel extends javax.swing.JPanel {
         
     }
     
+    public void setGridPanel(GridPanel panel)
+    {
+        addMouseListener(this);
+        gridPanel = panel;
+    }
     
+   /*
+    * MOUSE INPUT HANDLING
+     */
+    @Override
+    public void mouseClicked(MouseEvent me)
+    {
+        Point loc = gameStatus.getLocation();
+        Dimension size = gameStatus.getSize();
+        
+        if((me.getX() >= loc.x & me.getX() < loc.x + size.width) &
+                (me.getY() >= loc.y & me.getY() < loc.y + size.height))
+        {
+            me.translatePoint(loc.x, loc.y);
+        }
+        
+        gridPanel.mouseClicked(me);
+    }
 
+    @Override
+    public void mouseMoved(MouseEvent me)
+    {
+        gridPanel.mouseMoved(me);
+    }
+    
+    @Override
+    public void mousePressed(MouseEvent me)
+    {
+        gridPanel.mousePressed(me);
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent me)
+    {
+        gridPanel.mouseDragged(me);
+    }
+
+    @Override
+    public void mouseWheelMoved(MouseWheelEvent me)
+    {
+        gridPanel.mouseWheelMoved(me);
+    }
+    // don't need these
+    @Override
+    public void mouseReleased(MouseEvent me) {
+    }
+    @Override
+    public void mouseEntered(MouseEvent me){}
+    @Override
+    public void mouseExited(MouseEvent me)    {    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel gameModeLabel;
     private javax.swing.JTextArea gameStatus;

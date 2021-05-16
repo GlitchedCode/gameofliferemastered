@@ -3,23 +3,24 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.giuseppelamalfa.gameofliferemastered.gamelogic;
+package com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation;
 import com.giuseppelamalfa.gameofliferemastered.GridPanel;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.requests.InvalidRequestException;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
 import java.io.IOException;
-import java.net.Socket;
 /**
  *
  * @author glitchedcode
  */
 public interface SimulationInterface {
     
-    boolean         isSimulationStarted();
-    boolean         isSimulationRunning();
+    boolean         isStarted();
+    boolean         isRunning();
+    boolean         isLocallyControlled();
     
     int             getRowCount();
     int             getColumnCount();
+    void            resize(int rows, int cols);
     int             getSectorSideLength();
     int             getCurrentTurn();
     

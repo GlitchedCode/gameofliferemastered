@@ -17,7 +17,16 @@ public class Snake extends Unit
     public Snake()
     {
         super();
-        
+        init();
+    }
+    
+    public Snake(int playerID)
+    {
+        super(playerID);
+        init();
+    }
+    
+    private void init() {
         species = Species.SNAKE;
         health = 7;
         friendlySpecies.add(species);
@@ -33,10 +42,5 @@ public class Snake extends Unit
         reproductionSelector = selector;
         
         nextTurnState = State.ALIVE_AGING;
-    }
-    
-    public void computeNextTurn()
-    {
-        
     }
 }

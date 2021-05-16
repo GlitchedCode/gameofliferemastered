@@ -3,10 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.giuseppelamalfa.gameofliferemastered.gamelogic;
+package com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation;
 
 import com.giuseppelamalfa.gameofliferemastered.ApplicationFrame;
 import com.giuseppelamalfa.gameofliferemastered.GridPanel;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.requests.*;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
 import com.giuseppelamalfa.gameofliferemastered.utils.PlayerData;
@@ -70,21 +71,28 @@ public class SimulationServer implements SimulationInterface{
     
     Object          gridLock = new Object();
     Thread          acceptConnectionThread;
-    Thread          readClientInputThread;
     
+    boolean         remoteInstance = false;
     HashMap<Integer, ClientData>    connectedClients = new HashMap<>();
     ServerSocket    serverSocket;
     String          serverIP;
-    int         portNumber;    
+    int             portNumber;    
   
-    public SimulationServer(Integer portNumber, Integer playerCount, 
-            Integer rowCount, Integer columnCount) throws Exception {
+    public SimulationServer(int portNumber, int playerCount, 
+            int rowCount, int columnCount) throws Exception {
         
-        init(portNumber, playerCount, rowCount, columnCount);        
+        remoteInstance = true;
+        initializeRemoteServer(portNumber, playerCount, rowCount, columnCount);        
     }
     
-    public final void init(Integer portNumber, Integer playerCount, Integer rowCount, Integer columnCount) throws IOException {
-        if(playerCount < 2 | playerCount > MAX_PLAYER_COUNT)
+    public SimulationServer(int rowCount, int columnCount) throws Exception {
+        currentGrid = new Grid(rowCount, columnCount);
+        isStarted = true;
+    }
+    
+    private void initializeRemoteServer(int portNumber, int playerCount, int rowCount, int columnCount)
+            throws IOException, Exception {
+        if(playerCount < 2 | playerCount > MAX_PLAYER_COUNT) 
             this.playerCount = DEFAULT_PLAYER_COUNT;
         else
             this.playerCount = playerCount;
@@ -102,11 +110,7 @@ public class SimulationServer implements SimulationInterface{
         
         this.rowCount = rowCount;
         this.columnCount = columnCount;
-        try {
-            currentGrid = new Grid(rowCount, columnCount);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        currentGrid = new Grid(rowCount, columnCount);
         
         acceptConnectionThread = new Thread(() -> {
             try{
@@ -163,14 +167,16 @@ public class SimulationServer implements SimulationInterface{
     }
     
     @Override
-    public boolean          isSimulationStarted() { return isStarted; }
+    public boolean          isStarted() { return isStarted; }
     @Override
-    public boolean          isSimulationRunning() { return isRunning; }
+    public boolean          isRunning() { return isRunning; }
+    @Override
     
+    public boolean          isLocallyControlled() { return true; }
     @Override
-    public int              getRowCount() { return rowCount; }
+    public int              getRowCount() { return currentGrid.getRowCount(); }
     @Override
-    public int              getColumnCount() { return columnCount; }
+    public int              getColumnCount() { return currentGrid.getColumnCount(); }
     @Override
     public int              getSectorSideLength() { return currentGrid.getSectorSideLength(); }
     @Override
@@ -194,7 +200,7 @@ public class SimulationServer implements SimulationInterface{
     public void computeNextTurn() throws Exception { 
         synchronized(currentGrid){
             currentGrid.computeNextTurn();
-            if(currentGrid.getCurrentTurn() % syncTurnCount == 0)
+            if(currentGrid.getCurrentTurn() % syncTurnCount == 0 | !isRunning)
                 synchronize();
         }
     }
@@ -288,5 +294,14 @@ public class SimulationServer implements SimulationInterface{
         }
         
         isStarted = false;
+    }
+    
+    public void resize(int rows, int cols){
+        try {
+            currentGrid.resize(rows, cols);
+            synchronize();
+        } catch (Exception ex) {
+           ApplicationFrame.writeToStatusLog(ex.toString());
+        }
     }
 }

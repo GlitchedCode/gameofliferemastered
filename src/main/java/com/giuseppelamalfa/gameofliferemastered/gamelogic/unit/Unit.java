@@ -6,7 +6,6 @@
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.GameLogicException;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid;
 import java.util.HashSet;
 import java.util.Set;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
@@ -16,7 +15,7 @@ import java.io.Serializable;
  *
  * @author glitchedcode
  */
-public abstract class Unit implements UnitInterface, Serializable, Cloneable
+public class Unit implements UnitInterface, Serializable, Cloneable
 {
 
     // ALL FIELDS MARKED WITH * MUST BE INITIALIZED IN ALL SUBCLASSES
@@ -34,13 +33,31 @@ public abstract class Unit implements UnitInterface, Serializable, Cloneable
     protected RuleInterface<Integer> friendlyCountSelector;  //*
     protected RuleInterface<Integer> hostileCountSelector;   //*
     protected RuleInterface<Integer> reproductionSelector;   //*
+    
+    private int playerID;
+    private boolean competitive = false;
 
-    protected Unit()
+    protected Unit(){
+        playerID = 0;
+        friendlySpecies = new HashSet<>();
+        hostileSpecies = new HashSet<>();
+    }
+    
+    protected Unit(int playerID)
     {
+        this.playerID = playerID;
+        
         friendlySpecies = new HashSet<>();
         hostileSpecies = new HashSet<>();
     }
 
+    @Override
+    public final int getPlayerID() { return playerID; }
+    @Override
+    public final boolean isCompetitive() { return competitive; }
+    @Override
+    public final void setCompetitive(boolean val) { competitive = val; }
+    
     /**
      * Intermediary function to compute the unit's state relative to the board
      *
@@ -271,7 +288,7 @@ public abstract class Unit implements UnitInterface, Serializable, Cloneable
      * @param increment health increment
      */
     @Override
-    public void incrementHealth(Integer increment)
+    public void incrementHealth(int increment)
     {
         health = health + increment;
         healthChanged = true;

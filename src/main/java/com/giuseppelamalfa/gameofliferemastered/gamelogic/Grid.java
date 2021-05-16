@@ -7,32 +7,26 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.*;
 import com.giuseppelamalfa.gameofliferemastered.utils.*;
-import com.giuseppelamalfa.gameofliferemastered.*;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.requests.InvalidRequestException;
 import java.awt.Point;
-import java.io.IOException;
 import java.io.Serializable;
-import java.net.Socket;
-import java.util.Timer;
+
 /**
  * Class for handling all of game logic and rendering all units to the grid
  *
  * @author glitchedcode
  */
-public class Grid implements SimulationInterface, Serializable, Cloneable
+public class Grid implements Serializable, Cloneable
 {
     private TwoDimensionalContainer<UnitInterface> board;
-    private final TwoDimensionalContainer<Boolean> sectorFlags;
+    private TwoDimensionalContainer<Boolean> sectorFlags;
 
-    private boolean isRunning;
-    private int turn;
-    private int sideLength;
+    private int turn = 0;
 
-    private final Integer rowCount;
-    private final Integer columnCount;
+    private Integer rowCount;
+    private Integer columnCount;
+    private Integer sectorRowCount;
+    private Integer sectorColumnCount;
     private final Integer sectorSideLength = 32;
-    private final Integer sectorRowCount;
-    private final Integer sectorColumnCount;
 
     private boolean unitFoundThisTurn = false;
     private final Point topLeftActive;
@@ -56,8 +50,7 @@ public class Grid implements SimulationInterface, Serializable, Cloneable
         sectorColumnCount = (cols / sectorSideLength) + 1;
 
         board = new TwoDimensionalContainer<>(rows, cols);
-        sectorFlags = new TwoDimensionalContainer<>(sectorRowCount, sectorColumnCount);
-        initSelectorFlags();
+        sectorFlags = new TwoDimensionalContainer<>(sectorRowCount, sectorColumnCount, false);
         deadUnit = new DeadUnit();
 
         topLeftActive = new Point(0, 0);
@@ -65,16 +58,15 @@ public class Grid implements SimulationInterface, Serializable, Cloneable
 
         topLeftProcessed = new Point(topLeftActive);
         bottomRightProcessed = new Point(bottomRightActive);
-        
-        turn = 0;
     }
     
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "unchecked"})
     public Object clone() {
         try {
             Grid ret = (Grid) super.clone();
             ret.board = (TwoDimensionalContainer<UnitInterface>)board.clone();
+            ret.sectorFlags = (TwoDimensionalContainer<Boolean>)sectorFlags.clone();
             return ret;
         } catch (CloneNotSupportedException e) {
             System.out.println("com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid.clone() failed idk");
@@ -82,36 +74,13 @@ public class Grid implements SimulationInterface, Serializable, Cloneable
         }
     }
     
-    @Override
-    public void         initializeGridPanel(GridPanel panel) {}
-    @Override
-    public void         synchronize() {}
-    @Override
-    public void         close() { }
-    @Override
-    public int          getCurrentTurn() {return turn;}
-    @Override
-    public void         handleRequest(Object request, int ID) throws IOException, InvalidRequestException {}
-    @Override
-    public void         setRunning(boolean val) {isRunning = val;}
-    @Override
-    public boolean      isSimulationRunning() {return isRunning;}
-    @Override
-    public boolean      isSimulationStarted() {return true;}
-
-    private void initSelectorFlags()    {
-        for (int r = 0; r < sectorRowCount; r++)
-        {
-            for (int c = 0; c < sectorColumnCount; c++)
-            {
-                sectorFlags.put(r, c, false);
-            }
-        }
-    }
-
     /*
     * GETTERS AND SETTERS
      */
+    public int          getCurrentTurn() {
+        return turn;
+    }
+
     /**
      * @return the number of the board's columns
      */
@@ -125,7 +94,18 @@ public class Grid implements SimulationInterface, Serializable, Cloneable
     public int getColumnCount()    {
         return columnCount;
     }
+    
+    public void resize(int rows, int cols) throws Exception {
+        rowCount = rows;
+        columnCount = cols;
+        sectorRowCount = (rows / sectorSideLength) + 1;
+        sectorColumnCount = (cols / sectorSideLength) + 1;
 
+        board.resize(rows, cols);
+        sectorFlags.resize(sectorRowCount, sectorColumnCount);
+        
+    }
+    
     public UnitInterface getUnit(int row, int col)    {
         return board.get(row, col);
     }
@@ -407,4 +387,8 @@ public class Grid implements SimulationInterface, Serializable, Cloneable
         }
     }
    
+    public void addPlayer()
+    {
+        
+    }
 }

@@ -6,7 +6,7 @@
 package com.giuseppelamalfa.gameofliferemastered;
 
 import java.util.TimerTask;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.SimulationInterface;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationInterface;
 
 /**
  *
@@ -29,7 +29,7 @@ public class BoardUpdateTask extends TimerTask
     public void run()
     {
         if(grid == null) return;
-        if(!grid.isSimulationRunning()) return;
+        if(!grid.isRunning()) return;
         try
         {
             grid.computeNextTurn();

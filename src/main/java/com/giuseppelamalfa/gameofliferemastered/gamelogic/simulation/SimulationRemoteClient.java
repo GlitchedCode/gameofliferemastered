@@ -3,10 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.giuseppelamalfa.gameofliferemastered.gamelogic;
+package com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation;
 
 import com.giuseppelamalfa.gameofliferemastered.ApplicationFrame;
 import com.giuseppelamalfa.gameofliferemastered.GridPanel;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.requests.*;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
 import java.io.EOFException;
@@ -22,7 +23,7 @@ import java.util.logging.Logger;
  *
  * @author glitchedcode
  */
-public class SimulationClient implements SimulationInterface {
+public class SimulationRemoteClient implements SimulationInterface {
     boolean isStarted = false;
     boolean isRunning = false;
     
@@ -38,7 +39,7 @@ public class SimulationClient implements SimulationInterface {
     String host;
     int portNumber;
     
-    public SimulationClient(String host, int portNumber) throws IOException, Exception {
+    public SimulationRemoteClient(String host, int portNumber) throws IOException, Exception {
         init(host,portNumber);
     }
     
@@ -72,10 +73,12 @@ public class SimulationClient implements SimulationInterface {
     }
     
     @Override
-    public boolean          isSimulationStarted() { return isStarted; }
+    public boolean          isStarted() { return isStarted; }
     @Override
-    public boolean          isSimulationRunning() { return isRunning; }
-    
+    public boolean          isRunning() { return isRunning; }
+    @Override
+    public boolean          isLocallyControlled() { return false; }
+
     @Override
     public int              getRowCount() { return rowCount; }
     @Override
@@ -94,7 +97,7 @@ public class SimulationClient implements SimulationInterface {
         try {
             outputStream.writeObject(new SetUnitRequest(row, col, unit));
         } catch (IOException ex) {
-            Logger.getLogger(SimulationClient.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SimulationRemoteClient.class.getName()).log(Level.SEVERE, null, ex);
         }
         currentGrid.setUnit(row, col, unit); 
     }
@@ -109,7 +112,7 @@ public class SimulationClient implements SimulationInterface {
             try {
                 outputStream.writeObject(new PauseRequest(true));
             } catch (IOException ex) {
-                Logger.getLogger(SimulationClient.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SimulationRemoteClient.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
@@ -156,7 +159,7 @@ public class SimulationClient implements SimulationInterface {
             try {
                 outputStream.writeObject(req);
             } catch (IOException ex) {
-                Logger.getLogger(SimulationClient.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SimulationRemoteClient.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
@@ -174,4 +177,6 @@ public class SimulationClient implements SimulationInterface {
         
         isStarted = false;
     }
+    
+    public void resize(int rows, int cols){}
 }

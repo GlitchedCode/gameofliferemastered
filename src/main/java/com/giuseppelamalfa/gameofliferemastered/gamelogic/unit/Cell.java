@@ -5,7 +5,6 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.IntegerRangeRule;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.IntegerSetRule;
 
@@ -18,6 +17,21 @@ public class Cell extends Unit {
     public Cell()
     {
         super();
+        species = Species.CELL;
+        health = 1;
+        friendlySpecies.add(species);
+        
+        friendlyCountSelector = new IntegerRangeRule(2, 3);
+        hostileCountSelector = new IntegerRangeRule(0, 9);
+        
+        IntegerSetRule selector = new IntegerSetRule();
+        selector.add(3);
+        reproductionSelector = selector;
+    }
+    
+    public Cell(int playerID)
+    {
+        super(playerID);
         species = Species.CELL;
         health = 1;
         friendlySpecies.add(species);
