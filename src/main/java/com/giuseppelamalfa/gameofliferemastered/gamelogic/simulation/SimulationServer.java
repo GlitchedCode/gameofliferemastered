@@ -8,9 +8,9 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation;
 import com.giuseppelamalfa.gameofliferemastered.ApplicationFrame;
 import com.giuseppelamalfa.gameofliferemastered.GridPanel;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.requests.*;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
-import com.giuseppelamalfa.gameofliferemastered.utils.PlayerData;
 import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.IOException;
@@ -21,29 +21,28 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 class ClientData{
-    public Socket socket;
-    public ObjectOutputStream stream;
-    public int ID;
-    public PlayerData playerData = new PlayerData();
+    public final Socket socket;
+    public final ObjectOutputStream stream;
+    public final PlayerData playerData = new PlayerData();
     
     public ClientData(Socket socket, ObjectOutputStream stream, int ID)
     {
         this.socket = socket;
         this.stream = stream;
-        this.ID = ID;
-        this.playerData.playerName = "Player" + ID;
+        this.playerData.ID = ID;
     }
     
     public ClientData(Socket socket, ObjectOutputStream stream, int ID, String playerName)
     {
         this.socket = socket;
         this.stream = stream;
-        this.ID = ID;
+        this.playerData.ID = ID;
         this.playerData.playerName = playerName;
     }
 }
@@ -56,13 +55,14 @@ public class SimulationServer implements SimulationInterface{
     public static final Integer DEFAULT_PLAYER_COUNT = 4;
     public static final Integer MAX_PLAYER_COUNT = 8;
     
-    public static Integer syncTurnCount = 40;
+    public static Integer gridSyncTurnCount = 40;
+    public static Integer playerSyncTurnCount = 15;
     public static Integer simulationPhaseLength = 80;
 
     boolean         isStarted = false;
     boolean         isRunning = false;
     
-    int             nextClientID = 0;
+    int             nextClientID = 1;
     int             playerCount;
     int             rowCount;
     int             columnCount;
@@ -74,14 +74,20 @@ public class SimulationServer implements SimulationInterface{
     
     boolean         remoteInstance = false;
     HashMap<Integer, ClientData>    connectedClients = new HashMap<>();
+    HashMap<Integer, PlayerData>    playerMap = new HashMap<>();
     ServerSocket    serverSocket;
     String          serverIP;
     int             portNumber;    
+    
+    ArrayList<PlayerData.TeamColor>   availableColors = new ArrayList<PlayerData.TeamColor>();
+    PlayerData                      localPlayerData;
+
   
-    public SimulationServer(int portNumber, int playerCount, 
+    public SimulationServer(String playerName, int portNumber, int playerCount, 
             int rowCount, int columnCount) throws Exception {
-        
         remoteInstance = true;
+        localPlayerData = new PlayerData(playerName, extractRandomColor());
+        localPlayerData.ID = 0;
         initializeRemoteServer(portNumber, playerCount, rowCount, columnCount);        
     }
     
@@ -96,6 +102,10 @@ public class SimulationServer implements SimulationInterface{
             this.playerCount = DEFAULT_PLAYER_COUNT;
         else
             this.playerCount = playerCount;
+        
+        for(PlayerData.TeamColor color : PlayerData.TeamColor.values())
+            if(color != PlayerData.TeamColor.NONE)
+                availableColors.add(color);
         
         serverSocket = new ServerSocket(portNumber);
         
@@ -112,48 +122,57 @@ public class SimulationServer implements SimulationInterface{
         this.columnCount = columnCount;
         currentGrid = new Grid(rowCount, columnCount);
         
+        // Spawn a thread to accept client connections.
         acceptConnectionThread = new Thread(() -> {
             try{
                 while(true){
                     int clientID = nextClientID;
                     Socket conn = serverSocket.accept();    
-                    ObjectOutputStream stream = new ObjectOutputStream(conn.getOutputStream());
+                    ObjectOutputStream outputStream = new ObjectOutputStream(conn.getOutputStream());
                     nextClientID++;
 
                     if(connectedClients.size() + 1 < playerCount)
                     {    
-                        ClientData newClient = new ClientData(conn, stream, clientID);
-                        connectedClients.put(clientID, newClient);
+                        ClientData client = new ClientData(conn, outputStream, clientID);
+                        client.playerData.color = extractRandomColor();
+                        client.playerData.ID = clientID;
+                        connectedClients.put(clientID, client);
                         
                         ApplicationFrame.writeToStatusLog("Accepting connection from" + conn.getRemoteSocketAddress());
-                        // Make a thread for each client connection. 
+                        // Make a thread for each client connection to handle their requests separately.
                         new Thread(() -> {
-                            ClientData clientData = newClient;
+                            ClientData clientData = client;
                             try{
                                 InputStream input = conn.getInputStream();
-                                ObjectInputStream objectInputStream = new ObjectInputStream(input);
+                                ObjectInputStream inputStream = new ObjectInputStream(input);
+                                
+                                PlayerData tmp = new PlayerData(clientData.playerData);
+                                
+                                outputStream.writeObject(new UpdatePlayerDataRequest(tmp));
+                                outputStream.writeObject(new SyncGridRequest(currentGrid));
+                                outputStream.writeObject(new PauseRequest(isRunning));
                                 
                                 while(true)
-                                    handleRequest(objectInputStream.readObject(), clientData.ID);
+                                    handleRequest(inputStream.readObject(), clientData.playerData.ID);
                             }
+                            // These exceptions are caught when the client disconnects
                             catch(EOFException e) {}
                             catch (InvalidRequestException | IOException | ClassNotFoundException e){
-                                System.err.println(e);
+                                ApplicationFrame.writeToStatusLog(e.toString());
                             }
-                            connectedClients.remove(clientData.ID);
+                            connectedClients.remove(clientData.playerData.ID);
                             try{
                                 conn.close();
                             }catch(IOException e) {}
                             
-                            ApplicationFrame.writeToStatusLog(clientData.playerData.playerName + " left the game.");
+                            sendLogMessage(clientData.playerData.playerName + " left the game.");
+                            if(clientData.playerData.color != PlayerData.TeamColor.NONE)
+                                availableColors.add(clientData.playerData.color);
                         }).start();
-                        
-                        stream.writeObject(new PauseRequest(isRunning));
-                        stream.writeObject(new SyncRequest(currentGrid));
                     }
                     else {
                         DisconnectRequest req = new DisconnectRequest("No player slots available. Closing connection.");
-                        stream.writeObject(req);
+                        outputStream.writeObject(req);
                         conn.close();
                     }
                 }
@@ -164,6 +183,14 @@ public class SimulationServer implements SimulationInterface{
         acceptConnectionThread.start();
         
         isStarted = true;
+    }
+    
+    public final PlayerData.TeamColor extractRandomColor(){
+        if(availableColors.isEmpty()) return PlayerData.TeamColor.NONE;
+        int index = (int)(Math.random() * availableColors.size());
+        PlayerData.TeamColor ret = availableColors.get(index);
+        availableColors.remove(index);
+        return ret;        
     }
     
     @Override
@@ -181,6 +208,8 @@ public class SimulationServer implements SimulationInterface{
     public int              getSectorSideLength() { return currentGrid.getSectorSideLength(); }
     @Override
     public int              getCurrentTurn() { return currentGrid.getCurrentTurn(); }
+    @Override
+    public String           getStatusText() { return ""; }
     
     @Override
     public UnitInterface    getUnit(int row, int col) { return currentGrid.getUnit(row, col); }
@@ -200,8 +229,21 @@ public class SimulationServer implements SimulationInterface{
     public void computeNextTurn() throws Exception { 
         synchronized(currentGrid){
             currentGrid.computeNextTurn();
-            if(currentGrid.getCurrentTurn() % syncTurnCount == 0 | !isRunning)
+            
+            // Syncronize grid and player data at regular intervals.
+            if(currentGrid.getCurrentTurn() % gridSyncTurnCount == 0 | !isRunning)
                 synchronize();
+            
+            if(currentGrid.getCurrentTurn() % playerSyncTurnCount == 0 | !isRunning)
+            {
+                SyncPlayerMapRequest req = new SyncPlayerMapRequest(playerMap);
+                try{
+                    for(Integer key : connectedClients.keySet())
+                        connectedClients.get(key).stream.writeObject(req);
+                }catch(IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
     
@@ -210,12 +252,12 @@ public class SimulationServer implements SimulationInterface{
         if(syncGrid.equals(currentGrid)) return;
         
         syncGrid = (Grid)currentGrid.clone();
-        SyncRequest syncRequest = new SyncRequest(syncGrid);
+        SyncGridRequest syncRequest = new SyncGridRequest(syncGrid);
         try{
             for(Integer key : connectedClients.keySet())
                 connectedClients.get(key).stream.writeObject(syncRequest);
-        }catch(Exception e) {
-            System.out.println(e);
+        }catch(IOException e) {
+            e.printStackTrace();
         }
 
     }
@@ -223,9 +265,10 @@ public class SimulationServer implements SimulationInterface{
     public synchronized void synchronize(ObjectOutputStream output) {
         syncGrid = (Grid)currentGrid.clone();
         try{
-            output.writeObject(new SyncRequest(syncGrid));
+            output.writeObject(new SyncGridRequest(syncGrid));
+            output.writeObject(new SyncPlayerMapRequest(playerMap));
         }catch(Exception e){
-            System.out.println(e);
+            e.printStackTrace();
         }
         
     }
@@ -249,27 +292,37 @@ public class SimulationServer implements SimulationInterface{
     @Override
     public synchronized void handleRequest(Object requestObject, int clientID) throws IOException, InvalidRequestException {
         Request tmp = (Request)requestObject;
-        ClientData data;
-        if (clientID >= 0)
-            data = connectedClients.get(clientID);
-        else data = null;
+        ClientData clientData;
+        clientData = connectedClients.get(clientID);
         switch(tmp.getType())   
         {
-            case SYNC:
-                if (data != null) synchronize(data.stream);
+            case SYNC_GRID:
+                if (clientData != null) synchronize(clientData.stream);
                 break;
             case UPDATE_PLAYER_DATA:
-                if(data == null) break;
+                if(clientData == null) break;
                 PlayerData playerData = ((UpdatePlayerDataRequest)tmp).playerData;
                 if(playerData.playerName != null)
-                    data.playerData.playerName = playerData.playerName;
+                {   
+                    if(clientData.playerData.playerName == null)
+                        sendLogMessage(playerData.playerName + " joined the game.");
+                    clientData.playerData.playerName = playerData.playerName;
+                }
+                if(playerData.color != PlayerData.TeamColor.NONE &
+                        availableColors.contains(playerData.color))
+                {
+                    if(clientData.playerData.color != PlayerData.TeamColor.NONE) 
+                        availableColors.add(clientData.playerData.color);
+                    clientData.playerData.color = playerData.color;
+                    availableColors.remove(playerData.color);
+                }
                 break;
             case DISCONNECT:
-                if (data == null) break;
+                if (clientData == null) break;
                 DisconnectRequest disconnect = (DisconnectRequest)tmp;
-                ApplicationFrame.writeToStatusLog(data.socket.getRemoteSocketAddress() + " disconnected: " + disconnect.message);
+                ApplicationFrame.writeToStatusLog(clientData.socket.getRemoteSocketAddress() + " disconnected: " + disconnect.message);
                 connectedClients.remove(clientID);
-                data.socket.close();
+                clientData.socket.close();
                 break;
             case SET_UNIT:
                 SetUnitRequest setUnit = (SetUnitRequest)tmp;
@@ -296,12 +349,24 @@ public class SimulationServer implements SimulationInterface{
         isStarted = false;
     }
     
+    @Override
     public void resize(int rows, int cols){
         try {
             currentGrid.resize(rows, cols);
             synchronize();
         } catch (Exception ex) {
            ApplicationFrame.writeToStatusLog(ex.toString());
+        }
+    }
+    
+    public void sendLogMessage(String msg){
+        ApplicationFrame.writeToStatusLog(msg);
+        LogMessageRequest req = new LogMessageRequest(msg);
+        try{
+            for(Integer key : connectedClients.keySet())
+                connectedClients.get(key).stream.writeObject(req);
+        }catch(IOException e) {
+            e.printStackTrace();
         }
     }
 }

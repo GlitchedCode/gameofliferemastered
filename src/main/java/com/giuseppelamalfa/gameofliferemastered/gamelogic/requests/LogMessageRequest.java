@@ -5,17 +5,14 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.requests;
 
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
-
 /**
  *
  * @author glitchedcode
  */
-public class UpdatePlayerDataRequest extends Request {
-    public final PlayerData playerData;
-
-    public UpdatePlayerDataRequest(PlayerData data){
-        type = RequestType.UPDATE_PLAYER_DATA;
-        playerData = data;
+public class LogMessageRequest extends Request {
+    public final String message;
+    public LogMessageRequest(String msg){
+        type = RequestType.LOG_MESSAGE;
+        message = msg;
     }
 }

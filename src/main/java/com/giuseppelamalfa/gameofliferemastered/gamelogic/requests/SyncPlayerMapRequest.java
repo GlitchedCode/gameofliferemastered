@@ -6,16 +6,18 @@
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.requests;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
+import java.util.HashMap;
 
 /**
  *
  * @author glitchedcode
  */
-public class UpdatePlayerDataRequest extends Request {
-    public final PlayerData playerData;
-
-    public UpdatePlayerDataRequest(PlayerData data){
-        type = RequestType.UPDATE_PLAYER_DATA;
-        playerData = data;
+public class SyncPlayerMapRequest extends Request {
+    
+    public final HashMap<Integer, PlayerData> playerMap;
+    
+    public SyncPlayerMapRequest(HashMap<Integer, PlayerData> map){
+        type = RequestType.SYNC_PLAYER_MAP;
+        playerMap = map;
     }
 }

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.giuseppelamalfa.gameofliferemastered.utils;
+package com.giuseppelamalfa.gameofliferemastered.ui;
 
 import com.giuseppelamalfa.gameofliferemastered.GridPanel;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationInterface;
@@ -33,10 +33,6 @@ public class GameStatusPanel extends javax.swing.JPanel implements MouseListener
         Color col = new Color(0,0,0,0);
         setBackground(col);
         jPanel1.setBackground(col);
-        gameStatus.setBackground(col);
-        gameStatus.addMouseMotionListener(this);
-        gameStatus.addMouseWheelListener(this);
-        gameStatus.addMouseListener(this);
     }
 
     /**
@@ -51,7 +47,7 @@ public class GameStatusPanel extends javax.swing.JPanel implements MouseListener
         jPanel1 = new javax.swing.JPanel();
         turnCountLabel = new javax.swing.JLabel();
         gameModeLabel = new javax.swing.JLabel();
-        gameStatus = new javax.swing.JTextArea();
+        filler = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 0));
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -72,34 +68,17 @@ public class GameStatusPanel extends javax.swing.JPanel implements MouseListener
         gameModeLabel.setForeground(new java.awt.Color(255, 255, 255));
         gameModeLabel.setText("Sandbox");
 
-        gameStatus.setEditable(false);
-        gameStatus.setColumns(20);
-        gameStatus.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
-        gameStatus.setForeground(new java.awt.Color(255, 255, 255));
-        gameStatus.setLineWrap(true);
-        gameStatus.setRows(5);
-        gameStatus.setText("wsssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
-        gameStatus.setWrapStyleWord(true);
-        gameStatus.setBorder(null);
-        gameStatus.setFocusable(false);
-        gameStatus.setHighlighter(null);
-        gameStatus.setKeymap(null);
-        gameStatus.setName(""); // NOI18N
-        gameStatus.setOpaque(false);
-        gameStatus.setRequestFocusEnabled(false);
-        gameStatus.setVerifyInputWhenFocusTarget(false);
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(gameStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 321, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(filler, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(gameModeLabel)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 136, Short.MAX_VALUE)
                         .addComponent(turnCountLabel)))
                 .addContainerGap())
         );
@@ -111,7 +90,7 @@ public class GameStatusPanel extends javax.swing.JPanel implements MouseListener
                     .addComponent(turnCountLabel)
                     .addComponent(gameModeLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(gameStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 357, Short.MAX_VALUE)
+                .addComponent(filler, javax.swing.GroupLayout.DEFAULT_SIZE, 357, Short.MAX_VALUE)
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -136,15 +115,6 @@ public class GameStatusPanel extends javax.swing.JPanel implements MouseListener
     @Override
     public void mouseClicked(MouseEvent me)
     {
-        Point loc = gameStatus.getLocation();
-        Dimension size = gameStatus.getSize();
-        
-        if((me.getX() >= loc.x & me.getX() < loc.x + size.width) &
-                (me.getY() >= loc.y & me.getY() < loc.y + size.height))
-        {
-            me.translatePoint(loc.x, loc.y);
-        }
-        
         gridPanel.mouseClicked(me);
     }
 
@@ -180,8 +150,8 @@ public class GameStatusPanel extends javax.swing.JPanel implements MouseListener
     @Override
     public void mouseExited(MouseEvent me)    {    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.Box.Filler filler;
     private javax.swing.JLabel gameModeLabel;
-    private javax.swing.JTextArea gameStatus;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JLabel turnCountLabel;
     // End of variables declaration//GEN-END:variables

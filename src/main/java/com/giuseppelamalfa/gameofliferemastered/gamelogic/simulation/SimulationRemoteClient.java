@@ -8,6 +8,7 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation;
 import com.giuseppelamalfa.gameofliferemastered.ApplicationFrame;
 import com.giuseppelamalfa.gameofliferemastered.GridPanel;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.requests.*;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
 import java.io.EOFException;
@@ -16,6 +17,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -39,7 +41,11 @@ public class SimulationRemoteClient implements SimulationInterface {
     String host;
     int portNumber;
     
-    public SimulationRemoteClient(String host, int portNumber) throws IOException, Exception {
+    HashMap<Integer, PlayerData>    playerMap = new HashMap<>();
+    PlayerData localPlayerData;
+    
+    public SimulationRemoteClient(String playerName, String host, int portNumber) throws IOException, Exception {
+        localPlayerData = new PlayerData(playerName);
         init(host,portNumber);
     }
     
@@ -47,6 +53,7 @@ public class SimulationRemoteClient implements SimulationInterface {
         clientSocket = new Socket(host, portNumber);
         outputStream = new ObjectOutputStream(clientSocket.getOutputStream());
 
+        outputStream.writeObject(new UpdatePlayerDataRequest(localPlayerData));
         ApplicationFrame.writeToStatusLog("Connected to " + host + ":" + portNumber);
         
         new Thread(() -> {
@@ -72,6 +79,7 @@ public class SimulationRemoteClient implements SimulationInterface {
         isStarted = true;
     }
     
+    
     @Override
     public boolean          isStarted() { return isStarted; }
     @Override
@@ -87,6 +95,8 @@ public class SimulationRemoteClient implements SimulationInterface {
     public int              getSectorSideLength() { return currentGrid.getSectorSideLength(); }
     @Override
     public int              getCurrentTurn() { return currentGrid.getCurrentTurn(); }
+    @Override
+    public String           getStatusText() { return "";}
     
     @Override
     public UnitInterface    getUnit(int row, int col) { 
@@ -123,15 +133,32 @@ public class SimulationRemoteClient implements SimulationInterface {
         Request request = (Request)requestObject;
         
         switch(request.getType()) {
-            case SYNC:
+            case LOG_MESSAGE:
+                ApplicationFrame.writeToStatusLog(((LogMessageRequest)request).message);
+                break;
+            case SYNC_GRID:
                 synchronized(syncGrid){
-                    syncGrid = ((SyncRequest)request).grid;
+                    syncGrid = ((SyncGridRequest)request).grid;
                 }
                 rowCount = syncGrid.getRowCount();
                 columnCount = syncGrid.getColumnCount();
                 Grid tmpGrid = (Grid)syncGrid.clone();
                 synchronized(currentGrid) {
                     currentGrid = tmpGrid;
+                }
+                break;
+            case SYNC_PLAYER_MAP:
+                playerMap = ((SyncPlayerMapRequest)request).playerMap;
+                break;
+            case UPDATE_PLAYER_DATA:
+                PlayerData playerData = ((UpdatePlayerDataRequest)request).playerData;
+                if(playerData.color != PlayerData.TeamColor.NONE)
+                    localPlayerData.color = playerData.color;
+                if(playerData.ID != -1)
+                {
+                    playerMap.remove(localPlayerData.ID);
+                    localPlayerData.ID = playerData.ID;
+                    playerMap.put(localPlayerData.ID, localPlayerData);
                 }
                 break;
             case DISCONNECT:
@@ -155,7 +182,7 @@ public class SimulationRemoteClient implements SimulationInterface {
     public void             synchronize() {
         if(isStarted)
         {
-            SyncRequest req = new SyncRequest();
+            SyncGridRequest req = new SyncGridRequest();
             try {
                 outputStream.writeObject(req);
             } catch (IOException ex) {

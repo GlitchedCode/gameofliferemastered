@@ -22,11 +22,11 @@ public class Grid implements Serializable, Cloneable
 
     private int turn = 0;
 
+    public final Integer SECTOR_SIDE_LENGTH = 32;
     private Integer rowCount;
     private Integer columnCount;
     private Integer sectorRowCount;
     private Integer sectorColumnCount;
-    private final Integer sectorSideLength = 32;
 
     private boolean unitFoundThisTurn = false;
     private final Point topLeftActive;
@@ -46,8 +46,8 @@ public class Grid implements Serializable, Cloneable
     public Grid(Integer rows, Integer cols) throws Exception    {
         rowCount = rows;
         columnCount = cols;
-        sectorRowCount = (rows / sectorSideLength) + 1;
-        sectorColumnCount = (cols / sectorSideLength) + 1;
+        sectorRowCount = (rows / SECTOR_SIDE_LENGTH) + 1;
+        sectorColumnCount = (cols / SECTOR_SIDE_LENGTH) + 1;
 
         board = new TwoDimensionalContainer<>(rows, cols);
         sectorFlags = new TwoDimensionalContainer<>(sectorRowCount, sectorColumnCount, false);
@@ -98,8 +98,8 @@ public class Grid implements Serializable, Cloneable
     public void resize(int rows, int cols) throws Exception {
         rowCount = rows;
         columnCount = cols;
-        sectorRowCount = (rows / sectorSideLength) + 1;
-        sectorColumnCount = (cols / sectorSideLength) + 1;
+        sectorRowCount = (rows / SECTOR_SIDE_LENGTH) + 1;
+        sectorColumnCount = (cols / SECTOR_SIDE_LENGTH) + 1;
 
         board.resize(rows, cols);
         sectorFlags.resize(sectorRowCount, sectorColumnCount);
@@ -111,7 +111,7 @@ public class Grid implements Serializable, Cloneable
     }
 
     public final int getSectorSideLength()    {
-        return sectorSideLength;
+        return SECTOR_SIDE_LENGTH;
     }
 
     /*
@@ -256,7 +256,7 @@ public class Grid implements Serializable, Cloneable
         {
             board.put(row, col, unit);
             moveProcessBoundaryToInclude(row, col);
-            sectorFlags.put(row / sectorSideLength, col / sectorSideLength, true);
+            sectorFlags.put(row / SECTOR_SIDE_LENGTH, col / SECTOR_SIDE_LENGTH, true);
         }
         else
         {
@@ -266,13 +266,13 @@ public class Grid implements Serializable, Cloneable
 
     private Point getSectorTopLeftBoundary(int sectorRow, int sectorColumn)
     {
-        return new Point(sectorColumn * sectorSideLength, sectorRow * sectorSideLength);
+        return new Point(sectorColumn * SECTOR_SIDE_LENGTH, sectorRow * SECTOR_SIDE_LENGTH);
     }
 
     private Point getSectorBottomRightBoundary(int sectorRow, int sectorColumn)
     {
-        int row = Integer.min(rowCount, (sectorRow + 1) * sectorSideLength - 1);
-        int col = Integer.min(columnCount, (sectorColumn + 1) * sectorSideLength - 1);
+        int row = Integer.min(rowCount, (sectorRow + 1) * SECTOR_SIDE_LENGTH - 1);
+        int col = Integer.min(columnCount, (sectorColumn + 1) * SECTOR_SIDE_LENGTH - 1);
 
         return new Point(col, row);
     }

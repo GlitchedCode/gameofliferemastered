@@ -23,6 +23,7 @@ public interface SimulationInterface {
     void            resize(int rows, int cols);
     int             getSectorSideLength();
     int             getCurrentTurn();
+    String          getStatusText();
     
     UnitInterface   getUnit(int row, int col);
     void            setUnit(int row, int col, UnitInterface unit);

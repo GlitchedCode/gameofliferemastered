@@ -130,7 +130,7 @@
             </DimensionLayout>
           </Layout>
           <SubComponents>
-            <Component class="com.giuseppelamalfa.gameofliferemastered.utils.GameStatusPanel" name="gameStatusPanel">
+            <Component class="com.giuseppelamalfa.gameofliferemastered.ui.GameStatusPanel" name="gameStatusPanel">
               <Events>
                 <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="gameStatusPanelMouseClicked"/>
               </Events>
@@ -410,9 +410,6 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Player"/>
               </Properties>
-              <AuxValues>
-                <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="PlainDocument playerNameFieldDocument = (PlainDocument) playerNameField.getDocument();&#xa;playerNameFieldDocument.addDocumentListener(new PlayerNameDocumentListener(playerNameField, this));"/>
-              </AuxValues>
             </Component>
             <Component class="javax.swing.JLabel" name="jLabel5">
               <Properties>

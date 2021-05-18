@@ -28,7 +28,7 @@ import javax.swing.text.PlainDocument;
  * @author glitchedcode
  */
 public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
-
+    static public final int             MAX_PLAYER_NAME_LENGTH = 30;
     static public final int             MAX_ROWS = 400;
     static public final int             MAX_COLS = 400;
     
@@ -46,7 +46,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
     boolean                             isInMenu = true;
     
     String                              localPlayerName = "Player";
-    PlayerData                          localPlayerData = new PlayerData(-1, "Player", PlayerData.TeamColor.NONE);
+    PlayerData                          localPlayerData = new PlayerData("Player", PlayerData.TeamColor.NONE);
     
     /*
     * JFRAME CODE
@@ -82,7 +82,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
 
         outerLayeredPane = new javax.swing.JLayeredPane();
         gridPanel = gridPanel = new com.giuseppelamalfa.gameofliferemastered.GridPanel(tileManager);
-        gameStatusPanel = new com.giuseppelamalfa.gameofliferemastered.utils.GameStatusPanel();
+        gameStatusPanel = new com.giuseppelamalfa.gameofliferemastered.ui.GameStatusPanel();
         unitPalette = new com.giuseppelamalfa.gameofliferemastered.UnitPalette();
         menuPanel = new com.giuseppelamalfa.gameofliferemastered.MenuPanel();
         titleLabel = new javax.swing.JLabel();
@@ -340,8 +340,6 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
                 .addContainerGap())
         );
 
-        PlainDocument playerNameFieldDocument = (PlainDocument) playerNameField.getDocument();
-        playerNameFieldDocument.addDocumentListener(new PlayerNameDocumentListener(playerNameField, this));
         PlainDocument rowFieldDocument = (PlainDocument) rowField.getDocument();
         GridSizeDocumentListener sizeListener = new GridSizeDocumentListener(rowField, colField, this);
         rowFieldDocument.addDocumentListener(sizeListener);
@@ -423,13 +421,24 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
         swapCanvas();
     }//GEN-LAST:event_unpauseButtonMouseClicked
 
+    private boolean CheckPlayerName(){
+        int len = playerNameField.getText().length();
+        if(len < 1 | len > MAX_PLAYER_NAME_LENGTH)
+        {
+            writeToStatusLog("Invalid player name.");
+            return false;
+        }
+        return true;
+    }
+    
     private void JoinGameHandler(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_JoinGameHandler
-        if(server != null) return;
+        if(server != null | !CheckPlayerName()) return;
 
         if(client == null)
         {
             try{
-                client = new SimulationRemoteClient(serverAddress.getText(), Integer.parseInt(serverPortNumber.getText()));
+                client = new SimulationRemoteClient(playerNameField.getText(), 
+                        serverAddress.getText(), Integer.parseInt(serverPortNumber.getText()));
             }catch (Exception e){
                 writeToStatusLog("Could not connect to  server at address "
                     + serverAddress.getText() + ":" + serverPortNumber.getText());
@@ -445,6 +454,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
                 serverAddress.setEditable(false);
                 serverPortNumber.setEditable(false);
                 hostGameButton.setEnabled(false);
+                playerNameField.setEditable(false);
 
                 gridPanel.setGrid(client);
             }
@@ -456,18 +466,19 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
             serverPortNumber.setEditable(true);
             hostGameButton.setEnabled(true);
             joinGameButton.setText("Join Game");
+            playerNameField.setEditable(true);
 
             gridPanel.setGrid(localGrid);
         }
     }//GEN-LAST:event_JoinGameHandler
 
     private void StartServerHandler(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_StartServerHandler
-        if(client != null) return;
+        if(client != null | !CheckPlayerName()) return;
 
         if(server == null)
         {
             try{
-                server = new SimulationServer(Integer.parseInt(hostPortNumber.getText()),
+                server = new SimulationServer(playerNameField.getText(), Integer.parseInt(hostPortNumber.getText()),
                     Integer.parseInt(maxPlayerCount.getText()), localRowCount, localColumnCount);
             }catch(Exception e){
                 writeToStatusLog("Could not host server on port " + hostPortNumber.getText());
@@ -481,6 +492,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
                 hostPortNumber.setEditable(false);
                 maxPlayerCount.setEditable(false);
                 joinGameButton.setEnabled(false);
+                playerNameField.setEditable(false);
 
                 gridPanel.setGrid(server);
             }
@@ -488,10 +500,11 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
             writeToStatusLog("Closing server...");
             server.close();
             server = null;
+            hostGameButton.setText("Start Server");
             hostPortNumber.setEditable(true);
             maxPlayerCount.setEditable(true);
             joinGameButton.setEnabled(true);
-            hostGameButton.setText("Start Server");
+            playerNameField.setEditable(true);
 
             gridPanel.setGrid(localGrid);
         }
@@ -507,23 +520,6 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
     public static void writeToStatusLog(String string)
     {
         mainStatusLog.append(string + "\n");
-    }
-    
-    public void renameLocalPlayer(String name){
-        if(name.length() <= 20) {
-            localPlayerName = name;
-        } else {
-            playerNameField.setText(localPlayerName);
-            name = localPlayerName;
-        }
-        
-        if(client != null)
-        {
-            
-        }else if (server != null)
-        {
-            
-        }
     }
     
     public int getRowCount(){ return localRowCount; }
@@ -627,7 +623,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField colField;
-    private com.giuseppelamalfa.gameofliferemastered.utils.GameStatusPanel gameStatusPanel;
+    private com.giuseppelamalfa.gameofliferemastered.ui.GameStatusPanel gameStatusPanel;
     private com.giuseppelamalfa.gameofliferemastered.GridPanel gridPanel;
     private javax.swing.JButton hostGameButton;
     private javax.swing.JTextField hostPortNumber;
@@ -652,27 +648,6 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
     private com.giuseppelamalfa.gameofliferemastered.UnitPalette unitPalette;
     private javax.swing.JButton unpauseButton;
     // End of variables declaration//GEN-END:variables
-}
-
-class PlayerNameDocumentListener implements DocumentListener{
-
-    JTextField field;
-    ApplicationFrame frame;
-    public PlayerNameDocumentListener(JTextField field, ApplicationFrame frame) { 
-        this.field = field;
-        this.frame = frame;
-    }
-    
-    @Override
-    public void insertUpdate(DocumentEvent e) {
-        frame.renameLocalPlayer(field.getText());
-    }
-    @Override
-    public void removeUpdate(DocumentEvent e) {
-        frame.renameLocalPlayer(field.getText());
-    }
-    @Override
-    public void changedUpdate(DocumentEvent e) {    }
 }
 
 class GridSizeDocumentListener implements DocumentListener{
