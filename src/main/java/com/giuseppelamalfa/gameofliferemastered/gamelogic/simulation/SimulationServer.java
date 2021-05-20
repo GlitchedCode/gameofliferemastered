@@ -74,7 +74,6 @@ public class SimulationServer implements SimulationInterface{
     
     boolean         remoteInstance = false;
     HashMap<Integer, ClientData>    connectedClients = new HashMap<>();
-    HashMap<Integer, PlayerData>    playerMap = new HashMap<>();
     ServerSocket    serverSocket;
     String          serverIP;
     int             portNumber;    
@@ -85,9 +84,9 @@ public class SimulationServer implements SimulationInterface{
   
     public SimulationServer(String playerName, int portNumber, int playerCount, 
             int rowCount, int columnCount) throws Exception {
-        remoteInstance = true;
         localPlayerData = new PlayerData(playerName, extractRandomColor());
         localPlayerData.ID = 0;
+        remoteInstance = true;
         initializeRemoteServer(portNumber, playerCount, rowCount, columnCount);        
     }
     
@@ -148,7 +147,7 @@ public class SimulationServer implements SimulationInterface{
                                 
                                 PlayerData tmp = new PlayerData(clientData.playerData);
                                 
-                                outputStream.writeObject(new UpdatePlayerDataRequest(tmp));
+                                outputStream.writeObject(new UpdatePlayerDataRequest(tmp, true, true));
                                 outputStream.writeObject(new SyncGridRequest(currentGrid));
                                 outputStream.writeObject(new PauseRequest(isRunning));
                                 
@@ -198,8 +197,10 @@ public class SimulationServer implements SimulationInterface{
     @Override
     public boolean          isRunning() { return isRunning; }
     @Override
-    
     public boolean          isLocallyControlled() { return true; }
+    @Override
+    public int              getLocalPlayerID() { return localPlayerData.ID; }
+    
     @Override
     public int              getRowCount() { return currentGrid.getRowCount(); }
     @Override
@@ -208,8 +209,6 @@ public class SimulationServer implements SimulationInterface{
     public int              getSectorSideLength() { return currentGrid.getSectorSideLength(); }
     @Override
     public int              getCurrentTurn() { return currentGrid.getCurrentTurn(); }
-    @Override
-    public String           getStatusText() { return ""; }
     
     @Override
     public UnitInterface    getUnit(int row, int col) { return currentGrid.getUnit(row, col); }
@@ -233,17 +232,6 @@ public class SimulationServer implements SimulationInterface{
             // Syncronize grid and player data at regular intervals.
             if(currentGrid.getCurrentTurn() % gridSyncTurnCount == 0 | !isRunning)
                 synchronize();
-            
-            if(currentGrid.getCurrentTurn() % playerSyncTurnCount == 0 | !isRunning)
-            {
-                SyncPlayerMapRequest req = new SyncPlayerMapRequest(playerMap);
-                try{
-                    for(Integer key : connectedClients.keySet())
-                        connectedClients.get(key).stream.writeObject(req);
-                }catch(IOException e) {
-                    e.printStackTrace();
-                }
-            }
         }
     }
     
@@ -266,7 +254,6 @@ public class SimulationServer implements SimulationInterface{
         syncGrid = (Grid)currentGrid.clone();
         try{
             output.writeObject(new SyncGridRequest(syncGrid));
-            output.writeObject(new SyncPlayerMapRequest(playerMap));
         }catch(Exception e){
             e.printStackTrace();
         }
@@ -301,20 +288,38 @@ public class SimulationServer implements SimulationInterface{
                 break;
             case UPDATE_PLAYER_DATA:
                 if(clientData == null) break;
-                PlayerData playerData = ((UpdatePlayerDataRequest)tmp).playerData;
-                if(playerData.playerName != null)
-                {   
-                    if(clientData.playerData.playerName == null)
-                        sendLogMessage(playerData.playerName + " joined the game.");
-                    clientData.playerData.playerName = playerData.playerName;
-                }
-                if(playerData.color != PlayerData.TeamColor.NONE &
-                        availableColors.contains(playerData.color))
-                {
-                    if(clientData.playerData.color != PlayerData.TeamColor.NONE) 
-                        availableColors.add(clientData.playerData.color);
-                    clientData.playerData.color = playerData.color;
-                    availableColors.remove(playerData.color);
+                UpdatePlayerDataRequest updateRequest = (UpdatePlayerDataRequest)tmp;
+                PlayerData playerData = updateRequest.playerData;
+                
+                if(!updateRequest.connected){
+                    currentGrid.removePlayer(playerData.ID);
+                    UpdatePlayerDataRequest disconnectRequest = new UpdatePlayerDataRequest(playerData, false);
+                    for(ClientData data : connectedClients.values())
+                        if(data.playerData.ID != playerData.ID)
+                            connectedClients.get(data.playerData.ID).stream.writeObject(disconnectRequest);
+                } 
+                else if(updateRequest.updateLocal){
+                    if(playerData.playerName != null)
+                    {   
+                        if(clientData.playerData.playerName == null)
+                            sendLogMessage(playerData.playerName + " joined the game.");
+                        clientData.playerData.playerName = playerData.playerName;
+                    }
+                    if(playerData.color != PlayerData.TeamColor.NONE &
+                            availableColors.contains(playerData.color))
+                    {
+                        if(clientData.playerData.color != PlayerData.TeamColor.NONE) 
+                            availableColors.add(clientData.playerData.color);
+                        clientData.playerData.color = playerData.color;
+                        availableColors.remove(playerData.color);
+                    }
+                    
+                    currentGrid.addPlayer(clientData.playerData);
+                    UpdatePlayerDataRequest clientUpdateRequest = 
+                            new UpdatePlayerDataRequest(clientData.playerData, true);
+                    for(ClientData data : connectedClients.values())
+                        if(data.playerData.ID != playerData.ID)
+                            connectedClients.get(data.playerData.ID).stream.writeObject(clientUpdateRequest);
                 }
                 break;
             case DISCONNECT:

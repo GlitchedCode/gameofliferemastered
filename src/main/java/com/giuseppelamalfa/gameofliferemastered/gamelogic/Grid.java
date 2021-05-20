@@ -9,6 +9,9 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.*;
 import com.giuseppelamalfa.gameofliferemastered.utils.*;
 import java.awt.Point;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 
 /**
  * Class for handling all of game logic and rendering all units to the grid
@@ -35,6 +38,9 @@ public class Grid implements Serializable, Cloneable
     private final Point bottomRightProcessed;
 
     private final DeadUnit deadUnit;
+    
+    private final HashMap<Integer, PlayerData> players = new HashMap<>();
+    private ArrayList<PlayerData> orderedPlayers = new ArrayList<>(); // players ordered by their ranking
 
     /**
      * Constructor
@@ -110,18 +116,16 @@ public class Grid implements Serializable, Cloneable
         return board.get(row, col);
     }
 
-    public final int getSectorSideLength()    {
-        return SECTOR_SIDE_LENGTH;
-    }
-
-    /*
-    * RENDERING AND UI CODE
-     */
     public void setUnit(int row, int col, UnitInterface unit)
     {
+        if(!players.containsKey(unit.getPlayerID())) return;
         unit.update();
         setToPosition(row, col, unit);
         correctProcessRegion();
+    }
+    
+    public final int getSectorSideLength()    {
+        return SECTOR_SIDE_LENGTH;
     }
 
     public void clearBoard()
@@ -166,15 +170,15 @@ public class Grid implements Serializable, Cloneable
     {
         unitFoundThisTurn = false;
 
+        for(PlayerData data : players.values())
+            data.score = 0;
+        
         for (int sectorRow = 0; sectorRow < sectorRowCount; sectorRow++)
         {
             for (int sectorColumn = 0; sectorColumn < sectorColumnCount; sectorColumn++)
             {
-
                 if ( !surroundingSectorsActive(sectorRow, sectorColumn) )
-                {
                     continue;
-                }
 
                 Point topLeftBoundary = getSectorTopLeftBoundary(sectorRow, sectorColumn);
                 Point bottomRightBoundary = getSectorBottomRightBoundary(sectorRow, sectorColumn);
@@ -199,6 +203,7 @@ public class Grid implements Serializable, Cloneable
 
         cleanupStep();
         correctProcessRegion();
+        orderPlayersByScore();
         turn += 1;
 
         //System.out.println("Turn " + turn);
@@ -250,7 +255,7 @@ public class Grid implements Serializable, Cloneable
      * @param col row
      * @param unit unit to be set
      */
-    public final void setToPosition(Integer row, Integer col, UnitInterface unit)
+    protected final void setToPosition(Integer row, Integer col, UnitInterface unit)
     {
         if ( board.get(row, col) == null )
         {
@@ -312,10 +317,7 @@ public class Grid implements Serializable, Cloneable
             {
                 UnitInterface current = board.get(row, col);
                 if ( current == null )
-                {
                     continue;
-                }
-
                 
                 UnitInterface[] adjacentUnits = getUnitsAdjacentToPosition(row, col);
                 //System.out.println("" + col + " " + row + " " + Arrays.toString(adjacentUnits));
@@ -325,6 +327,7 @@ public class Grid implements Serializable, Cloneable
                 // process more units
                 if ( current.getNextTurnState() != UnitInterface.State.DEAD )
                 {
+                    players.get(current.getPlayerID()).score++;
                     moveProcessBoundaryToInclude(row, col);
                     aliveNextTurn = true;
                 }
@@ -387,8 +390,36 @@ public class Grid implements Serializable, Cloneable
         }
     }
    
-    public void addPlayer()
+    public ArrayList<PlayerData> getOrderedPlayers(){ return new ArrayList<>(orderedPlayers); }
+    
+    private void orderPlayersByScore(){
+        orderedPlayers =  new ArrayList<>(players.values());
+        orderedPlayers.sort(new Comparator<PlayerData> () {
+            public int compare(PlayerData one, PlayerData two){
+                int val = two.score - one.score;
+                if(val == 0)
+                    val = one.ID - two.ID;
+                return val;
+            }
+        });
+    }
+    
+    public void addPlayer(PlayerData player)
     {
-        
+        players.put(player.ID, player);
+        orderPlayersByScore();
+    }
+    
+    public void removePlayer(int id){
+        for(int r = 0; r < rowCount; r++)
+            for(int c = 0; c < columnCount; c++)
+            {
+                UnitInterface unit = getUnit(r, c);
+                if(unit != null)
+                    if(unit.getPlayerID() == id)
+                        setToPosition(r, c, null);
+            }
+        players.remove(id);
+        orderPlayersByScore();
     }
 }

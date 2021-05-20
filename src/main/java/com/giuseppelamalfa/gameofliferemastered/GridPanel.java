@@ -22,11 +22,11 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.AffineTransform;
 import java.awt.image.ImageObserver;
-import java.util.Timer;
 import javax.swing.JPanel;
 import javax.swing.ToolTipManager;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationInterface;
 import com.giuseppelamalfa.gameofliferemastered.ui.GameStatusPanel;
+import com.giuseppelamalfa.gameofliferemastered.utils.TimerWrapper;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,6 +36,8 @@ import java.util.logging.Logger;
  */
 public final class GridPanel extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener, KeyListener
 {
+    final int TOOLTIP_INITIAL_DELAY_MS = 150;
+    
     protected int sideLength;
     protected SimulationInterface simulation;
     protected ImageManager tileManager;
@@ -51,23 +53,20 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
     protected int startRow;
     protected int startColumn;
     
-    protected final Timer timer = new Timer();
-    protected BoardUpdateTask updateTask = new BoardUpdateTask();
+    protected final TimerWrapper timer = new TimerWrapper();
+    private boolean initialized = false;
     
     protected GameStatusPanel gameStatusPanel;
     protected UnitPalette palette;
     
-        
     public GridPanel()
     {
-        timer.scheduleAtFixedRate(updateTask, 0, updateTask.getMsInterval());
         setSideLength(32);
     }
     
     public GridPanel(ImageManager tileManager)
     {
         this.tileManager = tileManager;
-        timer.scheduleAtFixedRate(updateTask, 0, updateTask.getMsInterval());
         setSideLength(32);
     }
 
@@ -194,7 +193,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
         int col = point.x / lineSpacing + startColumn;
         
         try {
-            simulation.setUnit(row, col, palette.getNewUnit());
+            simulation.setUnit(row, col, palette.getNewUnit(simulation.getLocalPlayerID()));
         } catch (Exception ex) {
             Logger.getLogger(GridPanel.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -204,7 +203,6 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
     public void setGrid(SimulationInterface grid, boolean resetOrigin)
     {
         this.simulation = grid;
-        updateTask.grid = grid;
         setSideLength(sideLength);
         
         gameStatusPanel.setTurnCount(grid.getCurrentTurn());
@@ -219,7 +217,6 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
     public void setGrid(SimulationInterface grid)
     {
         this.simulation = grid;
-        updateTask.grid = grid;
         setSideLength(sideLength);
 
         Dimension size = getSize();
@@ -366,14 +363,29 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
 
     public void init(UnitPalette palette)
     {
+        if (initialized) return;
+        
         addMouseListener(this);
         addMouseMotionListener(this);
         addMouseWheelListener(this);
         addKeyListener(this);
-        timer.schedule(new BoardRenderTask(this), 0, 18);
-        ToolTipManager.sharedInstance().setInitialDelay(150);
+        // repaint 60 times a secound
+        timer.scheduleAtFixedRate(() -> {
+            repaint();
+        }, 0, 18); 
+        // board update task
+        timer.scheduleAtFixedRate(() -> {
+            if(simulation == null) return;
+            if(!simulation.isRunning()) return;
+            try{
+                simulation.computeNextTurn();
+            } catch(Exception e) {e.printStackTrace();}
+        }, 0, ApplicationFrame.BOARD_UPDATE_MS);
+
+        ToolTipManager.sharedInstance().setInitialDelay(TOOLTIP_INITIAL_DELAY_MS);
         
         gameStatusPanel = (GameStatusPanel)getComponent(0);
         this.palette = palette;
+        initialized = true;
     }
 }

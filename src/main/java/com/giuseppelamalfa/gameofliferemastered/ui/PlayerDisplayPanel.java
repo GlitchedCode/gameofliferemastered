@@ -5,6 +5,8 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.ui;
 
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
+
 /**
  *
  * @author glitchedcode
@@ -28,41 +30,60 @@ public class PlayerDisplayPanel extends javax.swing.JPanel {
     private void initComponents() {
 
         nameLabel = new javax.swing.JLabel();
-        jLabel1 = new javax.swing.JLabel();
+        scoreLabel = new javax.swing.JLabel();
+
+        setOpaque(false);
 
         nameLabel.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
+        nameLabel.setForeground(new java.awt.Color(255, 255, 255));
         nameLabel.setText("PlayerName");
 
-        jLabel1.setBackground(new java.awt.Color(57, 0, 153));
-        jLabel1.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
-        jLabel1.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
-        jLabel1.setText("1235678");
-        jLabel1.setOpaque(true);
+        scoreLabel.setBackground(new java.awt.Color(57, 0, 153));
+        scoreLabel.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
+        scoreLabel.setForeground(new java.awt.Color(255, 255, 255));
+        scoreLabel.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        scoreLabel.setText("1235678");
+        scoreLabel.setOpaque(true);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
                 .addComponent(nameLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 132, Short.MAX_VALUE)
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(scoreLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(nameLabel)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(nameLabel)
+                    .addComponent(scoreLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
     }// </editor-fold>//GEN-END:initComponents
-
+    
+    public void setToPlayer(PlayerData data){
+        if(data == null) reset();
+        else{
+            nameLabel.setText(data.playerName);
+            scoreLabel.setText(Integer.toString(data.score));
+            scoreLabel.setBackground(data.color.getMainAWTColor());
+            scoreLabel.setForeground(data.color.getTextAWTColor());
+        }
+    }
+    
+    public void reset(){
+        nameLabel.setText("");
+        scoreLabel.setText("");
+        scoreLabel.setBackground(PlayerData.TeamColor.NONE.getMainAWTColor());
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel nameLabel;
+    private javax.swing.JLabel scoreLabel;
     // End of variables declaration//GEN-END:variables
 }

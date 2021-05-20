@@ -17,13 +17,13 @@ public interface SimulationInterface {
     boolean         isStarted();
     boolean         isRunning();
     boolean         isLocallyControlled();
+    int             getLocalPlayerID();
     
     int             getRowCount();
     int             getColumnCount();
     void            resize(int rows, int cols);
     int             getSectorSideLength();
     int             getCurrentTurn();
-    String          getStatusText();
     
     UnitInterface   getUnit(int row, int col);
     void            setUnit(int row, int col, UnitInterface unit);

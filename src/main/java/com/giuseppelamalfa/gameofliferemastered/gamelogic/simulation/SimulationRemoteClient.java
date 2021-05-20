@@ -40,8 +40,6 @@ public class SimulationRemoteClient implements SimulationInterface {
     ObjectOutputStream outputStream;
     String host;
     int portNumber;
-    
-    HashMap<Integer, PlayerData>    playerMap = new HashMap<>();
     PlayerData localPlayerData;
     
     public SimulationRemoteClient(String playerName, String host, int portNumber) throws IOException, Exception {
@@ -53,20 +51,16 @@ public class SimulationRemoteClient implements SimulationInterface {
         clientSocket = new Socket(host, portNumber);
         outputStream = new ObjectOutputStream(clientSocket.getOutputStream());
 
-        outputStream.writeObject(new UpdatePlayerDataRequest(localPlayerData));
+        outputStream.writeObject(new UpdatePlayerDataRequest(localPlayerData, true, true));
         ApplicationFrame.writeToStatusLog("Connected to " + host + ":" + portNumber);
         
         new Thread(() -> {
                 try {
                     ObjectInputStream input = new ObjectInputStream(clientSocket.getInputStream());
-
-                    while(true){
+                    while(true)
                         handleRequest(input.readObject(), 0);
-                    }
                 }
-                catch (EOFException | SocketException e){
-                    
-                }
+                catch (EOFException | SocketException e) { }
                 catch (InvalidRequestException | IOException | ClassNotFoundException e){
                     e.printStackTrace();
                     isRunning = false;
@@ -80,30 +74,18 @@ public class SimulationRemoteClient implements SimulationInterface {
     }
     
     
-    @Override
-    public boolean          isStarted() { return isStarted; }
-    @Override
-    public boolean          isRunning() { return isRunning; }
-    @Override
-    public boolean          isLocallyControlled() { return false; }
+    @Override public boolean isStarted() { return isStarted; }
+    @Override public boolean isRunning() { return isRunning; }
+    @Override public boolean isLocallyControlled() { return false; }
+    @Override public int getLocalPlayerID() { return localPlayerData.ID; }
+    @Override public int getRowCount() { return rowCount; }
+    @Override public int getColumnCount() { return columnCount; }
+    @Override public int getSectorSideLength() { return currentGrid.getSectorSideLength(); }
+    @Override public int getCurrentTurn() { return currentGrid.getCurrentTurn(); }
 
+    @Override public UnitInterface    getUnit(int row, int col) { return currentGrid.getUnit(row, col); }
     @Override
-    public int              getRowCount() { return rowCount; }
-    @Override
-    public int              getColumnCount() { return columnCount; }
-    @Override
-    public int              getSectorSideLength() { return currentGrid.getSectorSideLength(); }
-    @Override
-    public int              getCurrentTurn() { return currentGrid.getCurrentTurn(); }
-    @Override
-    public String           getStatusText() { return "";}
-    
-    @Override
-    public UnitInterface    getUnit(int row, int col) { 
-        return currentGrid.getUnit(row, col); 
-    }
-    @Override
-    public void             setUnit(int row, int col, UnitInterface unit) { 
+    public void             setUnit(int row, int col, UnitInterface unit) {
         try {
             outputStream.writeObject(new SetUnitRequest(row, col, unit));
         } catch (IOException ex) {
@@ -147,19 +129,20 @@ public class SimulationRemoteClient implements SimulationInterface {
                     currentGrid = tmpGrid;
                 }
                 break;
-            case SYNC_PLAYER_MAP:
-                playerMap = ((SyncPlayerMapRequest)request).playerMap;
-                break;
             case UPDATE_PLAYER_DATA:
-                PlayerData playerData = ((UpdatePlayerDataRequest)request).playerData;
-                if(playerData.color != PlayerData.TeamColor.NONE)
-                    localPlayerData.color = playerData.color;
-                if(playerData.ID != -1)
-                {
-                    playerMap.remove(localPlayerData.ID);
-                    localPlayerData.ID = playerData.ID;
-                    playerMap.put(localPlayerData.ID, localPlayerData);
+                UpdatePlayerDataRequest updateRequest = (UpdatePlayerDataRequest)request;
+                PlayerData playerData = updateRequest.playerData;
+                if(playerData.ID != localPlayerData.ID) {
+                    if(updateRequest.connected) 
+                        currentGrid.addPlayer(playerData);
+                    else
+                        currentGrid.removePlayer(playerData.ID);
                 }
+                if(updateRequest.updateLocal)
+                {
+                    if(playerData.color != PlayerData.TeamColor.NONE)
+                        localPlayerData.color = playerData.color;
+                } 
                 break;
             case DISCONNECT:
                 String msg = ((DisconnectRequest)request).message;
@@ -197,6 +180,7 @@ public class SimulationRemoteClient implements SimulationInterface {
     @Override
     public void          close(){
         try {
+            outputStream.writeObject(new UpdatePlayerDataRequest(localPlayerData, false));
             clientSocket.close();
         }catch(Exception e) {
             System.err.println("e");

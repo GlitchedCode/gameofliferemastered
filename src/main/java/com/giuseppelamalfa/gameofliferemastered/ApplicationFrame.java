@@ -28,6 +28,7 @@ import javax.swing.text.PlainDocument;
  * @author glitchedcode
  */
 public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
+    static public final int             BOARD_UPDATE_MS = 150;
     static public final int             MAX_PLAYER_NAME_LENGTH = 30;
     static public final int             MAX_ROWS = 400;
     static public final int             MAX_COLS = 400;
@@ -38,7 +39,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
     private final SimulationInterface   localGrid;
     private final ImageManager          tileManager;
     
-    SimulationRemoteClient                    client;
+    SimulationRemoteClient              client;
     SimulationServer                    server;
     
     static ImageIcon                    icon;

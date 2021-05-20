@@ -6,6 +6,7 @@
 package com.giuseppelamalfa.gameofliferemastered.ui;
 
 import com.giuseppelamalfa.gameofliferemastered.GridPanel;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationInterface;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
 import java.awt.Color;
@@ -16,6 +17,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.util.ArrayList;
 
 /**
  *
@@ -24,6 +26,7 @@ import java.awt.event.MouseWheelListener;
 public class GameStatusPanel extends javax.swing.JPanel implements MouseListener, MouseMotionListener, MouseWheelListener {
 
     GridPanel gridPanel;
+    ArrayList<PlayerDisplayPanel> playerPanels = new ArrayList<>();
     
     /**
      * Creates new form GameStatusPanel
@@ -33,6 +36,18 @@ public class GameStatusPanel extends javax.swing.JPanel implements MouseListener
         Color col = new Color(0,0,0,0);
         setBackground(col);
         jPanel1.setBackground(col);
+        
+        playerPanels.add(playerDisplayPanel1);
+        playerPanels.add(playerDisplayPanel2);
+        playerPanels.add(playerDisplayPanel3);
+        playerPanels.add(playerDisplayPanel4);
+        playerPanels.add(playerDisplayPanel5);
+        playerPanels.add(playerDisplayPanel6);
+        playerPanels.add(playerDisplayPanel7);
+        playerPanels.add(playerDisplayPanel8);
+        
+        
+        resetPlayerPanels();
     }
 
     /**
@@ -47,7 +62,14 @@ public class GameStatusPanel extends javax.swing.JPanel implements MouseListener
         jPanel1 = new javax.swing.JPanel();
         turnCountLabel = new javax.swing.JLabel();
         gameModeLabel = new javax.swing.JLabel();
-        filler = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 0));
+        playerDisplayPanel1 = new com.giuseppelamalfa.gameofliferemastered.ui.PlayerDisplayPanel();
+        playerDisplayPanel2 = new com.giuseppelamalfa.gameofliferemastered.ui.PlayerDisplayPanel();
+        playerDisplayPanel3 = new com.giuseppelamalfa.gameofliferemastered.ui.PlayerDisplayPanel();
+        playerDisplayPanel4 = new com.giuseppelamalfa.gameofliferemastered.ui.PlayerDisplayPanel();
+        playerDisplayPanel5 = new com.giuseppelamalfa.gameofliferemastered.ui.PlayerDisplayPanel();
+        playerDisplayPanel6 = new com.giuseppelamalfa.gameofliferemastered.ui.PlayerDisplayPanel();
+        playerDisplayPanel7 = new com.giuseppelamalfa.gameofliferemastered.ui.PlayerDisplayPanel();
+        playerDisplayPanel8 = new com.giuseppelamalfa.gameofliferemastered.ui.PlayerDisplayPanel();
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -72,14 +94,27 @@ public class GameStatusPanel extends javax.swing.JPanel implements MouseListener
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(filler, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(gameModeLabel)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 136, Short.MAX_VALUE)
-                        .addComponent(turnCountLabel)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(turnCountLabel))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(playerDisplayPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(playerDisplayPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(playerDisplayPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(playerDisplayPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(playerDisplayPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(playerDisplayPanel5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(playerDisplayPanel7, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(playerDisplayPanel8, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -90,11 +125,38 @@ public class GameStatusPanel extends javax.swing.JPanel implements MouseListener
                     .addComponent(turnCountLabel)
                     .addComponent(gameModeLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(filler, javax.swing.GroupLayout.DEFAULT_SIZE, 357, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(playerDisplayPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(playerDisplayPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(playerDisplayPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(playerDisplayPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(playerDisplayPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(playerDisplayPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(playerDisplayPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(playerDisplayPanel8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
+    public void setPlayerPanels(ArrayList<PlayerData> list)
+    {
+        resetPlayerPanels();
+        if (list != null)
+            for(int i = 0; i < list.size() & i < playerPanels.size(); i++)
+                playerPanels.get(i).setToPlayer(list.get(i));
+    }
+    
+    public void resetPlayerPanels(){
+        for(PlayerDisplayPanel panel : playerPanels)
+            panel.reset();
+    }
+    
     public void setTurnCount(int val){
         turnCountLabel.setText("Turn: " + val);
     }
@@ -112,47 +174,25 @@ public class GameStatusPanel extends javax.swing.JPanel implements MouseListener
    /*
     * MOUSE INPUT HANDLING
      */
-    @Override
-    public void mouseClicked(MouseEvent me)
-    {
-        gridPanel.mouseClicked(me);
-    }
-
-    @Override
-    public void mouseMoved(MouseEvent me)
-    {
-        gridPanel.mouseMoved(me);
-    }
-    
-    @Override
-    public void mousePressed(MouseEvent me)
-    {
-        gridPanel.mousePressed(me);
-    }
-
-    @Override
-    public void mouseDragged(MouseEvent me)
-    {
-        gridPanel.mouseDragged(me);
-    }
-
-    @Override
-    public void mouseWheelMoved(MouseWheelEvent me)
-    {
-        gridPanel.mouseWheelMoved(me);
-    }
-    // don't need these
-    @Override
-    public void mouseReleased(MouseEvent me) {
-    }
-    @Override
-    public void mouseEntered(MouseEvent me){}
-    @Override
-    public void mouseExited(MouseEvent me)    {    }
+    @Override public void mouseClicked(MouseEvent me){gridPanel.mouseClicked(me);}
+    @Override public void mouseMoved(MouseEvent me){gridPanel.mouseMoved(me);}
+    @Override public void mousePressed(MouseEvent me){gridPanel.mousePressed(me);}
+    @Override public void mouseDragged(MouseEvent me){gridPanel.mouseDragged(me);}
+    @Override public void mouseWheelMoved(MouseWheelEvent me){gridPanel.mouseWheelMoved(me);}
+    @Override public void mouseReleased(MouseEvent me){}
+    @Override public void mouseEntered(MouseEvent me){}
+    @Override public void mouseExited(MouseEvent me){}
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.Box.Filler filler;
     private javax.swing.JLabel gameModeLabel;
     private javax.swing.JPanel jPanel1;
+    private com.giuseppelamalfa.gameofliferemastered.ui.PlayerDisplayPanel playerDisplayPanel1;
+    private com.giuseppelamalfa.gameofliferemastered.ui.PlayerDisplayPanel playerDisplayPanel2;
+    private com.giuseppelamalfa.gameofliferemastered.ui.PlayerDisplayPanel playerDisplayPanel3;
+    private com.giuseppelamalfa.gameofliferemastered.ui.PlayerDisplayPanel playerDisplayPanel4;
+    private com.giuseppelamalfa.gameofliferemastered.ui.PlayerDisplayPanel playerDisplayPanel5;
+    private com.giuseppelamalfa.gameofliferemastered.ui.PlayerDisplayPanel playerDisplayPanel6;
+    private com.giuseppelamalfa.gameofliferemastered.ui.PlayerDisplayPanel playerDisplayPanel7;
+    private com.giuseppelamalfa.gameofliferemastered.ui.PlayerDisplayPanel playerDisplayPanel8;
     private javax.swing.JLabel turnCountLabel;
     // End of variables declaration//GEN-END:variables
 }

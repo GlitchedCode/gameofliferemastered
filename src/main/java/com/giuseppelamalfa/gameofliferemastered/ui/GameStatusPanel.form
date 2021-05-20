@@ -33,14 +33,31 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" alignment="1" attributes="0">
+          <Group type="102" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="1" attributes="0">
-                  <Component id="filler" max="32767" attributes="0"/>
-                  <Group type="102" attributes="0">
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="102" alignment="1" attributes="0">
                       <Component id="gameModeLabel" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace pref="136" max="32767" attributes="0"/>
+                      <EmptySpace max="32767" attributes="0"/>
                       <Component id="turnCountLabel" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <Group type="102" attributes="0">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="playerDisplayPanel1" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="playerDisplayPanel3" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="playerDisplayPanel4" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="playerDisplayPanel6" alignment="0" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                  </Group>
+                  <Group type="102" alignment="1" attributes="0">
+                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="playerDisplayPanel2" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="playerDisplayPanel5" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="playerDisplayPanel7" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="playerDisplayPanel8" alignment="1" min="-2" max="-2" attributes="0"/>
+                      </Group>
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
@@ -56,8 +73,22 @@
                   <Component id="gameModeLabel" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="filler" pref="357" max="32767" attributes="0"/>
+              <Component id="playerDisplayPanel1" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
+              <Component id="playerDisplayPanel2" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="playerDisplayPanel3" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="playerDisplayPanel4" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="playerDisplayPanel5" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="playerDisplayPanel6" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="playerDisplayPanel7" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="playerDisplayPanel8" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -85,15 +116,21 @@
         <Property name="text" type="java.lang.String" value="Sandbox"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.Box$Filler" name="filler">
-      <Properties>
-        <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-          <Dimension value="[32767, 0]"/>
-        </Property>
-      </Properties>
-      <AuxValues>
-        <AuxValue name="classDetails" type="java.lang.String" value="Box.Filler.VerticalStrut"/>
-      </AuxValues>
+    <Component class="com.giuseppelamalfa.gameofliferemastered.ui.PlayerDisplayPanel" name="playerDisplayPanel1">
+    </Component>
+    <Component class="com.giuseppelamalfa.gameofliferemastered.ui.PlayerDisplayPanel" name="playerDisplayPanel2">
+    </Component>
+    <Component class="com.giuseppelamalfa.gameofliferemastered.ui.PlayerDisplayPanel" name="playerDisplayPanel3">
+    </Component>
+    <Component class="com.giuseppelamalfa.gameofliferemastered.ui.PlayerDisplayPanel" name="playerDisplayPanel4">
+    </Component>
+    <Component class="com.giuseppelamalfa.gameofliferemastered.ui.PlayerDisplayPanel" name="playerDisplayPanel5">
+    </Component>
+    <Component class="com.giuseppelamalfa.gameofliferemastered.ui.PlayerDisplayPanel" name="playerDisplayPanel6">
+    </Component>
+    <Component class="com.giuseppelamalfa.gameofliferemastered.ui.PlayerDisplayPanel" name="playerDisplayPanel7">
+    </Component>
+    <Component class="com.giuseppelamalfa.gameofliferemastered.ui.PlayerDisplayPanel" name="playerDisplayPanel8">
     </Component>
   </SubComponents>
 </Form>

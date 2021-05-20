@@ -129,12 +129,13 @@ public class UnitPalette extends JPanel implements MouseListener
     }
     
     @SuppressWarnings("unchecked")
-    public UnitInterface getNewUnit() throws Exception{
+    public UnitInterface getNewUnit(int playerID) throws Exception{
         PaletteItem item = items.get(selectedIndex);
         if(!item.active | item.count == 0)
             return null;
         Class<UnitPalette> unitClass = item.getSpecies().getUnitClass();
-        UnitInterface ret = (UnitInterface) unitClass.getConstructors()[0].newInstance();
+        UnitInterface ret = (UnitInterface) unitClass
+                .getConstructor(Integer.class).newInstance(playerID);
         if(item.count < 0)
             item.count--;
         return ret;
