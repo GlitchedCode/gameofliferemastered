@@ -138,7 +138,7 @@ public class SimulationRemoteClient implements SimulationInterface {
                 synchronized(currentGrid) {
                     currentGrid = tmpGrid;
                     currentGrid.setPlayerIDCheckNextTurn();
-                    //currentGrid.addPlayer(localPlayerData);
+                    currentGrid.addPlayer(localPlayerData);
                     currentGrid.calculateScore();
                 }
                 panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
