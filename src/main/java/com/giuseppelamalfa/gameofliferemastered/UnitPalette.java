@@ -133,7 +133,7 @@ public class UnitPalette extends JPanel implements MouseListener
         PaletteItem item = items.get(selectedIndex);
         if(!item.active | item.count == 0)
             return null;
-        Class<UnitPalette> unitClass = item.getSpecies().getUnitClass();
+        Class<UnitInterface> unitClass = item.getSpecies().getUnitClass();
         UnitInterface ret = (UnitInterface) unitClass
                 .getConstructor(Integer.class).newInstance(playerID);
         if(item.count < 0)

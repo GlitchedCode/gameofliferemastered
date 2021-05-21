@@ -64,6 +64,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
         icon = new ImageIcon(resource);
         
         initComponents();
+        localGrid.initializeGridPanel(gridPanel);
         mainStatusLog = statusLog;
         
         if (!tileManager.isInitialized())
@@ -457,6 +458,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
                 hostGameButton.setEnabled(false);
                 playerNameField.setEditable(false);
 
+                client.initializeGridPanel(gridPanel);
                 gridPanel.setGrid(client);
             }
         }else{
@@ -494,7 +496,8 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
                 maxPlayerCount.setEditable(false);
                 joinGameButton.setEnabled(false);
                 playerNameField.setEditable(false);
-
+                
+                server.initializeGridPanel(gridPanel);
                 gridPanel.setGrid(server);
             }
         }else{

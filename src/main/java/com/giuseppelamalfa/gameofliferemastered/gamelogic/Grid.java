@@ -41,6 +41,7 @@ public class Grid implements Serializable, Cloneable
     
     private final HashMap<Integer, PlayerData> players = new HashMap<>();
     private ArrayList<PlayerData> orderedPlayers = new ArrayList<>(); // players ordered by their ranking
+    private boolean runPlayerIDCheck = false;
 
     /**
      * Constructor
@@ -204,6 +205,7 @@ public class Grid implements Serializable, Cloneable
         cleanupStep();
         correctProcessRegion();
         orderPlayersByScore();
+        runPlayerIDCheck = false;
         turn += 1;
 
         //System.out.println("Turn " + turn);
@@ -318,6 +320,9 @@ public class Grid implements Serializable, Cloneable
                 UnitInterface current = board.get(row, col);
                 if ( current == null )
                     continue;
+                if (runPlayerIDCheck)
+                    if(current.getPlayerID() != -1 & players.containsKey(current.getPlayerID()))
+                        setToPosition(row, col, null);
                 
                 UnitInterface[] adjacentUnits = getUnitsAdjacentToPosition(row, col);
                 //System.out.println("" + col + " " + row + " " + Arrays.toString(adjacentUnits));
@@ -390,7 +395,7 @@ public class Grid implements Serializable, Cloneable
         }
     }
    
-    public ArrayList<PlayerData> getOrderedPlayers(){ return new ArrayList<>(orderedPlayers); }
+    public ArrayList<PlayerData> getPlayerRankings(){ return new ArrayList<>(orderedPlayers); }
     
     private void orderPlayersByScore(){
         orderedPlayers =  new ArrayList<>(players.values());
@@ -421,5 +426,17 @@ public class Grid implements Serializable, Cloneable
             }
         players.remove(id);
         orderPlayersByScore();
+    }
+
+    public void setPlayerIDCheckNextTurn(){
+        runPlayerIDCheck = true;
+    }
+    
+    public PlayerData.TeamColor getPlayerColor(int ID){
+        try{
+            return players.get(ID).color;
+        }catch(Exception e){
+            return PlayerData.TeamColor.NONE;
+        }
     }
 }

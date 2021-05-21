@@ -5,9 +5,11 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation;
 import com.giuseppelamalfa.gameofliferemastered.GridPanel;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.requests.InvalidRequestException;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
 import java.io.IOException;
+import java.util.ArrayList;
 /**
  *
  * @author glitchedcode
@@ -18,6 +20,8 @@ public interface SimulationInterface {
     boolean         isRunning();
     boolean         isLocallyControlled();
     int             getLocalPlayerID();
+    PlayerData.TeamColor    getPlayerColor(int ID);
+    ArrayList<PlayerData>   getPlayerRankings();
     
     int             getRowCount();
     int             getColumnCount();

@@ -17,7 +17,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -77,7 +77,14 @@ public class SimulationRemoteClient implements SimulationInterface {
     @Override public boolean isStarted() { return isStarted; }
     @Override public boolean isRunning() { return isRunning; }
     @Override public boolean isLocallyControlled() { return false; }
-    @Override public int getLocalPlayerID() { return localPlayerData.ID; }
+    @Override public int getLocalPlayerID() { 
+        return localPlayerData.ID; 
+    }
+    @Override public PlayerData.TeamColor getPlayerColor(int ID){
+        return currentGrid.getPlayerColor(ID);
+    }
+    @Override public ArrayList<PlayerData> getPlayerRankings() { return currentGrid.getPlayerRankings(); }
+
     @Override public int getRowCount() { return rowCount; }
     @Override public int getColumnCount() { return columnCount; }
     @Override public int getSectorSideLength() { return currentGrid.getSectorSideLength(); }
@@ -96,9 +103,11 @@ public class SimulationRemoteClient implements SimulationInterface {
     
     @Override
     public synchronized void computeNextTurn() throws Exception {
-        currentGrid.computeNextTurn(); 
+        currentGrid.computeNextTurn();
+        panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
     }
     
+    @Override
     public void setRunning(boolean val) {
         if(!val){
             try {
@@ -127,22 +136,33 @@ public class SimulationRemoteClient implements SimulationInterface {
                 Grid tmpGrid = (Grid)syncGrid.clone();
                 synchronized(currentGrid) {
                     currentGrid = tmpGrid;
+                    currentGrid.setPlayerIDCheckNextTurn();
+                    currentGrid.addPlayer(localPlayerData);
                 }
                 break;
             case UPDATE_PLAYER_DATA:
                 UpdatePlayerDataRequest updateRequest = (UpdatePlayerDataRequest)request;
                 PlayerData playerData = updateRequest.playerData;
+                
+                if(updateRequest.updateLocal)
+                {
+                    if(playerData.color != PlayerData.TeamColor.NONE)
+                        localPlayerData.color = playerData.color;
+                    if(playerData.ID != -1)
+                    {
+                        currentGrid.removePlayer(localPlayerData.ID);
+                        localPlayerData.ID = playerData.ID;
+                        currentGrid.addPlayer(localPlayerData);
+                    }
+                } 
                 if(playerData.ID != localPlayerData.ID) {
                     if(updateRequest.connected) 
                         currentGrid.addPlayer(playerData);
                     else
                         currentGrid.removePlayer(playerData.ID);
                 }
-                if(updateRequest.updateLocal)
-                {
-                    if(playerData.color != PlayerData.TeamColor.NONE)
-                        localPlayerData.color = playerData.color;
-                } 
+                
+                panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
                 break;
             case DISCONNECT:
                 String msg = ((DisconnectRequest)request).message;

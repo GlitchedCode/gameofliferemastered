@@ -29,7 +29,7 @@ public class Cell extends Unit {
         reproductionSelector = selector;
     }
     
-    public Cell(int playerID)
+    public Cell(Integer playerID)
     {
         super(playerID);
         species = Species.CELL;

@@ -158,34 +158,27 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
         int rotation = me.getWheelRotation();
         setSideLength(sideLength - (rotation * 4));
     }
+    
     // don't need these
-    @Override
-    public void mouseReleased(MouseEvent me) {
-    }
-    @Override
-    public void mouseEntered(MouseEvent me){}
-    @Override
-    public void mouseExited(MouseEvent me)    {    }
+    @Override public void mouseReleased(MouseEvent me){}
+    @Override public void mouseEntered(MouseEvent me){}
+    @Override public void mouseExited(MouseEvent me){}
     
     /*
     * KEYBOARD EVENT LOGIC
      */
-    @Override
-    public void keyPressed(KeyEvent e)    {    }
+    @Override public void keyPressed(KeyEvent e){}
+    @Override public void keyTyped(KeyEvent e){}
 
     @Override
-    public void keyTyped(KeyEvent e)    {    }
-
-    @Override
-    public void keyReleased(KeyEvent e)    {
+    public void keyReleased(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_SPACE)
         {
             simulation.setRunning(!simulation.isRunning());
         }
     }
     
-    private void setUnit(Point point)
-    {
+    private void setUnit(Point point) {
         point.x += xoffset;
         point.y += yoffset;
 
@@ -200,12 +193,12 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
         
     }
 
-    public void setGrid(SimulationInterface grid, boolean resetOrigin)
-    {
+    public void setGrid(SimulationInterface grid, boolean resetOrigin) {
         this.simulation = grid;
         setSideLength(sideLength);
         
         gameStatusPanel.setTurnCount(grid.getCurrentTurn());
+        gameStatusPanel.setPlayerPanels(simulation.getPlayerRankings());
 
         Dimension size = getSize();
         Dimension gridSize = getGridSize();
@@ -214,19 +207,11 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
                     (gridSize.height - size.height) / 2));
     }
     
-    public void setGrid(SimulationInterface grid)
-    {
-        this.simulation = grid;
-        setSideLength(sideLength);
-
-        Dimension size = getSize();
-        Dimension gridSize = getGridSize();
-        setScreenOrigin(new Point((gridSize.width - size.width) / 2,
-                (gridSize.height - size.height) / 2));
+    public void setGrid(SimulationInterface grid) {
+        setGrid(grid, false);
     }
 
-    public void setScreenOrigin(Point newOrigin)
-    {
+    public void setScreenOrigin(Point newOrigin) {
         screenOrigin = newOrigin;
         Dimension size = getSize();
         Dimension gridSize = getGridSize();
@@ -241,20 +226,17 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
         startColumn = screenOrigin.x / lineSpacing;
     }
 
-    public void resetScreenOrigin()
-    {
+    public void resetScreenOrigin() {
         setScreenOrigin(screenOrigin);
     }
 
     @Override
-    public void repaint()
-    {
+    public void repaint() {
         super.repaint();
     }
     
     @Override
-    public void paintComponent(Graphics g)
-    {
+    public void paintComponent(Graphics g) {
         if (simulation == null)
             return;
         
@@ -326,17 +308,18 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
         }
     }
     
-    public void drawUnit(Graphics2D g, AffineTransform xform, ImageObserver obs, UnitInterface unit)
-    {
+    public void drawUnit(Graphics2D g, AffineTransform xform, ImageObserver obs, UnitInterface unit) {
         Image img = tileManager.getImage(unit.getSpecies().getTextureCode());
+        g.setColor(simulation.getPlayerColor(unit.getPlayerID()).getMainAWTColor());
+        g.fillRect((int)xform.getTranslateX(), (int)xform.getTranslateY(), 
+                (int)xform.getScaleX() * 8, (int)xform.getScaleY() * 8);
         g.drawImage(img, xform, obs);
     }
 
     /**
      * @return side length for units
      */
-    public Integer getSideLength()
-    {
+    public Integer getSideLength() {
         return sideLength;
     }
 
@@ -345,8 +328,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
      *
      * @param value
      */
-    public void setSideLength(Integer value)
-    {
+    public void setSideLength(Integer value) {
         sideLength = Integer.min(64, Integer.max(8, value));
         lineSpacing = sideLength + 1;
         if (simulation != null)
@@ -360,9 +342,12 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
         gridSize.height = (sideLength + 1) * simulation.getRowCount() + 1;
         return gridSize;
     }
+    
+    public GameStatusPanel getGameStatusPanel() {
+        return gameStatusPanel;
+    }
 
-    public void init(UnitPalette palette)
-    {
+    public void init(UnitPalette palette) {
         if (initialized) return;
         
         addMouseListener(this);

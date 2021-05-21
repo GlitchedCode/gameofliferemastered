@@ -73,25 +73,31 @@ public class SimulationServer implements SimulationInterface{
     Thread          acceptConnectionThread;
     
     boolean         remoteInstance = false;
-    HashMap<Integer, ClientData>    connectedClients = new HashMap<>();
+    static final ArrayList<PlayerData>  offlineRanking = new ArrayList<>();
+    HashMap<Integer, ClientData>        connectedClients = new HashMap<>();
     ServerSocket    serverSocket;
     String          serverIP;
     int             portNumber;    
     
     ArrayList<PlayerData.TeamColor>   availableColors = new ArrayList<PlayerData.TeamColor>();
-    PlayerData                      localPlayerData;
+    PlayerData      localPlayerData;
+    GridPanel       panel;
 
   
     public SimulationServer(String playerName, int portNumber, int playerCount, 
             int rowCount, int columnCount) throws Exception {
+        initializeRemoteServer(portNumber, playerCount, rowCount, columnCount); 
         localPlayerData = new PlayerData(playerName, extractRandomColor());
         localPlayerData.ID = 0;
         remoteInstance = true;
-        initializeRemoteServer(portNumber, playerCount, rowCount, columnCount);        
+        currentGrid.addPlayer(localPlayerData);
     }
     
     public SimulationServer(int rowCount, int columnCount) throws Exception {
         currentGrid = new Grid(rowCount, columnCount);
+        localPlayerData = new PlayerData();
+        localPlayerData.ID = 0;
+        currentGrid.addPlayer(localPlayerData);
         isStarted = true;
     }
     
@@ -146,7 +152,7 @@ public class SimulationServer implements SimulationInterface{
                                 ObjectInputStream inputStream = new ObjectInputStream(input);
                                 
                                 PlayerData tmp = new PlayerData(clientData.playerData);
-                                
+                                currentGrid.addPlayer(client.playerData);
                                 outputStream.writeObject(new UpdatePlayerDataRequest(tmp, true, true));
                                 outputStream.writeObject(new SyncGridRequest(currentGrid));
                                 outputStream.writeObject(new PauseRequest(isRunning));
@@ -159,7 +165,12 @@ public class SimulationServer implements SimulationInterface{
                             catch (InvalidRequestException | IOException | ClassNotFoundException e){
                                 ApplicationFrame.writeToStatusLog(e.toString());
                             }
+                            
+                            sendToAll(new UpdatePlayerDataRequest(clientData.playerData, false));
+                            
+                            currentGrid.removePlayer(clientData.playerData.ID);
                             connectedClients.remove(clientData.playerData.ID);
+                            panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
                             try{
                                 conn.close();
                             }catch(IOException e) {}
@@ -192,26 +203,28 @@ public class SimulationServer implements SimulationInterface{
         return ret;        
     }
     
-    @Override
-    public boolean          isStarted() { return isStarted; }
-    @Override
-    public boolean          isRunning() { return isRunning; }
-    @Override
-    public boolean          isLocallyControlled() { return true; }
-    @Override
-    public int              getLocalPlayerID() { return localPlayerData.ID; }
+    @Override public boolean isStarted() { return isStarted; }
+    @Override public boolean isRunning() { return isRunning; }
+    @Override public boolean isLocallyControlled() { return true; }
+    @Override public int getLocalPlayerID() { return localPlayerData.ID; }
+    @Override public PlayerData.TeamColor getPlayerColor(int ID){
+        return currentGrid.getPlayerColor(ID);
+    }
+    @Override public ArrayList<PlayerData> getPlayerRankings() { 
+        if(remoteInstance)
+            return currentGrid.getPlayerRankings(); 
+        else 
+            return offlineRanking;
+    }
+
     
-    @Override
-    public int              getRowCount() { return currentGrid.getRowCount(); }
-    @Override
-    public int              getColumnCount() { return currentGrid.getColumnCount(); }
-    @Override
-    public int              getSectorSideLength() { return currentGrid.getSectorSideLength(); }
-    @Override
-    public int              getCurrentTurn() { return currentGrid.getCurrentTurn(); }
+    @Override public int getRowCount() { return currentGrid.getRowCount(); }
+    @Override public int getColumnCount() { return currentGrid.getColumnCount(); }
+    @Override public int getSectorSideLength() { return currentGrid.getSectorSideLength(); }
+    @Override public int getCurrentTurn() { return currentGrid.getCurrentTurn(); }
     
-    @Override
-    public UnitInterface    getUnit(int row, int col) { return currentGrid.getUnit(row, col); }
+    @Override public UnitInterface getUnit(int row, int col) { return currentGrid.getUnit(row, col); }
+    
     @Override
     public void             setUnit(int row, int col, UnitInterface unit) {
         SetUnitRequest req = new SetUnitRequest(row, col, unit);
@@ -233,6 +246,7 @@ public class SimulationServer implements SimulationInterface{
             if(currentGrid.getCurrentTurn() % gridSyncTurnCount == 0 | !isRunning)
                 synchronize();
         }
+        panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
     }
     
     @Override
@@ -259,8 +273,27 @@ public class SimulationServer implements SimulationInterface{
         }
         
     }
-    @Override
-    public void             initializeGridPanel(GridPanel panel) {}
+    
+    public void sendToAll(Request req){
+        for(ClientData client : connectedClients.values())
+            try {
+                client.stream.writeObject(req);
+            } catch (IOException ex) {
+                Logger.getLogger(SimulationServer.class.getName()).log(Level.SEVERE, null, ex);
+            }
+    }
+    
+    public void sendToAll(Request req, int excludeID){
+        for(ClientData client : connectedClients.values())
+            if(client.playerData.ID != excludeID)
+                try {
+                    client.stream.writeObject(req);
+                } catch (IOException ex) {
+                    Logger.getLogger(SimulationServer.class.getName()).log(Level.SEVERE, null, ex);
+                }
+    }
+    
+    @Override public void initializeGridPanel(GridPanel panel) { this.panel = panel; }
     
     @Override
     public void             setRunning(boolean val) {
@@ -294,9 +327,7 @@ public class SimulationServer implements SimulationInterface{
                 if(!updateRequest.connected){
                     currentGrid.removePlayer(playerData.ID);
                     UpdatePlayerDataRequest disconnectRequest = new UpdatePlayerDataRequest(playerData, false);
-                    for(ClientData data : connectedClients.values())
-                        if(data.playerData.ID != playerData.ID)
-                            connectedClients.get(data.playerData.ID).stream.writeObject(disconnectRequest);
+                    sendToAll(disconnectRequest, playerData.ID);
                 } 
                 else if(updateRequest.updateLocal){
                     if(playerData.playerName != null)
@@ -317,10 +348,9 @@ public class SimulationServer implements SimulationInterface{
                     currentGrid.addPlayer(clientData.playerData);
                     UpdatePlayerDataRequest clientUpdateRequest = 
                             new UpdatePlayerDataRequest(clientData.playerData, true);
-                    for(ClientData data : connectedClients.values())
-                        if(data.playerData.ID != playerData.ID)
-                            connectedClients.get(data.playerData.ID).stream.writeObject(clientUpdateRequest);
+                    sendToAll(clientUpdateRequest, playerData.ID);
                 }
+                panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
                 break;
             case DISCONNECT:
                 if (clientData == null) break;

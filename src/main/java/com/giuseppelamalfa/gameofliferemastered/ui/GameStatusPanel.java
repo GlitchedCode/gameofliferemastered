@@ -8,10 +8,7 @@ package com.giuseppelamalfa.gameofliferemastered.ui;
 import com.giuseppelamalfa.gameofliferemastered.GridPanel;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationInterface;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -159,10 +156,6 @@ public class GameStatusPanel extends javax.swing.JPanel implements MouseListener
     
     public void setTurnCount(int val){
         turnCountLabel.setText("Turn: " + val);
-    }
-    
-    public void update(SimulationInterface simulation){
-        
     }
     
     public void setGridPanel(GridPanel panel)

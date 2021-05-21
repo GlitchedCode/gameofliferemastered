@@ -20,7 +20,7 @@ public class Snake extends Unit
         init();
     }
     
-    public Snake(int playerID)
+    public Snake(Integer playerID)
     {
         super(playerID);
         init();
