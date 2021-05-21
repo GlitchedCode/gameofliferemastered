@@ -332,7 +332,6 @@ public class Grid implements Serializable, Cloneable
                 // process more units
                 if ( current.getNextTurnState() != UnitInterface.State.DEAD )
                 {
-                    players.get(current.getPlayerID()).score++;
                     moveProcessBoundaryToInclude(row, col);
                     aliveNextTurn = true;
                 }
@@ -387,9 +386,9 @@ public class Grid implements Serializable, Cloneable
                 {
                     current.update();
                     if ( current.getCurrentState() == UnitInterface.State.DEAD )
-                    {
                         board.remove(row, col);
-                    }
+                    else
+                        players.get(current.getPlayerID()).score++;
                 }
             }
         }
