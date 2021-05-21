@@ -17,7 +17,6 @@ import java.util.Set;
  */
 public abstract interface UnitInterface
 {
-    
     enum State implements Serializable
     {
         INVALID(null),

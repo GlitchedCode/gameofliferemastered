@@ -170,9 +170,6 @@ public class Grid implements Serializable, Cloneable
     public synchronized void computeNextTurn() throws Exception
     {
         unitFoundThisTurn = false;
-
-        for(PlayerData data : players.values())
-            data.score = 0;
         
         for (int sectorRow = 0; sectorRow < sectorRowCount; sectorRow++)
         {
@@ -259,14 +256,17 @@ public class Grid implements Serializable, Cloneable
      */
     protected final void setToPosition(Integer row, Integer col, UnitInterface unit)
     {
-        if ( board.get(row, col) == null )
+        UnitInterface previous = board.get(row, col);
+        if ( previous == null )
         {
+            players.get(unit.getPlayerID()).score++;
             board.put(row, col, unit);
             moveProcessBoundaryToInclude(row, col);
             sectorFlags.put(row / SECTOR_SIDE_LENGTH, col / SECTOR_SIDE_LENGTH, true);
         }
         else
         {
+            players.get(previous.getPlayerID()).score--;
             board.remove(row, col);
         }
     }
@@ -321,8 +321,11 @@ public class Grid implements Serializable, Cloneable
                 if ( current == null )
                     continue;
                 if (runPlayerIDCheck)
-                    if(current.getPlayerID() != -1 & players.containsKey(current.getPlayerID()))
+                    if(current.getPlayerID() != -1 & !players.containsKey(current.getPlayerID()))
+                    {    
                         setToPosition(row, col, null);
+                        continue;
+                    }
                 
                 UnitInterface[] adjacentUnits = getUnitsAdjacentToPosition(row, col);
                 //System.out.println("" + col + " " + row + " " + Arrays.toString(adjacentUnits));
@@ -351,7 +354,7 @@ public class Grid implements Serializable, Cloneable
                 UnitInterface unit = board.get(row, col);
                 if ( unit != null )
                 {
-                    if ( unit.getCurrentState() == UnitInterface.State.ALIVE )
+                    if ( unit.getCurrentState() != UnitInterface.State.DEAD )
                     {
                         continue;
                     }
@@ -377,6 +380,9 @@ public class Grid implements Serializable, Cloneable
 
     private void cleanupStep()
     {
+        for(PlayerData data : players.values())
+            data.score = 0;
+
         for (int row = topLeftActive.y; row <= bottomRightActive.y; row++)
         {
             for (int col = topLeftActive.x; col <= bottomRightActive.x; col++)
@@ -394,6 +400,22 @@ public class Grid implements Serializable, Cloneable
         }
     }
    
+    public void calculateScore(){
+        for(PlayerData data : players.values())
+            data.score = 0;
+
+        for (int row = topLeftActive.y; row <= bottomRightActive.y; row++)
+            for (int col = topLeftActive.x; col <= bottomRightActive.x; col++)
+            {
+                UnitInterface current = board.get(row, col);
+                if ( current != null )
+                {
+                    players.get(current.getPlayerID()).score++;
+                }
+            }
+        orderPlayersByScore();
+    }
+    
     public ArrayList<PlayerData> getPlayerRankings(){
         return new ArrayList<>(orderedPlayers); 
     }

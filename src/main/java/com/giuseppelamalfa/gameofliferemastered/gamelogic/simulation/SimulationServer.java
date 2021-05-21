@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-class ClientData{
+class ClientData {
     public final Socket socket;
     public final ObjectOutputStream stream;
     public final PlayerData playerData = new PlayerData();
@@ -157,6 +157,13 @@ public class SimulationServer implements SimulationInterface{
                                 outputStream.writeObject(new SyncGridRequest(currentGrid));
                                 outputStream.writeObject(new PauseRequest(isRunning));
                                 
+                                for(ClientData data : connectedClients.values())
+                                    if(data.playerData.ID != clientID)
+                                    {
+                                        UpdatePlayerDataRequest req = new UpdatePlayerDataRequest(data.playerData, true);
+                                        sendToAll(req);
+                                    }
+                                
                                 while(true)
                                     handleRequest(inputStream.readObject(), clientData.playerData.ID);
                             }
@@ -235,6 +242,7 @@ public class SimulationServer implements SimulationInterface{
         } catch (InvalidRequestException ex) {
             Logger.getLogger(SimulationServer.class.getName()).log(Level.SEVERE, null, ex);
         }
+        panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
     }
     
     @Override
@@ -365,6 +373,7 @@ public class SimulationServer implements SimulationInterface{
                     if(key != clientID | clientID < 0)
                         connectedClients.get(key).stream.writeObject(requestObject);
                 currentGrid.setUnit(setUnit.row, setUnit.col, setUnit.unit);
+                panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
                 break;
         }
     }

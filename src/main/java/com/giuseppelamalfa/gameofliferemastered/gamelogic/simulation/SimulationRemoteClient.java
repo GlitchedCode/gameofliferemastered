@@ -99,6 +99,7 @@ public class SimulationRemoteClient implements SimulationInterface {
             Logger.getLogger(SimulationRemoteClient.class.getName()).log(Level.SEVERE, null, ex);
         }
         currentGrid.setUnit(row, col, unit); 
+        panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
     }
     
     @Override
@@ -137,8 +138,10 @@ public class SimulationRemoteClient implements SimulationInterface {
                 synchronized(currentGrid) {
                     currentGrid = tmpGrid;
                     currentGrid.setPlayerIDCheckNextTurn();
-                    currentGrid.addPlayer(localPlayerData);
+                    //currentGrid.addPlayer(localPlayerData);
+                    currentGrid.calculateScore();
                 }
+                panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
                 break;
             case UPDATE_PLAYER_DATA:
                 UpdatePlayerDataRequest updateRequest = (UpdatePlayerDataRequest)request;
@@ -181,6 +184,7 @@ public class SimulationRemoteClient implements SimulationInterface {
             case SET_UNIT:
                 SetUnitRequest setUnit = (SetUnitRequest)request;
                 currentGrid.setUnit(setUnit.row, setUnit.col, setUnit.unit);
+                panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
                 break;
         }
     }

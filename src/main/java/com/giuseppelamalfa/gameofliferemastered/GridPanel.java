@@ -363,7 +363,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
             if(simulation == null) return;
             if(!simulation.isRunning()) return;
             try{
-                simulation.computeNextTurn();
+                 simulation.computeNextTurn();
             } catch(Exception e) {e.printStackTrace();}
         }, 0, ApplicationFrame.BOARD_UPDATE_MS);
 
