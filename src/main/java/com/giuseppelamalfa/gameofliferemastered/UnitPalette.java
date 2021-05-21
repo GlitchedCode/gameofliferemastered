@@ -74,8 +74,10 @@ public class UnitPalette extends JPanel implements MouseListener
         {
             int xoff = me.getPoint().x - getLocation().x;
             int newIndex = xoff / (ICON_SIDE_LENGTH + items.size());
-            if(items.get(newIndex).active)
-                selectedIndex = newIndex;
+            try{
+                if(items.get(newIndex).active)
+                    selectedIndex = newIndex;
+            }catch(Exception e){}
             repaint();
         }
     }
