@@ -394,17 +394,17 @@ public class Grid implements Serializable, Cloneable
         }
     }
    
-    public ArrayList<PlayerData> getPlayerRankings(){ return new ArrayList<>(orderedPlayers); }
+    public ArrayList<PlayerData> getPlayerRankings(){
+        return new ArrayList<>(orderedPlayers); 
+    }
     
     private void orderPlayersByScore(){
         orderedPlayers =  new ArrayList<>(players.values());
-        orderedPlayers.sort(new Comparator<PlayerData> () {
-            public int compare(PlayerData one, PlayerData two){
-                int val = two.score - one.score;
-                if(val == 0)
-                    val = one.ID - two.ID;
-                return val;
-            }
+        orderedPlayers.sort((PlayerData one, PlayerData two) -> {
+            int val = two.score - one.score;
+            if(val == 0)
+                val = one.ID - two.ID;
+            return val;
         });
     }
     

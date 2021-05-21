@@ -161,8 +161,11 @@ public class SimulationRemoteClient implements SimulationInterface {
                     else
                         currentGrid.removePlayer(playerData.ID);
                 }
-                
-                panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
+                try{
+                    panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
+                }catch(Exception e){
+                    // IDK DUDE XDDDDDDDDDD
+                }
                 break;
             case DISCONNECT:
                 String msg = ((DisconnectRequest)request).message;
