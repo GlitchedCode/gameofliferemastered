@@ -10,7 +10,6 @@ import com.giuseppelamalfa.gameofliferemastered.utils.*;
 import java.awt.Point;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 
 /**
@@ -32,10 +31,10 @@ public class Grid implements Serializable, Cloneable
     private Integer sectorColumnCount;
 
     private boolean unitFoundThisTurn = false;
-    private final Point topLeftActive;
-    private final Point bottomRightActive;
-    private final Point topLeftProcessed;
-    private final Point bottomRightProcessed;
+    private Point topLeftActive;
+    private Point bottomRightActive;
+    private Point topLeftProcessed;
+    private Point bottomRightProcessed;
 
     private final DeadUnit deadUnit;
     
@@ -74,6 +73,12 @@ public class Grid implements Serializable, Cloneable
             Grid ret = (Grid) super.clone();
             ret.board = (TwoDimensionalContainer<UnitInterface>)board.clone();
             ret.sectorFlags = (TwoDimensionalContainer<Boolean>)sectorFlags.clone();
+            
+            ret.topLeftActive = new Point(0, 0);
+            ret.bottomRightActive = new Point(ret.columnCount, ret.rowCount);
+
+            ret.topLeftProcessed = new Point(ret.topLeftActive);
+            ret.bottomRightProcessed = new Point(ret.bottomRightActive);
             return ret;
         } catch (CloneNotSupportedException e) {
             System.out.println("com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid.clone() failed idk");

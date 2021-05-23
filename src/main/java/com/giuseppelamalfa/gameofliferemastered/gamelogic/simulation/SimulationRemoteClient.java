@@ -76,7 +76,7 @@ public class SimulationRemoteClient implements SimulationInterface {
     
     @Override public boolean isStarted() { return isStarted; }
     @Override public boolean isRunning() { return isRunning; }
-    @Override public boolean isLocallyControlled() { return false; }
+    @Override public boolean isLocallyControlled() { return true; }
     @Override public int getLocalPlayerID() { 
         return localPlayerData.ID; 
     }
@@ -98,7 +98,8 @@ public class SimulationRemoteClient implements SimulationInterface {
         } catch (IOException ex) {
             Logger.getLogger(SimulationRemoteClient.class.getName()).log(Level.SEVERE, null, ex);
         }
-        currentGrid.setUnit(row, col, unit); 
+        
+        currentGrid.setUnit(row, col, unit);
         panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
     }
     
@@ -110,9 +111,11 @@ public class SimulationRemoteClient implements SimulationInterface {
     
     @Override
     public void setRunning(boolean val) {
-        if(!val){
+        if(isLocallyControlled())
+            setRunning(val);
+        else{
             try {
-                outputStream.writeObject(new PauseRequest(true));
+                outputStream.writeObject(new PauseRequest(val));
             } catch (IOException ex) {
                 Logger.getLogger(SimulationRemoteClient.class.getName()).log(Level.SEVERE, null, ex);
             }

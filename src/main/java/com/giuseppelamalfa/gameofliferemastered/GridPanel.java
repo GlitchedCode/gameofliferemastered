@@ -312,7 +312,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
         Image img = tileManager.getImage(unit.getSpecies().getTextureCode());
         g.setColor(simulation.getPlayerColor(unit.getPlayerID()).getMainAWTColor());
         g.fillRect((int)xform.getTranslateX(), (int)xform.getTranslateY(), 
-                (int)xform.getScaleX() * 8, (int)xform.getScaleY() * 8);
+                (int)(xform.getScaleX() * 8), (int)(xform.getScaleY() * 8));
         g.drawImage(img, xform, obs);
     }
 
