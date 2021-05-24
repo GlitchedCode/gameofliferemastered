@@ -227,11 +227,11 @@ public class SimulationServer implements SimulationInterface{
     
     @Override public int getRowCount() { return currentGrid.getRowCount(); }
     @Override public int getColumnCount() { return currentGrid.getColumnCount(); }
-    @Override public int getSectorSideLength() { return currentGrid.getSectorSideLength(); }
+    @Override public int getSectorSideLength() { return currentGrid.SECTOR_SIDE_LENGTH; }
     @Override public int getCurrentTurn() { return currentGrid.getCurrentTurn(); }
     
     @Override public UnitInterface getUnit(int row, int col) { return currentGrid.getUnit(row, col); }
-    
+    @Override public void removeUnit(int row, int col) { currentGrid.removeUnit(row, col); }
     @Override
     public void             setUnit(int row, int col, UnitInterface unit) {
         SetUnitRequest req = new SetUnitRequest(row, col, unit);
@@ -261,7 +261,12 @@ public class SimulationServer implements SimulationInterface{
     public synchronized void synchronize() {
         if(syncGrid.equals(currentGrid)) return;
         
-        syncGrid = (Grid)currentGrid.clone();
+        try {
+            syncGrid = (Grid)currentGrid.clone();
+        } catch (CloneNotSupportedException ex) {
+            Logger.getLogger(SimulationServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
         SyncGridRequest syncRequest = new SyncGridRequest(syncGrid);
         try{
             for(Integer key : connectedClients.keySet())
@@ -269,11 +274,14 @@ public class SimulationServer implements SimulationInterface{
         }catch(IOException e) {
             e.printStackTrace();
         }
-
     }
     
     public synchronized void synchronize(ObjectOutputStream output) {
-        syncGrid = (Grid)currentGrid.clone();
+        try {
+            syncGrid = (Grid)currentGrid.clone();
+        } catch (CloneNotSupportedException ex) {
+            Logger.getLogger(SimulationServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
         try{
             output.writeObject(new SyncGridRequest(syncGrid));
         }catch(Exception e){

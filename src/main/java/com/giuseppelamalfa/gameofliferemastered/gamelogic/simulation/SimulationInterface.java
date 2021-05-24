@@ -30,6 +30,7 @@ public interface SimulationInterface {
     int             getCurrentTurn();
     
     UnitInterface   getUnit(int row, int col);
+    void            removeUnit(int row, int col);
     void            setUnit(int row, int col, UnitInterface unit);
     
     void            computeNextTurn() throws Exception;

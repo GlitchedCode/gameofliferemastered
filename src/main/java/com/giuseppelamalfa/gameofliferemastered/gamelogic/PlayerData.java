@@ -14,7 +14,7 @@ import java.io.Serializable;
  */
 public class PlayerData implements Serializable {
     
-    public enum TeamColor implements Serializable{
+    public enum TeamColor implements Serializable {
         NONE(new Color(0,0,0,0), new Color(255,255,255)),
         YELLOW(new Color(255,255,108), new Color(0,0,0)),
         ORANGE(new Color(252,170,103), new Color(0,0,0)),
@@ -35,7 +35,6 @@ public class PlayerData implements Serializable {
         
         public Color getMainAWTColor() { return color; }
         public Color getTextAWTColor() { return textColor; }
-        
     }
     
     public int ID = -1;

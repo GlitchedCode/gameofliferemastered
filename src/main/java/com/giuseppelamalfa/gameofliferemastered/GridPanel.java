@@ -186,7 +186,10 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
         int col = point.x / lineSpacing + startColumn;
         
         try {
-            simulation.setUnit(row, col, palette.getNewUnit(simulation.getLocalPlayerID()));
+            if(simulation.getUnit(row, col) != null)
+                simulation.removeUnit(row,col);
+            else
+                simulation.setUnit(row, col, palette.getNewUnit(simulation.getLocalPlayerID()));
         } catch (Exception ex) {
             Logger.getLogger(GridPanel.class.getName()).log(Level.SEVERE, null, ex);
         }

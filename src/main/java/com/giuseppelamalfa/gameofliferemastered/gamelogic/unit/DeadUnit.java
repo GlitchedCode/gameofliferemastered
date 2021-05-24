@@ -167,36 +167,23 @@ public class DeadUnit implements UnitInterface, Serializable, Cloneable
         return false;
     }
     
-    // overrides
+    // unused overrides
 
-    @Override
-    public int                      getPlayerID() { return -1; }
-    @Override
-    public boolean                  isCompetitive() { return false; }
-    @Override
-    public void                     setCompetitive(boolean val) {}
-    @Override
-    public boolean              reproduce(Integer a) {return false;}
-    @Override
-    public boolean              attack(Integer a) {return false;}
-    @Override
-    public void                 independentAction() {}
-    @Override
-    public State                getNextTurnState() {return State.INVALID; }
-    @Override
-    public State                getCurrentState() { return State.INVALID; }
-    @Override
-    public Species              getSpecies() { return Species.INVALID; }
-    @Override
-    public Set<Species>         getFriendlySpecies() { return new HashSet<>(); }
-    @Override
-    public Set<Species>         getHostileSpecies() { return new HashSet<>(); }
-    @Override
-    public RuleInterface<Integer>    getReproductionSelector() { return null; }
-    @Override
-    public Integer              getHealth() { return 0; }
-    @Override
-    public void                 incrementHealth(int increment) { }
+    @Override public int getPlayerID() { return -1; }
+    @Override public boolean isCompetitive() { return false; }
+    @Override public void setCompetitive(boolean val) {}
+    @Override public void kill(){}
+    @Override public boolean reproduce(Integer a) {return false;}
+    @Override public boolean attack(Integer a) {return false;}
+    @Override public void independentAction() {}
+    @Override public State getNextTurnState() {return State.INVALID; }
+    @Override public State getCurrentState() { return State.INVALID; }
+    @Override public Species getSpecies() { return Species.INVALID; }
+    @Override public Set<Species> getFriendlySpecies() { return new HashSet<>(); }
+    @Override public Set<Species> getHostileSpecies() { return new HashSet<>(); }
+    @Override public RuleInterface<Integer> getReproductionSelector() { return null; }
+    @Override public Integer getHealth() { return 0; }
+    @Override public void incrementHealth(int increment) { }
 
     @Override
     public Object clone() {

@@ -37,34 +37,29 @@ public class Unit implements UnitInterface, Serializable, Cloneable
     private int playerID;
     private boolean competitive = false;
 
-    protected Unit(){
+    protected Unit() {
         playerID = 0;
         friendlySpecies = new HashSet<>();
         hostileSpecies = new HashSet<>();
     }
     
-    protected Unit(int playerID)
-    {
+    protected Unit(int playerID) {
         this.playerID = playerID;
         
         friendlySpecies = new HashSet<>();
         hostileSpecies = new HashSet<>();
     }
 
-    @Override
-    public final int getPlayerID() { return playerID; }
-    @Override
-    public final boolean isCompetitive() { return competitive; }
-    @Override
-    public final void setCompetitive(boolean val) { competitive = val; }
+    @Override public final int getPlayerID() { return playerID; }
+    @Override public final boolean isCompetitive() { return competitive; }
+    @Override public final void setCompetitive(boolean val) { competitive = val; }
     
     /**
      * Intermediary function to compute the unit's state relative to the board
      *
      * @param adjacentUnits array of units adjacent to this unit
      */
-    protected void boardStep(UnitInterface[] adjacentUnits)
-    {
+    protected void boardStep(UnitInterface[] adjacentUnits) {
         int hostileCount = 0;
         int friendlyCount = 0;
         int healthIncrement = 0;
@@ -117,8 +112,7 @@ public class Unit implements UnitInterface, Serializable, Cloneable
         }
     }
 
-    protected void endStep()
-    {
+    protected void endStep() {
         if ( !healthChanged ) // rule #4: inactivity
         {
             independentAction();
@@ -140,8 +134,7 @@ public class Unit implements UnitInterface, Serializable, Cloneable
      * @param adjacentUnits
      */
     @Override
-    public final void computeNextTurn(UnitInterface[] adjacentUnits)
-    {
+    public final void computeNextTurn(UnitInterface[] adjacentUnits) {
         boardStep(adjacentUnits);
         endStep();
     }
@@ -150,10 +143,8 @@ public class Unit implements UnitInterface, Serializable, Cloneable
      * Updates the unit's status to the next turn
      */
     @Override
-    public void update()
-    {
-        if ( currentState != nextTurnState )
-        {
+    public void update() {
+        if ( currentState != nextTurnState ) {
             currentState.exit(this);
             currentState = nextTurnState;
             currentState.enter(this);
@@ -163,8 +154,13 @@ public class Unit implements UnitInterface, Serializable, Cloneable
     }
 
     @Override
-    public boolean isAlive()
-    {
+    public void kill() {
+        currentState = State.DEAD;
+        nextTurnState = State.DEAD;
+    }
+    
+    @Override
+    public boolean isAlive() {
         return currentState != State.DEAD & currentState != State.INVALID;
     }
 
@@ -176,8 +172,7 @@ public class Unit implements UnitInterface, Serializable, Cloneable
      * @return
      */
     @Override
-    public boolean reproduce(Integer adjacencyPostition)
-    {
+    public boolean reproduce(Integer adjacencyPostition) {
         return currentState.reproductionModifier(isAlive(), adjacencyPostition);
     }
 
@@ -189,8 +184,7 @@ public class Unit implements UnitInterface, Serializable, Cloneable
      * @return
      */
     @Override
-    public boolean attack(Integer adjacencyPosition)
-    {
+    public boolean attack(Integer adjacencyPosition) {
         return currentState.attackModifier(isAlive(), adjacencyPosition);
     }
 
@@ -199,8 +193,7 @@ public class Unit implements UnitInterface, Serializable, Cloneable
      * computeNextTurn se i punti vita dell'unità non sono cambiati
      */
     @Override
-    public void independentAction()
-    {
+    public void independentAction() {
         currentState.independentAction(this);
     }
 
@@ -212,8 +205,7 @@ public class Unit implements UnitInterface, Serializable, Cloneable
      * com.giuseppelamalfa.gameofliferemastered.gamelogic.GameLogicException
      */
     @Override
-    public State getNextTurnState() throws GameLogicException
-    {
+    public State getNextTurnState() throws GameLogicException {
         if ( nextTurnState == State.INVALID )
         {
             throw new GameLogicException(this, "Invalid state.");
@@ -226,70 +218,43 @@ public class Unit implements UnitInterface, Serializable, Cloneable
      *
      * @return
      */
-    @Override
-    public final State getCurrentState()
-    {
-        return currentState;
-    }
+    @Override public final State getCurrentState() { return currentState; }
 
     /**
      * Get the unit's texture code
      *
      * @return
      */
-    @Override
-    public final Species getSpecies()
-    {
-        return species;
-    }
+    @Override public final Species getSpecies() { return species; }
 
     /**
-     *
      * @return set with friendly species
      */
-    @Override
-    public final Set<Species> getFriendlySpecies()
-    {
-        return friendlySpecies;
-    }
+    @Override public final Set<Species> getFriendlySpecies() { return friendlySpecies; }
 
     /**
-     *
      * @return set with hostile species
      */
-    @Override
-    public final Set<Species> getHostileSpecies()
-    {
-        return hostileSpecies;
-    }
+    @Override public final Set<Species> getHostileSpecies() { return hostileSpecies; }
 
     /**
      *
      * @return lower bound of friendly units adjacent to this unit
      */
-    @Override
-    public final RuleInterface<Integer> getReproductionSelector()
-    {
-        return reproductionSelector;
-    }
+    @Override public final RuleInterface<Integer> getReproductionSelector() { return reproductionSelector; }
 
     /**
      * @return unit's health points
      */
-    @Override
-    public final Integer getHealth()
-    {
-        return health;
-    }
+    @Override public final Integer getHealth() { return health; }
 
     /**
      * Increments the unit's health
      *
      * @param increment health increment
      */
-    @Override
-    public void incrementHealth(int increment)
-    {
+    @Override 
+    public void incrementHealth(int increment) {
         health = health + increment;
         healthChanged = true;
     }

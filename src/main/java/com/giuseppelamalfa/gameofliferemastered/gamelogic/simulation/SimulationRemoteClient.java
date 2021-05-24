@@ -87,10 +87,11 @@ public class SimulationRemoteClient implements SimulationInterface {
 
     @Override public int getRowCount() { return rowCount; }
     @Override public int getColumnCount() { return columnCount; }
-    @Override public int getSectorSideLength() { return currentGrid.getSectorSideLength(); }
+    @Override public int getSectorSideLength() { return currentGrid.SECTOR_SIDE_LENGTH; }
     @Override public int getCurrentTurn() { return currentGrid.getCurrentTurn(); }
 
     @Override public UnitInterface    getUnit(int row, int col) { return currentGrid.getUnit(row, col); }
+    @Override public void removeUnit(int row, int col) { currentGrid.removeUnit(row, col); }
     @Override
     public void             setUnit(int row, int col, UnitInterface unit) {
         try {
@@ -137,7 +138,13 @@ public class SimulationRemoteClient implements SimulationInterface {
                 }
                 rowCount = syncGrid.getRowCount();
                 columnCount = syncGrid.getColumnCount();
-                Grid tmpGrid = (Grid)syncGrid.clone();
+                Grid tmpGrid;
+                try {
+                    tmpGrid = (Grid)syncGrid.clone();
+                } catch (CloneNotSupportedException ex) {
+                    Logger.getLogger(SimulationRemoteClient.class.getName()).log(Level.SEVERE, null, ex);
+                    break;
+                }
                 synchronized(currentGrid) {
                     currentGrid = tmpGrid;
                     currentGrid.setPlayerIDCheckNextTurn();
