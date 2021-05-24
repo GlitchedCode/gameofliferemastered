@@ -59,13 +59,11 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
     protected GameStatusPanel gameStatusPanel;
     protected UnitPalette palette;
     
-    public GridPanel()
-    {
+    public GridPanel() {
         setSideLength(32);
     }
     
-    public GridPanel(ImageManager tileManager)
-    {
+    public GridPanel(ImageManager tileManager) {
         this.tileManager = tileManager;
         setSideLength(32);
     }
@@ -74,8 +72,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
     * MOUSE INPUT HANDLING
      */
     @Override
-    public void mouseClicked(MouseEvent me)
-    {
+    public void mouseClicked(MouseEvent me) {
         synchronized (simulation)
         {
             int button = me.getButton();
@@ -98,8 +95,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
     }
 
     @Override
-    public void mouseMoved(MouseEvent me)
-    {
+    public void mouseMoved(MouseEvent me) {
         synchronized (simulation)
         {
             Point point = me.getPoint();
@@ -129,8 +125,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
     }
     
     @Override
-    public void mousePressed(MouseEvent me)
-    {
+    public void mousePressed(MouseEvent me) {
         int button = me.getButton();
         if (button == MouseEvent.BUTTON1)
         {
@@ -139,8 +134,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
     }
 
     @Override
-    public void mouseDragged(MouseEvent me)
-    {
+    public void mouseDragged(MouseEvent me) {
         int mask = MouseEvent.BUTTON1_DOWN_MASK;
         if (me.getModifiersEx() != mask)
             return;
@@ -153,8 +147,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
     }
 
     @Override
-    public void mouseWheelMoved(MouseWheelEvent me)
-    {
+    public void mouseWheelMoved(MouseWheelEvent me) {
         int rotation = me.getWheelRotation();
         setSideLength(sideLength - (rotation * 4));
     }
@@ -196,13 +189,14 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
         
     }
 
-    public void setGrid(SimulationInterface grid, boolean resetOrigin) {
-        this.simulation = grid;
+    public void setSimulation(SimulationInterface simulation, boolean resetOrigin) {
+        this.simulation = simulation;
         setSideLength(sideLength);
         
-        gameStatusPanel.setTurnCount(grid.getCurrentTurn());
+        gameStatusPanel.setTurnCount(simulation.getCurrentTurn());
         gameStatusPanel.setPlayerPanels(simulation.getPlayerRankings());
-
+        gameStatusPanel.setGameModeName(simulation.getGameModeName());
+        
         Dimension size = getSize();
         Dimension gridSize = getGridSize();
         if(resetOrigin)
@@ -210,8 +204,8 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
                     (gridSize.height - size.height) / 2));
     }
     
-    public void setGrid(SimulationInterface grid) {
-        setGrid(grid, false);
+    public void setSimulation(SimulationInterface grid) {
+        GridPanel.this.setSimulation(grid, false);
     }
 
     public void setScreenOrigin(Point newOrigin) {

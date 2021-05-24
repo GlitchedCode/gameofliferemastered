@@ -85,7 +85,7 @@ public class GameStatusPanel extends javax.swing.JPanel implements MouseListener
 
         gameModeLabel.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
         gameModeLabel.setForeground(new java.awt.Color(255, 255, 255));
-        gameModeLabel.setText("Sandbox");
+        gameModeLabel.setText("GameMode");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -162,6 +162,10 @@ public class GameStatusPanel extends javax.swing.JPanel implements MouseListener
     {
         addMouseListener(this);
         gridPanel = panel;
+    }
+    
+    public void setGameModeName(String name){
+        gameModeLabel.setText(name);
     }
     
    /*

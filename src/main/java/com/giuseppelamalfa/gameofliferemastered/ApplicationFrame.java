@@ -376,7 +376,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
         );
 
         gridPanel.init(unitPalette);
-        gridPanel.setGrid(localGrid);
+        gridPanel.setSimulation(localGrid);
         addKeyListener(gridPanel);
         unitPalette.init(tileManager);
         try{
@@ -459,7 +459,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
                 playerNameField.setEditable(false);
 
                 client.initializeGridPanel(gridPanel);
-                gridPanel.setGrid(client);
+                gridPanel.setSimulation(client);
             }
         }else{
             writeToStatusLog("Disconnecting...");
@@ -471,7 +471,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
             joinGameButton.setText("Join Game");
             playerNameField.setEditable(true);
 
-            gridPanel.setGrid(localGrid);
+            gridPanel.setSimulation(localGrid);
         }
     }//GEN-LAST:event_JoinGameHandler
 
@@ -498,7 +498,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
                 playerNameField.setEditable(false);
                 
                 server.initializeGridPanel(gridPanel);
-                gridPanel.setGrid(server);
+                gridPanel.setSimulation(server);
             }
         }else{
             writeToStatusLog("Closing server...");
@@ -510,7 +510,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
             joinGameButton.setEnabled(true);
             playerNameField.setEditable(true);
 
-            gridPanel.setGrid(localGrid);
+            gridPanel.setSimulation(localGrid);
         }
     }//GEN-LAST:event_StartServerHandler
 

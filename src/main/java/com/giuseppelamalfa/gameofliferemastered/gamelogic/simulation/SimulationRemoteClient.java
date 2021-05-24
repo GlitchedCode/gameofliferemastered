@@ -76,7 +76,8 @@ public class SimulationRemoteClient implements SimulationInterface {
     
     @Override public boolean isStarted() { return isStarted; }
     @Override public boolean isRunning() { return isRunning; }
-    @Override public boolean isLocallyControlled() { return true; }
+    @Override public boolean isLocallyControlled() { return false; }
+    @Override public String getGameModeName() { return currentGrid.GAMEMODE_NAME; }
     @Override public int getLocalPlayerID() { 
         return localPlayerData.ID; 
     }

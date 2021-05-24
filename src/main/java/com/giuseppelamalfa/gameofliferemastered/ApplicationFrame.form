@@ -108,7 +108,7 @@
           <AuxValues>
             <AuxValue name="JLayeredPane.layer" type="java.lang.Integer" value="100"/>
             <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="gridPanel = new com.giuseppelamalfa.gameofliferemastered.GridPanel(tileManager);"/>
-            <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="gridPanel.init(unitPalette);&#xa;gridPanel.setGrid(localGrid);&#xa;addKeyListener(gridPanel);"/>
+            <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="gridPanel.init(unitPalette);&#xa;gridPanel.setSimulation(localGrid);&#xa;addKeyListener(gridPanel);"/>
           </AuxValues>
 
           <Layout>

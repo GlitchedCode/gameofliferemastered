@@ -19,6 +19,7 @@ public interface SimulationInterface {
     boolean         isStarted();
     boolean         isRunning();
     boolean         isLocallyControlled();
+    String          getGameModeName();
     int             getLocalPlayerID();
     PlayerData.TeamColor    getPlayerColor(int ID);
     ArrayList<PlayerData>   getPlayerRankings();

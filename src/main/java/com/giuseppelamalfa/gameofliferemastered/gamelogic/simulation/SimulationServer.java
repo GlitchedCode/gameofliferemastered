@@ -213,6 +213,7 @@ public class SimulationServer implements SimulationInterface{
     @Override public boolean isStarted() { return isStarted; }
     @Override public boolean isRunning() { return isRunning; }
     @Override public boolean isLocallyControlled() { return true; }
+    @Override public String getGameModeName() { return currentGrid.GAMEMODE_NAME; }
     @Override public int getLocalPlayerID() { return localPlayerData.ID; }
     @Override public PlayerData.TeamColor getPlayerColor(int ID){
         return currentGrid.getPlayerColor(ID);
