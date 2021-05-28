@@ -7,7 +7,7 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation;
 
 import com.giuseppelamalfa.gameofliferemastered.ApplicationFrame;
 import com.giuseppelamalfa.gameofliferemastered.GridPanel;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.Grid;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.requests.*;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
@@ -59,7 +59,6 @@ public class SimulationServer implements SimulationInterface{
     public static Integer playerSyncTurnCount = 15;
     public static Integer simulationPhaseLength = 80;
 
-    boolean         isStarted = false;
     boolean         isRunning = false;
     
     int             nextClientID = 1;
@@ -79,7 +78,7 @@ public class SimulationServer implements SimulationInterface{
     String          serverIP;
     int             portNumber;    
     
-    ArrayList<PlayerData.TeamColor>   availableColors = new ArrayList<PlayerData.TeamColor>();
+    ArrayList<PlayerData.TeamColor>   availableColors = new ArrayList<>();
     PlayerData      localPlayerData;
     GridPanel       panel;
 
@@ -98,11 +97,10 @@ public class SimulationServer implements SimulationInterface{
         localPlayerData = new PlayerData();
         localPlayerData.ID = 0;
         currentGrid.addPlayer(localPlayerData);
-        isStarted = true;
     }
     
-    private void initializeRemoteServer(int portNumber, int playerCount, int rowCount, int columnCount)
-            throws IOException, Exception {
+    private void initializeRemoteServer(int portNumber, int playerCount, 
+            int rowCount, int columnCount) throws IOException, Exception {
         if(playerCount < 2 | playerCount > MAX_PLAYER_COUNT) 
             this.playerCount = DEFAULT_PLAYER_COUNT;
         else
@@ -155,7 +153,7 @@ public class SimulationServer implements SimulationInterface{
                                 currentGrid.addPlayer(client.playerData);
                                 outputStream.writeObject(new UpdatePlayerDataRequest(tmp, true, true));
                                 outputStream.writeObject(new SyncGridRequest(currentGrid));
-                                outputStream.writeObject(new PauseRequest(isRunning));
+                                outputStream.writeObject(new GameStatusRequest(isRunning));
                                 
                                 for(ClientData data : connectedClients.values())
                                     if(data.playerData.ID != clientID)
@@ -198,8 +196,6 @@ public class SimulationServer implements SimulationInterface{
             }
         });
         acceptConnectionThread.start();
-        
-        isStarted = true;
     }
     
     public final PlayerData.TeamColor extractRandomColor(){
@@ -210,7 +206,7 @@ public class SimulationServer implements SimulationInterface{
         return ret;        
     }
     
-    @Override public boolean isStarted() { return isStarted; }
+    @Override public boolean isStarted() { return true; }
     @Override public boolean isRunning() { return isRunning; }
     @Override public boolean isLocallyControlled() { return true; }
     @Override public String getGameModeName() { return currentGrid.GAMEMODE_NAME; }
@@ -315,7 +311,7 @@ public class SimulationServer implements SimulationInterface{
     @Override
     public void             setRunning(boolean val) {
         isRunning = val;
-        PauseRequest req = new PauseRequest(val);
+        GameStatusRequest req = new GameStatusRequest(val);
         try{
             for (Integer key : connectedClients.keySet())
                 connectedClients.get(key).stream.writeObject(req);
@@ -398,8 +394,6 @@ public class SimulationServer implements SimulationInterface{
         catch(Exception e) {
             System.out.println(e);
         }
-        
-        isStarted = false;
     }
     
     @Override

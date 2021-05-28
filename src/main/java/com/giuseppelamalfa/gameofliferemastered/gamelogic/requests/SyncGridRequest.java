@@ -5,7 +5,7 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.requests;
 
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.Grid;
 
 /**
  *

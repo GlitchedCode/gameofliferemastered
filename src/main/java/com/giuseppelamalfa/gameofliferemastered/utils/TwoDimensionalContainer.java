@@ -21,12 +21,12 @@ public class TwoDimensionalContainer<T> extends HashMap<Integer, HashMap<Integer
     private T defaultValue = null;
     
     // Initializes the ArrayList objects 
-    public TwoDimensionalContainer(int rows, int cols, T sparseDefault) throws Exception
+    public TwoDimensionalContainer(int rows, int cols, T sparseDefault) throws IllegalArgumentException
     {
         super();        
         if (rows < 0 | cols < 0) // sanity check
         {
-            throw new Exception("Invalid size values for TwoDimensionalArrayList");
+            throw new IllegalArgumentException("Invalid size values for TwoDimensionalArrayList");
         }
         this.rows = rows;
         this.cols = cols;
@@ -36,12 +36,12 @@ public class TwoDimensionalContainer<T> extends HashMap<Integer, HashMap<Integer
     }
     
     // Initializes the ArrayList objects 
-    public TwoDimensionalContainer(int rows, int cols) throws Exception
+    public TwoDimensionalContainer(int rows, int cols) throws IllegalArgumentException
     {
         super();        
         if (rows < 0 | cols < 0) // sanity check
         {
-            throw new Exception("Invalid size values for TwoDimensionalArrayList");
+            throw new IllegalArgumentException("Invalid size values for TwoDimensionalArrayList");
         }
         this.rows = rows;
         this.cols = cols;
@@ -51,11 +51,11 @@ public class TwoDimensionalContainer<T> extends HashMap<Integer, HashMap<Integer
     public boolean hasDefaultValue() { return hasDefault; }
     
     // Resets the minimum capacity for all the ArrayList objects
-    public final void resize(int rows, int cols) throws Exception
+    public final void resize(int rows, int cols) throws IllegalArgumentException
     {
         if (rows < 0 | cols < 0) // sanity check
         {
-            throw new Exception("Invalid size values for TwoDimensionalArrayList");
+            throw new IllegalArgumentException("Invalid size values for TwoDimensionalArrayList");
         }
         
         if (cols < this.cols) // remove extra columns

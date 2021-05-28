@@ -1,0 +1,62 @@
+{
+    "author" : "glitchedcode",
+    "README" : {
+        "name": "the unit's species name",
+        "textureCode": "the unit's texture code",
+        "friendlySpecies": "a set of species the unit considers friendly",
+        "hostileSpecies": "a set of species the unit considers friendly",
+        "health": "the unit's initial health",
+        "initialState": "the unit's initial state",
+        "friendlyCountSelector, hostileCountSelector, reproductionSelector": {
+            "__help" : "rules for HP reduction and reproduction based on how many friendly or hostile units are adjacent", 
+            "ruleClassName": "rule's class name, derived from com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface",
+            "args": "constructor arguments for rule class"
+        }
+    },
+    "speciesData" : [
+        {
+            "name" : "Cell",
+            "textureCode" : "cell",
+            "friendlySpecies" : [
+                "Cell"
+            ],
+            "hostileSpecies" : [],
+            "health" : 1,
+            "initialState" : "ALIVE",
+            "friendlyCountSelector" : {
+                "ruleClassName" : "IntegerRangeRule",
+                "args" : [2,3]
+            },
+            "hostileCountSelector" : {
+                "ruleClassName" : "IntegerRangeRule",
+                "args" : [0,9]
+            },
+            "reproductionSelector" : {
+                "ruleClassName" : "IntegerSetRule",
+                "args" : [3]
+            }
+        },
+        {
+            "name" : "Snake",
+            "textureCode" : "snake",
+            "friendlySpecies" : [
+                "Snake"
+            ],
+            "hostileSpecies" : [],
+            "health" : 7,
+            "initialState" : "ALIVE_AGING",
+            "friendlyCountSelector" : {
+                "ruleClassName" : "IntegerRangeRule",
+                "args" : [1,5]
+            },
+            "hostileCountSelector" : {
+                "ruleClassName" : "IntegerRangeRule",
+                "args" : [0,9]
+            },
+            "reproductionSelector" : {
+                "ruleClassName" : "IntegerSetRule",
+                "args" : [3, 6]
+            }
+        }
+    ]
+}

@@ -47,13 +47,12 @@ public class ImageManager{
         {
             InputStream istream = loader.getResourceAsStream(path);
             BufferedReader reader = new BufferedReader(new InputStreamReader(istream));
-            StringBuilder JSONStringBuilder = new StringBuilder();
+            StringBuilder strBuilder = new StringBuilder();
             String line;
             while((line = reader.readLine()) != null)
-            {
-                JSONStringBuilder.append(line);
-            }
-            imageData = new JSONObject(JSONStringBuilder.toString());
+                strBuilder.append(line);
+
+            imageData = new JSONObject(strBuilder.toString());
             imagePathTemplate = imageData.getString("pathTemplate");
         }
         catch (IOException e)

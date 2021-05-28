@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.giuseppelamalfa.gameofliferemastered;
+package com.giuseppelamalfa.gameofliferemastered.ui;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
 import com.giuseppelamalfa.gameofliferemastered.utils.ImageManager;
@@ -27,9 +27,9 @@ class PaletteItem implements Serializable {
     public boolean active;
     public int count;
     
-    public PaletteItem(UnitInterface.Species species, boolean active, int count) throws Exception    {
+    public PaletteItem(UnitInterface.Species species, boolean active, int count) throws IllegalArgumentException    {
         if(count < 0)
-            throw new Exception("Invalid unit count.");
+            throw new IllegalArgumentException("Invalid unit count.");
         this.species = species;
         this.active = active;
         this.count = count;

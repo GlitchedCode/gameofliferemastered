@@ -17,21 +17,16 @@ public class Cell extends Unit {
     public Cell()
     {
         super();
-        species = Species.CELL;
-        health = 1;
-        friendlySpecies.add(species);
-        
-        friendlyCountSelector = new IntegerRangeRule(2, 3);
-        hostileCountSelector = new IntegerRangeRule(0, 9);
-        
-        IntegerSetRule selector = new IntegerSetRule();
-        selector.add(3);
-        reproductionSelector = selector;
+        init();        
     }
     
     public Cell(Integer playerID)
     {
         super(playerID);
+        init();
+    }
+    
+    private void init(){
         species = Species.CELL;
         health = 1;
         friendlySpecies.add(species);
@@ -42,6 +37,6 @@ public class Cell extends Unit {
         IntegerSetRule selector = new IntegerSetRule();
         selector.add(3);
         reproductionSelector = selector;
+
     }
-    
 }

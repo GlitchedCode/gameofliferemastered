@@ -3,14 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.giuseppelamalfa.gameofliferemastered.gamelogic;
+package com.giuseppelamalfa.gameofliferemastered.gamelogic.grid;
 
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.GameLogicException;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.*;
 import com.giuseppelamalfa.gameofliferemastered.utils.*;
 import java.awt.Point;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+
 
 /**
  * Class for handling all of game logic and rendering all units to the grid
@@ -43,6 +47,8 @@ public class Grid implements Serializable, Cloneable
     private final HashMap<Integer, PlayerData> players = new HashMap<>();
     private ArrayList<PlayerData> orderedPlayers = new ArrayList<>(); // players ordered by their ranking
     private boolean runPlayerIDCheck = false;
+    
+    protected String gameStatus = "Paused";
 
     /**
      * Constructor
@@ -51,7 +57,7 @@ public class Grid implements Serializable, Cloneable
      * @param cols Number of columns
      * @throws Exception
      */
-    public Grid(Integer rows, Integer cols) throws Exception    {
+    public Grid(Integer rows, Integer cols) throws Exception {
         rowCount = rows;
         columnCount = cols;
         sectorRowCount = (rows / SECTOR_SIDE_LENGTH) + 1;
@@ -89,8 +95,9 @@ public class Grid implements Serializable, Cloneable
     }
     
     /*
-    * GETTERS AND SETTERS
+     * GETTERS AND SETTERS
      */
+    
     public final int getCurrentTurn() { return turn; }
     public final int getRowCount() { return rowCount; }
     public final int getColumnCount() { return columnCount; }
@@ -371,7 +378,11 @@ public class Grid implements Serializable, Cloneable
             UnitInterface unit = board.get(row + 1, col - i + 1);
             ret[i + 4] = unit;
         }
-        // if there is no unit, just leave null
+        
+        for(int i = 0; i < 8; i++)
+            if(ret[i] == null)
+                ret[i] = deadUnit;
+        
         return ret;
     }
     private void orderPlayersByScore() {

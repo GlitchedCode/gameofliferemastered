@@ -10,6 +10,7 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.state.*;
 import java.io.Serializable;
 import java.util.Set;
+import org.json.JSONObject;
 
 /**
  *
@@ -17,6 +18,33 @@ import java.util.Set;
  */
 public abstract interface UnitInterface
 {
+    public class SpeciesData {
+        public final int speciesID;
+        public final String name;
+        public final String textureCode;
+        public final State initialState;
+        public final Set<Integer> friendlySpecies;
+        public final Set<Integer> hostileSpecies;
+        public final Integer health;
+        public final RuleInterface<Integer> friendlyCountSelector;
+        public final RuleInterface<Integer> hostileCountSelector;
+        public final RuleInterface<Integer> reproductionSelector;
+        
+        @SuppressWarnings("unchecked")
+        public SpeciesData(int ID, JSONObject obj){
+            speciesID = ID;
+            name = obj.getString("name");
+            textureCode = obj.getString("textureCode");
+            initialState = Unit.State.valueOf(obj.getString("initialState"));
+            friendlySpecies = (Set<Integer>)obj.get("friendlySpecies"); //  
+            hostileSpecies = (Set<Integer>)obj.get("hostileSpecies"); //
+            health = obj.getInt("health");
+            friendlyCountSelector = (RuleInterface<Integer>)obj.get("friendlyCountSelector"); // 
+            hostileCountSelector = (RuleInterface<Integer>)obj.get("hostileCountSelector"); // 
+            reproductionSelector = (RuleInterface<Integer>)obj.get("reproductionSelector"); //
+        }
+    }
+    
     enum State implements Serializable
     {
         INVALID(null),

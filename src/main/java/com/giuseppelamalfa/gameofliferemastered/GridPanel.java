@@ -26,6 +26,7 @@ import javax.swing.JPanel;
 import javax.swing.ToolTipManager;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationInterface;
 import com.giuseppelamalfa.gameofliferemastered.ui.GameStatusPanel;
+import com.giuseppelamalfa.gameofliferemastered.ui.UnitPalette;
 import com.giuseppelamalfa.gameofliferemastered.utils.TimerWrapper;
 import java.util.logging.Level;
 import java.util.logging.Logger;

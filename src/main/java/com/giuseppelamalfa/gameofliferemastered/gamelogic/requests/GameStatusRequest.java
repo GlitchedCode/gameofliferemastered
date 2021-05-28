@@ -9,12 +9,18 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic.requests;
  *
  * @author glitchedcode
  */
-public class PauseRequest extends Request {
+public class GameStatusRequest extends Request {
     public boolean running;
+    public String status;
     
-    public PauseRequest(boolean val)
-    {
+    public GameStatusRequest(boolean val) {
         type = RequestType.PAUSE;
         running = val;
+    }
+    
+    public GameStatusRequest(boolean val, String status) {
+        type = RequestType.PAUSE;
+        running = val;
+        this.status = status;
     }
 }

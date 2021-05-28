@@ -20,7 +20,7 @@ public abstract class Request implements Serializable {
         SYNC_GRID(SyncGridRequest.class),
         UPDATE_PLAYER_DATA(UpdatePlayerDataRequest.class),
         DISCONNECT(DisconnectRequest.class),
-        PAUSE(PauseRequest.class),
+        PAUSE(GameStatusRequest.class),
         SET_UNIT(SetUnitRequest.class);
         
         public final Type requestObjectType;

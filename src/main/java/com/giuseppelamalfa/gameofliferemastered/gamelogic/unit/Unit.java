@@ -16,8 +16,7 @@ import java.io.Serializable;
  * @author glitchedcode
  */
 public class Unit implements UnitInterface, Serializable, Cloneable
-{
-
+{    
     // ALL FIELDS MARKED WITH * MUST BE INITIALIZED IN ALL SUBCLASSES
     // REFER TO THE Cell CLASS FOR AN EXAMPLE OF CORRECT USAGE
     protected State currentState = State.INVALID;
@@ -38,6 +37,7 @@ public class Unit implements UnitInterface, Serializable, Cloneable
     private boolean competitive = false;
 
     protected Unit() {
+        
         playerID = 0;
         friendlySpecies = new HashSet<>();
         hostileSpecies = new HashSet<>();
@@ -67,33 +67,21 @@ public class Unit implements UnitInterface, Serializable, Cloneable
         for (int i = 0; i < 8; i++) // conto le unità ostili ed amichevoli
         {
             UnitInterface current = adjacentUnits[i];
-            if ( current == null )
-            {
+            if (!current.isAlive())
                 continue;
-            }
-            if ( !current.isAlive() )
-            {
-                continue;
-            }
 
             Integer oppositeDir = UnitInterface.getOppositeDirection(i);
 
             if ( friendlySpecies.contains(current.getSpecies()) )
-            {
                 friendlyCount++;
-            }
 
             // additionally check if the adjacent cell can attack from 
             // their position relative to this cell
             boolean attacked = false;
             if ( hostileSpecies.contains(current.getSpecies()) )
-            {
                 attacked = current.attack(oppositeDir);
-            }
             if ( attacked )
-            {
                 hostileCount++;
-            }
         }
 
         // rule #1: population
@@ -102,30 +90,20 @@ public class Unit implements UnitInterface, Serializable, Cloneable
         boolean hostilePenalty = !hostileCountSelector.test(hostileCount);
 
         if ( friendlyPenalty | hostilePenalty )
-        {
             healthIncrement--;
-        }
 
         if ( healthIncrement != 0 )
-        {
             incrementHealth(healthIncrement);
-        }
     }
 
     protected void endStep() {
         if ( !healthChanged ) // rule #4: inactivity
-        {
             independentAction();
-        }
 
-        if ( health < 1 ) // regola #5: hp
-        {
+        if ( health < 1 ) // rule #5: hp
             nextTurnState = State.DEAD;
-        }
         else
-        {
             nextTurnState = currentState;
-        }
     }
 
     /**

@@ -9,8 +9,9 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationR
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationServer;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationInterface;
 import com.giuseppelamalfa.gameofliferemastered.utils.ImageManager;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.*;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.*;
+import com.giuseppelamalfa.gameofliferemastered.ui.UnitPalette;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.ImageIcon;
@@ -58,6 +59,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
      * @throws java.lang.Exception
      */
     public ApplicationFrame() throws Exception{
+        new UnitPalette();
         tileManager = new ImageManager("tiles.json");
         localGrid = new SimulationServer(localRowCount, localColumnCount);
         URL resource = getClass().getClassLoader().getResource("Tiles/tile_0083.png");
@@ -85,7 +87,6 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
         outerLayeredPane = new javax.swing.JLayeredPane();
         gridPanel = gridPanel = new com.giuseppelamalfa.gameofliferemastered.GridPanel(tileManager);
         gameStatusPanel = new com.giuseppelamalfa.gameofliferemastered.ui.GameStatusPanel();
-        unitPalette = new com.giuseppelamalfa.gameofliferemastered.UnitPalette();
         menuPanel = new com.giuseppelamalfa.gameofliferemastered.MenuPanel();
         titleLabel = new javax.swing.JLabel();
         hostPortNumber = new javax.swing.JTextField();
@@ -107,6 +108,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
         rowField = new javax.swing.JTextField();
         colField = new javax.swing.JTextField();
         unpauseButton = new javax.swing.JButton();
+        unitPalette = new com.giuseppelamalfa.gameofliferemastered.ui.UnitPalette();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("The game of Life: Remastered");
@@ -141,27 +143,16 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
             gridPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(gridPanelLayout.createSequentialGroup()
                 .addComponent(gameStatusPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 467, Short.MAX_VALUE))
+                .addGap(0, 558, Short.MAX_VALUE))
         );
         gridPanelLayout.setVerticalGroup(
             gridPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(gridPanelLayout.createSequentialGroup()
                 .addComponent(gameStatusPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(169, Short.MAX_VALUE))
+                .addContainerGap(360, Short.MAX_VALUE))
         );
 
         gameStatusPanel.setGridPanel(gridPanel);
-
-        javax.swing.GroupLayout unitPaletteLayout = new javax.swing.GroupLayout(unitPalette);
-        unitPalette.setLayout(unitPaletteLayout);
-        unitPaletteLayout.setHorizontalGroup(
-            unitPaletteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
-        );
-        unitPaletteLayout.setVerticalGroup(
-            unitPaletteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 34, Short.MAX_VALUE)
-        );
 
         menuPanel.setInheritsPopupMenu(true);
         menuPanel.setOpaque(false);
@@ -348,9 +339,20 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
         PlainDocument colFieldDocument = (PlainDocument) colField.getDocument();
         colFieldDocument.addDocumentListener(sizeListener);
 
+        javax.swing.GroupLayout unitPaletteLayout = new javax.swing.GroupLayout(unitPalette);
+        unitPalette.setLayout(unitPaletteLayout);
+        unitPaletteLayout.setHorizontalGroup(
+            unitPaletteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 800, Short.MAX_VALUE)
+        );
+        unitPaletteLayout.setVerticalGroup(
+            unitPaletteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 34, Short.MAX_VALUE)
+        );
+
         outerLayeredPane.setLayer(gridPanel, javax.swing.JLayeredPane.PALETTE_LAYER);
-        outerLayeredPane.setLayer(unitPalette, javax.swing.JLayeredPane.POPUP_LAYER);
         outerLayeredPane.setLayer(menuPanel, javax.swing.JLayeredPane.DRAG_LAYER);
+        outerLayeredPane.setLayer(unitPalette, javax.swing.JLayeredPane.MODAL_LAYER);
 
         javax.swing.GroupLayout outerLayeredPaneLayout = new javax.swing.GroupLayout(outerLayeredPane);
         outerLayeredPane.setLayout(outerLayeredPaneLayout);
@@ -378,14 +380,13 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
         gridPanel.init(unitPalette);
         gridPanel.setSimulation(localGrid);
         addKeyListener(gridPanel);
-        unitPalette.init(tileManager);
-        try{
-            unitPalette.addPaletteItem(UnitInterface.Species.CELL, true);
-            unitPalette.addPaletteItem(UnitInterface.Species.SNAKE, true);
-        }catch(Exception e){e.printStackTrace();}
         menuPanel.getAccessibleContext().setAccessibleParent(menuPanel);
         menuPanel.setBackground(new Color(0,0,0,127));
         addKeyListener(menuPanel);
+        unitPalette.init(tileManager);
+        try{
+            unitPalette.addPaletteItem(UnitInterface.Species.CELL, true);
+        }catch (Exception e) {}
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -649,7 +650,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
     private javax.swing.JTextField serverPortNumber;
     private javax.swing.JTextArea statusLog;
     private javax.swing.JLabel titleLabel;
-    private com.giuseppelamalfa.gameofliferemastered.UnitPalette unitPalette;
+    private com.giuseppelamalfa.gameofliferemastered.ui.UnitPalette unitPalette;
     private javax.swing.JButton unpauseButton;
     // End of variables declaration//GEN-END:variables
 }

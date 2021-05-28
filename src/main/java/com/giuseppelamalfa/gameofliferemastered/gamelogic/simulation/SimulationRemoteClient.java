@@ -7,7 +7,7 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation;
 
 import com.giuseppelamalfa.gameofliferemastered.ApplicationFrame;
 import com.giuseppelamalfa.gameofliferemastered.GridPanel;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.Grid;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.requests.*;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
@@ -117,7 +117,7 @@ public class SimulationRemoteClient implements SimulationInterface {
             setRunning(val);
         else{
             try {
-                outputStream.writeObject(new PauseRequest(val));
+                outputStream.writeObject(new GameStatusRequest(val));
             } catch (IOException ex) {
                 Logger.getLogger(SimulationRemoteClient.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -190,7 +190,7 @@ public class SimulationRemoteClient implements SimulationInterface {
                 isStarted = false;
                 break;
             case PAUSE:
-                isRunning = ((PauseRequest)request).running;
+                isRunning = ((GameStatusRequest)request).running;
                 break;
             case SET_UNIT:
                 SetUnitRequest setUnit = (SetUnitRequest)request;
