@@ -25,6 +25,7 @@ import java.awt.image.ImageObserver;
 import javax.swing.JPanel;
 import javax.swing.ToolTipManager;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationInterface;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
 import com.giuseppelamalfa.gameofliferemastered.ui.GameStatusPanel;
 import com.giuseppelamalfa.gameofliferemastered.ui.UnitPalette;
 import com.giuseppelamalfa.gameofliferemastered.utils.TimerWrapper;
@@ -307,7 +308,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
     }
     
     public void drawUnit(Graphics2D g, AffineTransform xform, ImageObserver obs, UnitInterface unit) {
-        Image img = tileManager.getImage(unit.getSpecies().getTextureCode());
+        Image img = tileManager.getImage(SpeciesLoader.getSpecies(unit.getSpeciesID()).textureCode);
         g.setColor(simulation.getPlayerColor(unit.getPlayerID()).getMainAWTColor());
         g.fillRect((int)xform.getTranslateX(), (int)xform.getTranslateY(), 
                 (int)(xform.getScaleX() * 8), (int)(xform.getScaleY() * 8));

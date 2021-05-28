@@ -9,9 +9,8 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationR
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationServer;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationInterface;
 import com.giuseppelamalfa.gameofliferemastered.utils.ImageManager;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.*;
-import com.giuseppelamalfa.gameofliferemastered.ui.UnitPalette;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.ImageIcon;
@@ -59,7 +58,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
      * @throws java.lang.Exception
      */
     public ApplicationFrame() throws Exception{
-        new UnitPalette();
+        SpeciesLoader.loadUnitClasses();
         tileManager = new ImageManager("tiles.json");
         localGrid = new SimulationServer(localRowCount, localColumnCount);
         URL resource = getClass().getClassLoader().getResource("Tiles/tile_0083.png");
@@ -383,10 +382,9 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
         menuPanel.getAccessibleContext().setAccessibleParent(menuPanel);
         menuPanel.setBackground(new Color(0,0,0,127));
         addKeyListener(menuPanel);
-        unitPalette.init(tileManager);
-        try{
-            unitPalette.addPaletteItem(UnitInterface.Species.CELL, true);
-        }catch (Exception e) {}
+        try {
+            unitPalette.init(tileManager);
+        } catch (Exception e) {e.printStackTrace();}
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);

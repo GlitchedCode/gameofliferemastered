@@ -58,31 +58,27 @@ public class DeadUnit implements UnitInterface, Serializable, Cloneable
     public void computeNextTurn(UnitInterface[] adjacentUnits)
     {        
         // Contains how many units of a given species are adjacent.
-        HashMap<Species, ReproductionCounter> reproductionCounters = new HashMap<>();
-        Species candidate = Species.INVALID;
+        HashMap<Integer, ReproductionCounter> reproductionCounters = new HashMap<>();
+        int candidate = -1;
         ReproductionCounter candidateCounter = new ReproductionCounter();
-        reproductionCounters.put(Species.INVALID, candidateCounter);
+        reproductionCounters.put(-1, candidateCounter);
         
         // Contains the required amount of units of a given species to 
         // give birth to a new unit of that species.
-        HashMap<Species, RuleInterface<Integer> > reproductionSelectors = new HashMap<>();
+        HashMap<Integer, RuleInterface<Integer> > reproductionSelectors = new HashMap<>();
         bornUnit = null;
         for (int i = 0; i < 8; i++)
         {
             UnitInterface current = adjacentUnits[i];
             
             if (current == null) // there is no adjacent unit in this direction
-            {
                 continue;
-            }
             
             Integer oppositeDir = UnitInterface.getOppositeDirection(i);
             if (!current.reproduce(oppositeDir)) // this unity doesn't reproduce from this direction
-            {
                 continue;
-            }
             
-            Species species = current.getSpecies();
+            int species = current.getSpeciesID();
             // Add new species to the map as we find them in
             // nearby cells
             if(reproductionCounters.keySet().contains(species))
@@ -96,16 +92,16 @@ public class DeadUnit implements UnitInterface, Serializable, Cloneable
         
         // Choose the candidate species to generate based on the reproduction
         // counters taken above and thei order in the Species enum
-        for (Species current : reproductionCounters.keySet())
+        for (int current : reproductionCounters.keySet())
         {
-            if (current == Species.INVALID) continue;
+            if (current == -1) continue;
             
             ReproductionCounter currentCounter = reproductionCounters.get(current);
             RuleInterface<Integer> selector = reproductionSelectors.get(current);
             
             if (currentCounter.getCount() == candidateCounter.getCount())
             {
-                if (current.ordinal() < candidate.ordinal() &
+                if (current < candidate &
                         selector.test(currentCounter.getCount()))
                 {
                     candidate = current;
@@ -120,30 +116,12 @@ public class DeadUnit implements UnitInterface, Serializable, Cloneable
             }
         }
         
-        if (candidate == Species.INVALID)
-        {
-            // neighboring units do not satisfy reproduction requirements
+        if (candidate == -1) // neighboring units do not satisfy reproduction requirements
             return;
-        }
         
         // If we have exactly as many units are necessary for reproduction,
         // we instantiate a new unit and store it in bornUnit.
-        Class<UnitInterface> unitClass;
-        unitClass = candidate.getUnitClass();
-        try
-        {
-            bornUnit = (UnitInterface) unitClass.getConstructor(Integer.class)
-                    .newInstance(candidateCounter.getPlayerID());
-        }
-        catch (InvocationTargetException | InstantiationException | IllegalAccessException e)
-        {
-            Logger.getLogger(DeadUnit.class.getName()).log(Level.SEVERE, null, e);
-        } catch (NoSuchMethodException ex) {
-            Logger.getLogger(DeadUnit.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SecurityException ex) {
-            Logger.getLogger(DeadUnit.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
+        bornUnit = SpeciesLoader.getNewUnit(candidate, candidateCounter.getPlayerID());
     }
     
     /**
@@ -178,9 +156,9 @@ public class DeadUnit implements UnitInterface, Serializable, Cloneable
     @Override public void independentAction() {}
     @Override public State getNextTurnState() {return State.INVALID; }
     @Override public State getCurrentState() { return State.INVALID; }
-    @Override public Species getSpecies() { return Species.INVALID; }
-    @Override public Set<Species> getFriendlySpecies() { return new HashSet<>(); }
-    @Override public Set<Species> getHostileSpecies() { return new HashSet<>(); }
+    @Override public int getSpeciesID() { return -1; }
+    @Override public Set<Integer> getFriendlySpecies() { return new HashSet<>(); }
+    @Override public Set<Integer> getHostileSpecies() { return new HashSet<>(); }
     @Override public RuleInterface<Integer> getReproductionSelector() { return null; }
     @Override public Integer getHealth() { return 0; }
     @Override public void incrementHealth(int increment) { }

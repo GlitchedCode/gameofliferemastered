@@ -9,6 +9,7 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.GameLogicException;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.state.*;
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Set;
 import org.json.JSONObject;
 
@@ -23,26 +24,36 @@ public abstract interface UnitInterface
         public final String name;
         public final String textureCode;
         public final State initialState;
-        public final Set<Integer> friendlySpecies;
-        public final Set<Integer> hostileSpecies;
         public final Integer health;
+        
+        public final HashSet<Integer> friendlySpecies;
+        public final HashSet<Integer> hostileSpecies;
+        
         public final RuleInterface<Integer> friendlyCountSelector;
         public final RuleInterface<Integer> hostileCountSelector;
         public final RuleInterface<Integer> reproductionSelector;
         
         @SuppressWarnings("unchecked")
-        public SpeciesData(int ID, JSONObject obj){
+        public SpeciesData(int ID, JSONObject obj, 
+                HashSet<Integer> friendlySpecies, HashSet<Integer> hostileSpecies,
+                RuleInterface<Integer> friendlyCountSelector, RuleInterface<Integer> hostileCountSelector,
+                RuleInterface<Integer> reproductionSelector) {
             speciesID = ID;
             name = obj.getString("name");
             textureCode = obj.getString("textureCode");
             initialState = Unit.State.valueOf(obj.getString("initialState"));
-            friendlySpecies = (Set<Integer>)obj.get("friendlySpecies"); //  
-            hostileSpecies = (Set<Integer>)obj.get("hostileSpecies"); //
             health = obj.getInt("health");
-            friendlyCountSelector = (RuleInterface<Integer>)obj.get("friendlyCountSelector"); // 
-            hostileCountSelector = (RuleInterface<Integer>)obj.get("hostileCountSelector"); // 
-            reproductionSelector = (RuleInterface<Integer>)obj.get("reproductionSelector"); //
+            
+            this.friendlySpecies = friendlySpecies;
+            this.hostileSpecies = hostileSpecies;
+            this.friendlyCountSelector = friendlyCountSelector;
+            this.hostileCountSelector = hostileCountSelector;
+            this.reproductionSelector = reproductionSelector;
         }
+        
+        public HashSet<Integer> getFriendlySpecies() { return new HashSet<>(friendlySpecies); }
+        public HashSet<Integer> getHostileSpecies() { return new HashSet<>(hostileSpecies); }
+
     }
     
     enum State implements Serializable
@@ -96,9 +107,9 @@ public abstract interface UnitInterface
     
     enum Species
     {
-        SNAKE("snake", Snake.class),
-        CELL("cell", Cell.class),
-        INVALID("", DeadUnit.class);
+        SNAKE("snake", null),
+        CELL("cell", null),
+        INVALID("", null);
         
         private final String textureCode;
         private final Class unitClass;
@@ -137,9 +148,9 @@ public abstract interface UnitInterface
     public boolean                  attack(Integer adjacencyPosition);
     public void                     independentAction();
 
-    public Species                  getSpecies();
-    public Set<Species>             getFriendlySpecies();
-    public Set<Species>             getHostileSpecies();
+    public int                      getSpeciesID();
+    public Set<Integer>             getFriendlySpecies();
+    public Set<Integer>             getHostileSpecies();
     public RuleInterface<Integer>   getReproductionSelector();
 
     public boolean                  isAlive();

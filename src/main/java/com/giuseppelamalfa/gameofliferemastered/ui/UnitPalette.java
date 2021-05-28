@@ -5,6 +5,8 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.ui;
 
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
 import com.giuseppelamalfa.gameofliferemastered.utils.ImageManager;
 import java.awt.BasicStroke;
@@ -23,26 +25,26 @@ import java.util.ArrayList;
 import javax.swing.JPanel;
 
 class PaletteItem implements Serializable {
-    UnitInterface.Species species;
+    int speciesID;
     public boolean active;
     public int count;
     
-    public PaletteItem(UnitInterface.Species species, boolean active, int count) throws IllegalArgumentException    {
+    public PaletteItem(int speciesID, boolean active, int count) throws IllegalArgumentException    {
         if(count < 0)
             throw new IllegalArgumentException("Invalid unit count.");
-        this.species = species;
+        this.speciesID = speciesID;
         this.active = active;
         this.count = count;
     }
     
-    public PaletteItem(UnitInterface.Species species, boolean active)    {
-        this.species = species;
+    public PaletteItem(int speciesID, boolean active) {
+        this.speciesID = speciesID;
         this.active = active;
         this.count = -1;
     }
     
-    public UnitInterface.Species getSpecies()    {
-        return species;
+    public int getSpeciesID() {
+        return speciesID;
     }
 }
 
@@ -91,35 +93,35 @@ public class UnitPalette extends JPanel implements MouseListener
         return items;
     }
     
-    public void addPaletteItem(UnitInterface.Species species, boolean active, int count) throws Exception    {
+    public void addPaletteItem(int speciesID, boolean active, int count) throws Exception    {
         boolean canAdd = true;
         
         for(PaletteItem item : items)
-            if(item.getSpecies() == species)
+            if(item.getSpeciesID() == speciesID)
                 canAdd = false;
         
         if(canAdd)
-            items.add(new PaletteItem(species, active, count));
+            items.add(new PaletteItem(speciesID, active, count));
         resetSize();
         repaint();
     }
     
-    public void addPaletteItem(UnitInterface.Species species, boolean active) throws Exception    {
+    public void addPaletteItem(int speciesID, boolean active) throws Exception    {
         boolean canAdd = true;
         
         for(PaletteItem item : items)
-            if(item.getSpecies() == species)
+            if(item.getSpeciesID() == speciesID)
                 canAdd = false;
         
         if(canAdd)
-            items.add(new PaletteItem(species, active));
+            items.add(new PaletteItem(speciesID, active));
         resetSize();
         repaint();
     }
     
-    public void removePaletteItem(UnitInterface.Species species){
+    public void removePaletteItem(int speciesID){
         for(int i = 0; i < items.size(); i++)
-            if(items.get(i).getSpecies() == species) {
+            if(items.get(i).getSpeciesID() == speciesID) {
                 selectedIndex--;
                 for(; selectedIndex >= 0; selectedIndex--)
                     if(items.get(selectedIndex).active)
@@ -135,21 +137,19 @@ public class UnitPalette extends JPanel implements MouseListener
         PaletteItem item = items.get(selectedIndex);
         if(!item.active | item.count == 0)
             return null;
-        Class<UnitInterface> unitClass = item.getSpecies().getUnitClass();
-        UnitInterface ret = (UnitInterface) unitClass
-                .getConstructor(Integer.class).newInstance(playerID);
+        UnitInterface ret = (UnitInterface) SpeciesLoader.getNewUnit(item.getSpeciesID());
         if(item.count < 0)
             item.count--;
         return ret;
   
     }
     
-    public UnitInterface.Species getSpeciesAtIndex(int index)    {
+    public int getSpeciesAtIndex(int index)    {
         PaletteItem item = items.get(index);
         if(item.active)
-            return item.species;
+            return item.speciesID;
         else
-            return UnitInterface.Species.INVALID;
+            return -1;
     }
     
     public int getSpeciesCount() {
@@ -204,7 +204,7 @@ public class UnitPalette extends JPanel implements MouseListener
             AffineTransform xform = new AffineTransform();
             xform.translate(offset, 1);
             xform.scale(ICON_SCALE, ICON_SCALE);
-            Image img = tileManager.getImage(item.species.getTextureCode());
+            Image img = tileManager.getImage(SpeciesLoader.getSpecies(item.speciesID).textureCode);
             g2.drawImage(img, xform, this);
             
             g2.setColor(getForeground());
@@ -224,10 +224,11 @@ public class UnitPalette extends JPanel implements MouseListener
         }
     }
     
-    public void init(ImageManager tileManager)
+    public void init(ImageManager tileManager) throws Exception
     {
         addMouseListener(this);
         this.tileManager = tileManager;
-        
+        for(int c = 0; c < SpeciesLoader.getSpeciesCount(); c++)
+            addPaletteItem(c, true);
     }
 }

@@ -6,6 +6,8 @@
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.GameLogicException;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.IntegerRangeRule;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.IntegerSetRule;
 import java.util.HashSet;
 import java.util.Set;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
@@ -16,38 +18,49 @@ import java.io.Serializable;
  * @author glitchedcode
  */
 public class Unit implements UnitInterface, Serializable, Cloneable
-{    
-    // ALL FIELDS MARKED WITH * MUST BE INITIALIZED IN ALL SUBCLASSES
-    // REFER TO THE Cell CLASS FOR AN EXAMPLE OF CORRECT USAGE
+{   
+    public final int speciesID;
+    
     protected State currentState = State.INVALID;
     protected State nextTurnState = State.ALIVE;
 
-    protected Species species;                //*
-    protected Set<Species> friendlySpecies;        //* add friendly species
-    protected Set<Species> hostileSpecies;         //* add hostile species
+    protected HashSet<Integer> friendlySpecies;   
+    protected HashSet<Integer> hostileSpecies;
 
-    protected Integer health;                 //*
+    protected Integer health;
     protected boolean healthChanged = false;
 
-    protected RuleInterface<Integer> friendlyCountSelector;  //*
-    protected RuleInterface<Integer> hostileCountSelector;   //*
-    protected RuleInterface<Integer> reproductionSelector;   //*
+    protected RuleInterface<Integer> friendlyCountSelector;  
+    protected RuleInterface<Integer> hostileCountSelector;   
+    protected RuleInterface<Integer> reproductionSelector;   
     
     private int playerID;
     private boolean competitive = false;
 
-    protected Unit() {
+    private void initSpeciesData(SpeciesData data)
+    {
+        health = data.health;
+        nextTurnState = data.initialState;
         
-        playerID = 0;
-        friendlySpecies = new HashSet<>();
-        hostileSpecies = new HashSet<>();
+        friendlySpecies = data.getFriendlySpecies();
+        hostileSpecies = data.getHostileSpecies();
+        
+        friendlyCountSelector = data.friendlyCountSelector;
+        hostileCountSelector = data.hostileCountSelector;
+        reproductionSelector = data.reproductionSelector;
     }
     
-    protected Unit(int playerID) {
+    protected Unit(SpeciesData data) {
+        speciesID = data.speciesID;
+        playerID = 0;
+        initSpeciesData(data);
+    }
+    
+    protected Unit(SpeciesData data, int playerID) {
         this.playerID = playerID;
-        
-        friendlySpecies = new HashSet<>();
-        hostileSpecies = new HashSet<>();
+        speciesID = data.speciesID;
+
+        initSpeciesData(data);
     }
 
     @Override public final int getPlayerID() { return playerID; }
@@ -72,13 +85,13 @@ public class Unit implements UnitInterface, Serializable, Cloneable
 
             Integer oppositeDir = UnitInterface.getOppositeDirection(i);
 
-            if ( friendlySpecies.contains(current.getSpecies()) )
+            if ( friendlySpecies.contains(current.getSpeciesID()) )
                 friendlyCount++;
 
             // additionally check if the adjacent cell can attack from 
             // their position relative to this cell
             boolean attacked = false;
-            if ( hostileSpecies.contains(current.getSpecies()) )
+            if ( hostileSpecies.contains(current.getSpeciesID()) )
                 attacked = current.attack(oppositeDir);
             if ( attacked )
                 hostileCount++;
@@ -203,17 +216,17 @@ public class Unit implements UnitInterface, Serializable, Cloneable
      *
      * @return
      */
-    @Override public final Species getSpecies() { return species; }
+    @Override public final int getSpeciesID() { return speciesID; }
 
     /**
      * @return set with friendly species
      */
-    @Override public final Set<Species> getFriendlySpecies() { return friendlySpecies; }
+    @Override public final Set<Integer> getFriendlySpecies() { return friendlySpecies; }
 
     /**
      * @return set with hostile species
      */
-    @Override public final Set<Species> getHostileSpecies() { return hostileSpecies; }
+    @Override public final Set<Integer> getHostileSpecies() { return hostileSpecies; }
 
     /**
      *
@@ -240,7 +253,7 @@ public class Unit implements UnitInterface, Serializable, Cloneable
     @Override
     public String toString()
     {
-        String ret = species.toString();
+        String ret = SpeciesLoader.getSpecies(speciesID).name;
         ret += "@" + hashCode();
         ret += " " + currentState.toString();
         return ret;

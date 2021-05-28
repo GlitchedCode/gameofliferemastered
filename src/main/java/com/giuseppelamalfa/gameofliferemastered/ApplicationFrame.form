@@ -464,7 +464,7 @@
         <Container class="com.giuseppelamalfa.gameofliferemastered.ui.UnitPalette" name="unitPalette">
           <AuxValues>
             <AuxValue name="JLayeredPane.layer" type="java.lang.Integer" value="200"/>
-            <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="unitPalette.init(tileManager);&#xa;try{&#xa;    unitPalette.addPaletteItem(UnitInterface.Species.CELL, true);&#xa;}catch (Exception e) {}"/>
+            <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="try {&#xa;    unitPalette.init(tileManager);&#xa;} catch (Exception e) {e.printStackTrace();}"/>
           </AuxValues>
 
           <Layout>

@@ -22,7 +22,7 @@ import org.json.JSONObject;
  *
  * @author glitchedcode
  */
-public class UnitClassLoader {
+public class SpeciesLoader {
     
     static private final String rulePath = "com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.";
     static HashMap<Integer, UnitInterface.SpeciesData> speciesData;
@@ -31,8 +31,8 @@ public class UnitClassLoader {
             throws IOException, ClassNotFoundException, InstantiationException, 
             IllegalAccessException, IllegalArgumentException, InvocationTargetException {        
         
-        InputStream istream = new UnitClassLoader().getClass().
-                getClassLoader().getResourceAsStream("units.json");
+        InputStream istream = new SpeciesLoader().getClass().
+                getClassLoader().getResourceAsStream("species.json");
         BufferedReader reader = new BufferedReader(new InputStreamReader(istream));
         StringBuilder strBuilder = new StringBuilder();
         String line;
@@ -41,7 +41,7 @@ public class UnitClassLoader {
 
         speciesData = new HashMap<>();
         HashMap<String, Integer> speciesIDs = new HashMap<>();
-        JSONArray unitDataArray = new JSONObject(strBuilder.toString()).getJSONArray("unitData");
+        JSONArray unitDataArray = new JSONObject(strBuilder.toString()).getJSONArray("speciesData");
         
         // Correlate names to IDs
         for(int c = 0; c < unitDataArray.length(); c++)
@@ -61,26 +61,47 @@ public class UnitClassLoader {
             for(int i = 0; i < hostiles.length(); i++)
                 hostileSpecies.add(speciesIDs.get(friendlies.getString(i)));    
             
-            current.put("friendlySpecies", friendlySpecies);
-            current.put("hostileSpecies", hostileSpecies);
+            current.put("friendlySpeciesSet", friendlySpecies);
+            current.put("hostileSpeciesSet", hostileSpecies);
             
             // Create rule objects
-            JSONObject friendlyCount = current.getJSONObject("friendlyCountSelector");
-            Class<?> friendlyRule = Class.forName(rulePath + friendlyCount.getString("ruleClassName"));
-            JSONObject hostileCount = current.getJSONObject("hostileCountSelector");
-            Class<?> hostileRule = Class.forName(rulePath + friendlyCount.getString("ruleClassName"));
+            JSONObject friendlyCountJSON = current.getJSONObject("friendlyCountSelector");
+            Class<?> friendlyRule = Class.forName(rulePath + friendlyCountJSON.getString("ruleClassName"));
+            JSONObject hostileCountJSON = current.getJSONObject("hostileCountSelector");
+            Class<?> hostileRule = Class.forName(rulePath + hostileCountJSON.getString("ruleClassName"));
             JSONObject reproductionCount = current.getJSONObject("reproductionSelector");
-            Class<?> reproductionRule = Class.forName(rulePath + friendlyCount.getString("ruleClassName"));
+            Class<?> reproductionRule = Class.forName(rulePath + reproductionCount.getString("ruleClassName"));
             
-            try {
-                current.put("friendlyCountSelector", friendlyRule.getConstructors()[0].newInstance(friendlyCount.getJSONArray("args").toList()));
-                current.put("hostileCountSelector", hostileRule.getConstructors()[0].newInstance(friendlyCount.getJSONArray("args").toList()));
-                current.put("reproductionSelector", reproductionRule.getConstructors()[0].newInstance(friendlyCount.getJSONArray("args").toList()));
-            } catch (InvocationTargetException ex) {
-                ex.printStackTrace();
-            }
-                        
-            speciesData.put(c, new UnitInterface.SpeciesData(c, current));
+
+            @SuppressWarnings("unchecked")
+            RuleInterface<Integer> friendlyCountRule = 
+                    (RuleInterface<Integer>)friendlyRule.getConstructors()[0].newInstance(friendlyCountJSON.getJSONArray("args").toList());
+            @SuppressWarnings("unchecked")
+            RuleInterface<Integer> hostileCountRule = 
+                    (RuleInterface<Integer>)hostileRule.getConstructors()[0].newInstance(hostileCountJSON.getJSONArray("args").toList());
+            @SuppressWarnings("unchecked")
+            RuleInterface<Integer> reproductionCountRule = 
+                    (RuleInterface<Integer>)reproductionRule.getConstructors()[0].newInstance(reproductionCount.getJSONArray("args").toList());
+
+            speciesData.put(c, new UnitInterface.SpeciesData(speciesIDs.get(current.getString("name")), current, friendlySpecies, 
+                    hostileSpecies, friendlyCountRule, hostileCountRule, reproductionCountRule));
         }
     }
+    
+    public static synchronized UnitInterface.SpeciesData getSpecies(int index){
+        return speciesData.get(index);
+    }
+    
+    public static synchronized int getSpeciesCount(){
+        return speciesData.size();
+    }
+    
+    public static synchronized Unit getNewUnit(int speciesID, int playerID) throws IllegalArgumentException {
+        return new Unit(speciesData.get(speciesID), playerID);
+    }
+
+    public static synchronized Unit getNewUnit(int speciesID) throws IllegalArgumentException {
+        return getNewUnit(speciesID, 0);
+    }
+
 }
