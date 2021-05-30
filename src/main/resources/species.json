@@ -1,8 +1,9 @@
 {
     "author" : "glitchedcode",
     "README" : {
-        "name": "the unit's species name",
-        "textureCode": "the unit's texture code",
+        "name": "the species' name",
+        "id" : "the species' numeric ID, must be unique",
+        "textureCode": "the species' texture code",
         "friendlySpecies": "a set of species the unit considers friendly",
         "hostileSpecies": "a set of species the unit considers friendly",
         "health": "the unit's initial health",
@@ -16,6 +17,8 @@
     "speciesData" : [
         {
             "name" : "Cell",
+            "id" : 0,
+            "implementingType" : "Unit",
             "textureCode" : "cell",
             "friendlySpecies" : [
                 "Cell"
@@ -38,6 +41,8 @@
         },
         {
             "name" : "Snake",
+            "id" : 1,
+            "implementingType" : "Unit",
             "textureCode" : "snake",
             "friendlySpecies" : [
                 "Snake"

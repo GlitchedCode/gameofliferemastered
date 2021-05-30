@@ -6,9 +6,6 @@
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.GameLogicException;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.IntegerRangeRule;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.IntegerSetRule;
-import java.util.HashSet;
 import java.util.Set;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
 import java.io.Serializable;
@@ -22,10 +19,10 @@ public class Unit implements UnitInterface, Serializable, Cloneable
     public final int speciesID;
     
     protected State currentState = State.INVALID;
-    protected State nextTurnState = State.ALIVE;
+    protected State nextTurnState = State.INVALID;
 
-    protected HashSet<Integer> friendlySpecies;   
-    protected HashSet<Integer> hostileSpecies;
+    protected Set<Integer> friendlySpecies;   
+    protected Set<Integer> hostileSpecies;
 
     protected Integer health;
     protected boolean healthChanged = false;
@@ -42,24 +39,31 @@ public class Unit implements UnitInterface, Serializable, Cloneable
         health = data.health;
         nextTurnState = data.initialState;
         
-        friendlySpecies = data.getFriendlySpecies();
-        hostileSpecies = data.getHostileSpecies();
+        friendlySpecies = data.friendlySpecies;
+        hostileSpecies = data.hostileSpecies;
         
         friendlyCountSelector = data.friendlyCountSelector;
         hostileCountSelector = data.hostileCountSelector;
         reproductionSelector = data.reproductionSelector;
     }
     
-    protected Unit(SpeciesData data) {
+    public Unit(UnitInterface.SpeciesData data) {
         speciesID = data.speciesID;
         playerID = 0;
         initSpeciesData(data);
     }
     
-    protected Unit(SpeciesData data, int playerID) {
+    public Unit(UnitInterface.SpeciesData data, Integer playerID) {
         this.playerID = playerID;
         speciesID = data.speciesID;
 
+        initSpeciesData(data);
+    }
+    
+    public Unit(UnitInterface.SpeciesData data, Integer playerID, Boolean competitive) {
+        this.playerID = playerID;
+        speciesID = data.speciesID;
+        this.competitive = competitive;
         initSpeciesData(data);
     }
 

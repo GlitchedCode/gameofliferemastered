@@ -6,7 +6,6 @@
 package com.giuseppelamalfa.gameofliferemastered.ui;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
 import com.giuseppelamalfa.gameofliferemastered.utils.ImageManager;
 import java.awt.BasicStroke;
@@ -29,7 +28,7 @@ class PaletteItem implements Serializable {
     public boolean active;
     public int count;
     
-    public PaletteItem(int speciesID, boolean active, int count) throws IllegalArgumentException    {
+    public PaletteItem(int speciesID, boolean active, int count) throws IllegalArgumentException {
         if(count < 0)
             throw new IllegalArgumentException("Invalid unit count.");
         this.speciesID = speciesID;
@@ -137,7 +136,7 @@ public class UnitPalette extends JPanel implements MouseListener
         PaletteItem item = items.get(selectedIndex);
         if(!item.active | item.count == 0)
             return null;
-        UnitInterface ret = (UnitInterface) SpeciesLoader.getNewUnit(item.getSpeciesID());
+        UnitInterface ret = (UnitInterface) SpeciesLoader.getNewUnit(item.getSpeciesID(), playerID);
         if(item.count < 0)
             item.count--;
         return ret;

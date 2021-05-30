@@ -158,6 +158,7 @@ public class Grid implements Serializable, Cloneable
      * @param unit Unit to be set.
      */
     public final void setUnit(int row, int col, UnitInterface unit) {
+        if(unit == null) return;
         if(!players.containsKey(unit.getPlayerID())) return;
         unit.update();
         setToPosition(row, col, unit);

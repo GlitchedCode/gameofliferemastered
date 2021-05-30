@@ -13,8 +13,6 @@ import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -24,12 +22,14 @@ import org.json.JSONObject;
  */
 public class SpeciesLoader {
     
-    static private final String rulePath = "com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.";
+    static public final String RULE_CLASS_PATH = "com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.";
+    static public final String UNIT_CLASS_PATH = "com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.";
+    
     static HashMap<Integer, UnitInterface.SpeciesData> speciesData;
     
     public static synchronized void loadUnitClasses() 
             throws IOException, ClassNotFoundException, InstantiationException, 
-            IllegalAccessException, IllegalArgumentException, InvocationTargetException {        
+            IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {        
         
         InputStream istream = new SpeciesLoader().getClass().
                 getClassLoader().getResourceAsStream("species.json");
@@ -45,46 +45,15 @@ public class SpeciesLoader {
         
         // Correlate names to IDs
         for(int c = 0; c < unitDataArray.length(); c++)
-            speciesIDs.put(unitDataArray.getJSONObject(c).getString("name"), c);
+        {
+            JSONObject current = unitDataArray.getJSONObject(c);
+            speciesIDs.put(current.getString("name"), current.getInt("id"));
+        }
         
         for(int c = 0; c < unitDataArray.length(); c++)
         {
-            // Calculate friendly and hostile species sets
             JSONObject current = unitDataArray.getJSONObject(c);
-            JSONArray friendlies = current.getJSONArray("friendlySpecies");
-            HashSet<Integer> friendlySpecies = new HashSet<>();
-            JSONArray hostiles = current.getJSONArray("hostileSpecies");
-            HashSet<Integer> hostileSpecies = new HashSet<>();
-
-            for(int i = 0; i < friendlies.length(); i++)
-                friendlySpecies.add(speciesIDs.get(friendlies.getString(i)));
-            for(int i = 0; i < hostiles.length(); i++)
-                hostileSpecies.add(speciesIDs.get(friendlies.getString(i)));    
-            
-            current.put("friendlySpeciesSet", friendlySpecies);
-            current.put("hostileSpeciesSet", hostileSpecies);
-            
-            // Create rule objects
-            JSONObject friendlyCountJSON = current.getJSONObject("friendlyCountSelector");
-            Class<?> friendlyRule = Class.forName(rulePath + friendlyCountJSON.getString("ruleClassName"));
-            JSONObject hostileCountJSON = current.getJSONObject("hostileCountSelector");
-            Class<?> hostileRule = Class.forName(rulePath + hostileCountJSON.getString("ruleClassName"));
-            JSONObject reproductionCount = current.getJSONObject("reproductionSelector");
-            Class<?> reproductionRule = Class.forName(rulePath + reproductionCount.getString("ruleClassName"));
-            
-
-            @SuppressWarnings("unchecked")
-            RuleInterface<Integer> friendlyCountRule = 
-                    (RuleInterface<Integer>)friendlyRule.getConstructors()[0].newInstance(friendlyCountJSON.getJSONArray("args").toList());
-            @SuppressWarnings("unchecked")
-            RuleInterface<Integer> hostileCountRule = 
-                    (RuleInterface<Integer>)hostileRule.getConstructors()[0].newInstance(hostileCountJSON.getJSONArray("args").toList());
-            @SuppressWarnings("unchecked")
-            RuleInterface<Integer> reproductionCountRule = 
-                    (RuleInterface<Integer>)reproductionRule.getConstructors()[0].newInstance(reproductionCount.getJSONArray("args").toList());
-
-            speciesData.put(c, new UnitInterface.SpeciesData(speciesIDs.get(current.getString("name")), current, friendlySpecies, 
-                    hostileSpecies, friendlyCountRule, hostileCountRule, reproductionCountRule));
+            speciesData.put(c, new UnitInterface.SpeciesData(speciesIDs.get(current.getString("name")), current, speciesIDs));
         }
     }
     
@@ -96,11 +65,21 @@ public class SpeciesLoader {
         return speciesData.size();
     }
     
-    public static synchronized Unit getNewUnit(int speciesID, int playerID) throws IllegalArgumentException {
-        return new Unit(speciesData.get(speciesID), playerID);
+    public static synchronized UnitInterface getNewUnit(int speciesID, int playerID, boolean competitive) {
+        try{
+            UnitInterface.SpeciesData data = speciesData.get(speciesID);
+            return (UnitInterface) data.constructor.newInstance(data, playerID, competitive);
+        }catch (IllegalAccessException | IllegalArgumentException | InstantiationException 
+                | SecurityException | InvocationTargetException e) {
+            return null;
+        }
+    }
+    
+    public static synchronized UnitInterface getNewUnit(int speciesID, int playerID) throws IllegalArgumentException {
+        return getNewUnit(speciesID, playerID, false);
     }
 
-    public static synchronized Unit getNewUnit(int speciesID) throws IllegalArgumentException {
+    public static synchronized UnitInterface getNewUnit(int speciesID) throws IllegalArgumentException {
         return getNewUnit(speciesID, 0);
     }
 
