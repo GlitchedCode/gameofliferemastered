@@ -5,6 +5,7 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.state.State;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.HashSet;

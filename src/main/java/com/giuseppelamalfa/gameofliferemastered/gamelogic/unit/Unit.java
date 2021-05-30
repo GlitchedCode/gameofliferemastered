@@ -5,6 +5,7 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.state.State;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.GameLogicException;
 import java.util.Set;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
@@ -47,20 +48,20 @@ public class Unit implements UnitInterface, Serializable, Cloneable
         reproductionSelector = data.reproductionSelector;
     }
     
-    public Unit(UnitInterface.SpeciesData data) {
+    public Unit(SpeciesData data) {
         speciesID = data.speciesID;
         playerID = 0;
         initSpeciesData(data);
     }
     
-    public Unit(UnitInterface.SpeciesData data, Integer playerID) {
+    public Unit(SpeciesData data, Integer playerID) {
         this.playerID = playerID;
         speciesID = data.speciesID;
 
         initSpeciesData(data);
     }
     
-    public Unit(UnitInterface.SpeciesData data, Integer playerID, Boolean competitive) {
+    public Unit(SpeciesData data, Integer playerID, Boolean competitive) {
         this.playerID = playerID;
         speciesID = data.speciesID;
         this.competitive = competitive;

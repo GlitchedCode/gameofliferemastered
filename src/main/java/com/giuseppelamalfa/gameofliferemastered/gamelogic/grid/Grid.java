@@ -5,6 +5,7 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.grid;
 
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.state.State;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.GameLogicException;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.*;
@@ -420,7 +421,7 @@ public class Grid implements Serializable, Cloneable
 
                 // Expand the board's processing area accordingly as we
                 // process more units
-                if ( current.getNextTurnState() != UnitInterface.State.DEAD )
+                if ( current.getNextTurnState() != State.DEAD )
                 {
                     moveProcessBoundaryToInclude(row, col);
                     aliveNextTurn = true;
@@ -438,12 +439,8 @@ public class Grid implements Serializable, Cloneable
             {
                 UnitInterface unit = board.get(row, col);
                 if ( unit != null )
-                {
-                    if ( unit.getCurrentState() != UnitInterface.State.DEAD )
-                    {
+                    if ( unit.isAlive() )
                         continue;
-                    }
-                }
 
                 UnitInterface[] adjacentUnits = getUnitsAdjacentToPosition(row, col);
 
@@ -475,7 +472,7 @@ public class Grid implements Serializable, Cloneable
                 {
                     current.update();
                     players.get(current.getPlayerID()).score += getUnitScoreIncrement(current);
-                    if ( current.getCurrentState() == UnitInterface.State.DEAD )
+                    if ( !current.isAlive() )
                         board.remove(row, col);
                 }
             }

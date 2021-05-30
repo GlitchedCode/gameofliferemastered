@@ -5,14 +5,12 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
-import java.util.HashSet;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -25,7 +23,7 @@ public class SpeciesLoader {
     static public final String RULE_CLASS_PATH = "com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.";
     static public final String UNIT_CLASS_PATH = "com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.";
     
-    static HashMap<Integer, UnitInterface.SpeciesData> speciesData;
+    static HashMap<Integer, SpeciesData> speciesData;
     
     public static synchronized void loadUnitClasses() 
             throws IOException, ClassNotFoundException, InstantiationException, 
@@ -53,11 +51,11 @@ public class SpeciesLoader {
         for(int c = 0; c < unitDataArray.length(); c++)
         {
             JSONObject current = unitDataArray.getJSONObject(c);
-            speciesData.put(c, new UnitInterface.SpeciesData(speciesIDs.get(current.getString("name")), current, speciesIDs));
+            speciesData.put(c, new SpeciesData(speciesIDs.get(current.getString("name")), current, speciesIDs));
         }
     }
     
-    public static synchronized UnitInterface.SpeciesData getSpecies(int index){
+    public static synchronized SpeciesData getSpecies(int index){
         return speciesData.get(index);
     }
     
@@ -67,7 +65,7 @@ public class SpeciesLoader {
     
     public static synchronized UnitInterface getNewUnit(int speciesID, int playerID, boolean competitive) {
         try{
-            UnitInterface.SpeciesData data = speciesData.get(speciesID);
+            SpeciesData data = speciesData.get(speciesID);
             return (UnitInterface) data.constructor.newInstance(data, playerID, competitive);
         }catch (IllegalAccessException | IllegalArgumentException | InstantiationException 
                 | SecurityException | InvocationTargetException e) {

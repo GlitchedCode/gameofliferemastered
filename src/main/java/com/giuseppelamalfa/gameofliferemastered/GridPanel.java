@@ -283,7 +283,6 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
         
         
         for (int r = 0; r < drawnRows; r++) // rows
-        {
             for (int c = 0; c < drawnColumns; c++) // columns
             {
                 int row = r + startRow;
@@ -304,7 +303,6 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
 
                 drawUnit(g2, xform, this, unit);
             }
-        }
     }
     
     public void drawUnit(Graphics2D g, AffineTransform xform, ImageObserver obs, UnitInterface unit) {
