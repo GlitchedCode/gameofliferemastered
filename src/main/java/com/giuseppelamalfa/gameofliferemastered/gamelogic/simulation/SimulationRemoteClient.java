@@ -26,14 +26,12 @@ import java.util.logging.Logger;
  * @author glitchedcode
  */
 public class SimulationRemoteClient implements SimulationInterface {
-    boolean isStarted = false;
-    boolean isRunning = false;
-    
+
     int playerCount;
     int rowCount = 1;
     int columnCount = 1;
     Grid currentGrid;
-    Grid syncGrid = new Grid(1,1);
+    Grid syncGrid = new Grid(1, 1);
 
     GridPanel panel;
     Socket clientSocket;
@@ -41,81 +39,132 @@ public class SimulationRemoteClient implements SimulationInterface {
     String host;
     int portNumber;
     PlayerData localPlayerData;
-    
+
     public SimulationRemoteClient(String playerName, String host, int portNumber) throws IOException, Exception {
         localPlayerData = new PlayerData(playerName);
-        init(host,portNumber);
+        init(host, portNumber);
     }
-    
-    public void init(String host, int portNumber) throws IOException, Exception{
+
+    public void init(String host, int portNumber) throws IOException, Exception {
         clientSocket = new Socket(host, portNumber);
         outputStream = new ObjectOutputStream(clientSocket.getOutputStream());
 
         outputStream.writeObject(new UpdatePlayerDataRequest(localPlayerData, true, true));
         ApplicationFrame.writeToStatusLog("Connected to " + host + ":" + portNumber);
-        
+
         new Thread(() -> {
-                try {
-                    ObjectInputStream input = new ObjectInputStream(clientSocket.getInputStream());
-                    while(true)
-                        handleRequest(input.readObject(), 0);
+            try {
+                ObjectInputStream input = new ObjectInputStream(clientSocket.getInputStream());
+                while (true) {
+                    handleRequest(input.readObject(), 0);
                 }
-                catch (EOFException | SocketException e) { }
-                catch (InvalidRequestException | IOException | ClassNotFoundException e){
-                    e.printStackTrace();
-                    isRunning = false;
-                    isStarted = false;
-                }
-                try{clientSocket.close();} catch (IOException a) {}
+            } catch (EOFException | SocketException e) {
+            } catch (InvalidRequestException | IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+                currentGrid.setRunning(false);
+            }
+            try {
+                clientSocket.close();
+            } catch (IOException a) {
+            }
         }).start();
-        
+
         currentGrid = new Grid(1, 1);
-        isStarted = true;
     }
-    
-    
-    @Override public boolean isStarted() { return isStarted; }
-    @Override public boolean isRunning() { return isRunning; }
-    @Override public boolean isLocallyControlled() { return false; }
-    @Override public String getGameModeName() { return currentGrid.GAMEMODE_NAME; }
-    @Override public int getLocalPlayerID() { 
-        return localPlayerData.ID; 
+
+    @Override
+    public boolean isLocked() {
+        return currentGrid.isLocked();
     }
-    @Override public PlayerData.TeamColor getPlayerColor(int ID){
+
+    @Override
+    public boolean isRunning() {
+        return currentGrid.isRunning();
+    }
+
+    @Override
+    public boolean isLocallyControlled() {
+        return false;
+    }
+
+    @Override
+    public String getGameModeName() {
+        return currentGrid.GAMEMODE_NAME;
+    }
+
+    @Override
+    public int getLocalPlayerID() {
+        return localPlayerData.ID;
+    }
+
+    @Override
+    public PlayerData.TeamColor getPlayerColor(int ID) {
         return currentGrid.getPlayerColor(ID);
     }
-    @Override public ArrayList<PlayerData> getPlayerRankings() { return currentGrid.getPlayerRankings(); }
 
-    @Override public int getRowCount() { return rowCount; }
-    @Override public int getColumnCount() { return columnCount; }
-    @Override public int getSectorSideLength() { return currentGrid.SECTOR_SIDE_LENGTH; }
-    @Override public int getCurrentTurn() { return currentGrid.getCurrentTurn(); }
-
-    @Override public UnitInterface    getUnit(int row, int col) { return currentGrid.getUnit(row, col); }
-    @Override public void removeUnit(int row, int col) { currentGrid.removeUnit(row, col); }
     @Override
-    public void             setUnit(int row, int col, UnitInterface unit) {
+    public ArrayList<PlayerData> getPlayerRankings() {
+        return currentGrid.getPlayerRankings();
+    }
+
+    @Override
+    public int getRowCount() {
+        return rowCount;
+    }
+
+    @Override
+    public int getColumnCount() {
+        return columnCount;
+    }
+
+    @Override
+    public int getSectorSideLength() {
+        return currentGrid.SECTOR_SIDE_LENGTH;
+    }
+
+    @Override
+    public String getStatusString() {
+        return currentGrid.getStatusString();
+    }
+
+    @Override
+    public int getCurrentTurn() {
+        return currentGrid.getCurrentTurn();
+    }
+
+    @Override
+    public UnitInterface getUnit(int row, int col) {
+        return currentGrid.getUnit(row, col);
+    }
+
+    @Override
+    public void removeUnit(int row, int col) {
+        currentGrid.removeUnit(row, col);
+    }
+
+    @Override
+    public void setUnit(int row, int col, UnitInterface unit) {
         try {
             outputStream.writeObject(new SetUnitRequest(row, col, unit));
         } catch (IOException ex) {
             Logger.getLogger(SimulationRemoteClient.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
         currentGrid.setUnit(row, col, unit);
         panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
     }
-    
+
     @Override
     public synchronized void computeNextTurn() throws Exception {
         currentGrid.computeNextTurn();
         panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
     }
-    
+
     @Override
     public void setRunning(boolean val) {
-        if(isLocallyControlled())
+        if (isLocallyControlled()) {
             setRunning(val);
-        else{
+        } else {
             try {
                 outputStream.writeObject(new GameStatusRequest(val));
             } catch (IOException ex) {
@@ -123,30 +172,30 @@ public class SimulationRemoteClient implements SimulationInterface {
             }
         }
     }
-    
+
     @Override
     public void handleRequest(Object requestObject, int ID)
             throws IOException, InvalidRequestException {
-        Request request = (Request)requestObject;
-        
-        switch(request.getType()) {
+        Request request = (Request) requestObject;
+
+        switch (request.getType()) {
             case LOG_MESSAGE:
-                ApplicationFrame.writeToStatusLog(((LogMessageRequest)request).message);
+                ApplicationFrame.writeToStatusLog(((LogMessageRequest) request).message);
                 break;
             case SYNC_GRID:
-                synchronized(syncGrid){
-                    syncGrid = ((SyncGridRequest)request).grid;
+                synchronized (syncGrid) {
+                    syncGrid = ((SyncGridRequest) request).grid;
                 }
                 rowCount = syncGrid.getRowCount();
                 columnCount = syncGrid.getColumnCount();
                 Grid tmpGrid;
                 try {
-                    tmpGrid = (Grid)syncGrid.clone();
+                    tmpGrid = (Grid) syncGrid.clone();
                 } catch (CloneNotSupportedException ex) {
                     Logger.getLogger(SimulationRemoteClient.class.getName()).log(Level.SEVERE, null, ex);
                     break;
                 }
-                synchronized(currentGrid) {
+                synchronized (currentGrid) {
                     currentGrid = tmpGrid;
                     currentGrid.setPlayerIDCheckNextTurn();
                     currentGrid.addPlayer(localPlayerData);
@@ -155,77 +204,75 @@ public class SimulationRemoteClient implements SimulationInterface {
                 panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
                 break;
             case UPDATE_PLAYER_DATA:
-                UpdatePlayerDataRequest updateRequest = (UpdatePlayerDataRequest)request;
+                UpdatePlayerDataRequest updateRequest = (UpdatePlayerDataRequest) request;
                 PlayerData playerData = updateRequest.playerData;
-                
-                if(updateRequest.updateLocal)
-                {
-                    if(playerData.color != PlayerData.TeamColor.NONE)
+
+                if (updateRequest.updateLocal) {
+                    if (playerData.color != PlayerData.TeamColor.NONE) {
                         localPlayerData.color = playerData.color;
-                    if(playerData.ID != -1)
-                    {
+                    }
+                    if (playerData.ID != -1) {
                         currentGrid.removePlayer(localPlayerData.ID);
                         localPlayerData.ID = playerData.ID;
                         currentGrid.addPlayer(localPlayerData);
                     }
-                } 
-                if(playerData.ID != localPlayerData.ID) {
-                    if(updateRequest.connected) 
-                        currentGrid.addPlayer(playerData);
-                    else
-                        currentGrid.removePlayer(playerData.ID);
                 }
-                try{
+                if (playerData.ID != localPlayerData.ID) {
+                    if (updateRequest.connected) {
+                        currentGrid.addPlayer(playerData);
+                    } else {
+                        currentGrid.removePlayer(playerData.ID);
+                    }
+                }
+                try {
                     panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
-                }catch(Exception e){
+                } catch (Exception e) {
                     // IDK DUDE XDDDDDDDDDD
                 }
                 break;
             case DISCONNECT:
-                String msg = ((DisconnectRequest)request).message;
+                String msg = ((DisconnectRequest) request).message;
                 ApplicationFrame.writeToStatusLog("Disconnected from " + clientSocket.getRemoteSocketAddress()
-                    + ": " + msg);
+                        + ": " + msg);
                 clientSocket.close();
-                isRunning = false;
-                isStarted = false;
+                setRunning(false);
                 break;
             case PAUSE:
-                isRunning = ((GameStatusRequest)request).running;
+                setRunning(((GameStatusRequest) request).running);
                 break;
             case SET_UNIT:
-                SetUnitRequest setUnit = (SetUnitRequest)request;
+                SetUnitRequest setUnit = (SetUnitRequest) request;
                 currentGrid.setUnit(setUnit.row, setUnit.col, setUnit.unit);
                 panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
                 break;
         }
     }
+
     @Override
-    public void             synchronize() {
-        if(isStarted)
-        {
-            SyncGridRequest req = new SyncGridRequest();
-            try {
-                outputStream.writeObject(req);
-            } catch (IOException ex) {
-                Logger.getLogger(SimulationRemoteClient.class.getName()).log(Level.SEVERE, null, ex);
-            }
+    public void synchronize() {
+        SyncGridRequest req = new SyncGridRequest();
+        try {
+            outputStream.writeObject(req);
+        } catch (IOException ex) {
+            Logger.getLogger(SimulationRemoteClient.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+
     @Override
-    public void             initializeGridPanel(GridPanel panel) {
+    public void initializeGridPanel(GridPanel panel) {
         this.panel = panel;
     }
+
     @Override
-    public void          close(){
+    public void close() {
         try {
             outputStream.writeObject(new UpdatePlayerDataRequest(localPlayerData, false));
             clientSocket.close();
-        }catch(Exception e) {
+        } catch (Exception e) {
             System.err.println("e");
         }
-        
-        isStarted = false;
     }
-    
-    public void resize(int rows, int cols){}
+
+    public void resize(int rows, int cols) {
+    }
 }

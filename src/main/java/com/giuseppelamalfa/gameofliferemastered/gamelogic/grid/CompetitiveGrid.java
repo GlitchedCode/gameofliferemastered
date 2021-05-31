@@ -10,6 +10,9 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic.grid;
  * @author glitchedcode
  */
 public class CompetitiveGrid extends Grid {
+
+    public final static Integer SIMULATION_PHASE_LENGTH = 80;
+
     /**
      * Constructor
      *
@@ -18,7 +21,17 @@ public class CompetitiveGrid extends Grid {
      * @throws Exception
      */
     public CompetitiveGrid(Integer rows, Integer cols) throws Exception {
-        super(rows,cols);
+        super(rows, cols);
+        isLocked = true;
+        gameStatus = "Waiting for players...";
     }
-    
+
+    @Override
+    public void setRunning(boolean val) {
+    }
+
+    @Override
+    public synchronized void computeNextTurn() throws Exception {
+        advance();
+    }
 }

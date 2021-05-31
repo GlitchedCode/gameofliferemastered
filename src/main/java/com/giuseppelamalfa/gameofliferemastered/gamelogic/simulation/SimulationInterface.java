@@ -16,7 +16,7 @@ import java.util.ArrayList;
  */
 public interface SimulationInterface {
     
-    boolean         isStarted();
+    boolean         isLocked();
     boolean         isRunning();
     boolean         isLocallyControlled();
     String          getGameModeName();
@@ -28,6 +28,8 @@ public interface SimulationInterface {
     int             getColumnCount();
     void            resize(int rows, int cols);
     int             getSectorSideLength();
+    
+    String          getStatusString();
     int             getCurrentTurn();
     
     UnitInterface   getUnit(int row, int col);
