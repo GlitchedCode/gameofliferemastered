@@ -11,20 +11,18 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
  *
  * @author glitchedcode
  */
-public class GameLogicException extends Exception
-{
+public class GameLogicException extends Exception {
+
     private final Unit invalidUnit;
     private final String reason;
-    
-    public GameLogicException(Unit invalidUnit, String reason)
-    {
+
+    public GameLogicException(Unit invalidUnit, String reason) {
         this.invalidUnit = invalidUnit;
         this.reason = reason;
     }
-    
+
     @Override
-    public String toString()
-    {
+    public String toString() {
         String ret = "InvalidStateException: ";
         ret += invalidUnit.getClass().toString() + " ";
         ret += invalidUnit.getHealth().toString() + "HP ";

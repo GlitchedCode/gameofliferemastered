@@ -10,5 +10,5 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic.requests;
  * @author glitchedcode
  */
 public class InvalidRequestException extends Exception {
-    
+
 }

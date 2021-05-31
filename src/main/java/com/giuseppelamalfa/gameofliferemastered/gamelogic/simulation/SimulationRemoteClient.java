@@ -89,7 +89,7 @@ public class SimulationRemoteClient implements SimulationInterface {
 
     @Override
     public String getGameModeName() {
-        return currentGrid.GAMEMODE_NAME;
+        return currentGrid.getGameModeName();
     }
 
     @Override

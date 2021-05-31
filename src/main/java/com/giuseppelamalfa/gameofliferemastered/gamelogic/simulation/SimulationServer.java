@@ -9,6 +9,7 @@ import com.giuseppelamalfa.gameofliferemastered.ApplicationFrame;
 import com.giuseppelamalfa.gameofliferemastered.GridPanel;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.Grid;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.GameMode;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.requests.*;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
 import java.io.BufferedReader;
@@ -57,6 +58,7 @@ public class SimulationServer implements SimulationInterface {
 
     public final static Integer GRYD_SYNC_TURN_COUNT = 40;
 
+    final GameMode mode;
     int nextClientID = 1;
     int playerCount;
     int rowCount;
@@ -79,7 +81,8 @@ public class SimulationServer implements SimulationInterface {
     GridPanel panel;
 
     public SimulationServer(String playerName, int portNumber, int playerCount,
-            int rowCount, int columnCount) throws Exception {
+            int rowCount, int columnCount, GameMode mode) throws Exception {
+        this.mode = mode;
         initializeRemoteServer(portNumber, playerCount, rowCount, columnCount);
         localPlayerData = new PlayerData(playerName, extractRandomColor());
         localPlayerData.ID = 0;
@@ -88,6 +91,7 @@ public class SimulationServer implements SimulationInterface {
     }
 
     public SimulationServer(int rowCount, int columnCount) throws Exception {
+        mode = GameMode.SANDBOX;
         currentGrid = new Grid(rowCount, columnCount);
         localPlayerData = new PlayerData();
         localPlayerData.ID = 0;
@@ -121,7 +125,7 @@ public class SimulationServer implements SimulationInterface {
 
         this.rowCount = rowCount;
         this.columnCount = columnCount;
-        currentGrid = new Grid(rowCount, columnCount);
+        currentGrid = mode.getNewGrid(rowCount, columnCount);
 
         // Spawn a thread to accept client connections.
         acceptConnectionThread = new Thread(() -> {
@@ -218,12 +222,12 @@ public class SimulationServer implements SimulationInterface {
 
     @Override
     public boolean isLocallyControlled() {
-        return true;
+        return mode.locallyControlled;
     }
 
     @Override
     public String getGameModeName() {
-        return currentGrid.GAMEMODE_NAME;
+        return currentGrid.getGameModeName();
     }
 
     @Override

@@ -11,23 +11,29 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
  *
  * @author glitchedcode
  */
-public class AgingStateInterface implements StateInterface
-{
+public class AgingStateInterface implements StateInterface {
+
     @Override
-    public void enter(UnitInterface unit){}
+    public void enter(UnitInterface unit) {
+    }
+
     @Override
-    public void exit(UnitInterface unit){}
-    
+    public void exit(UnitInterface unit) {
+    }
+
     @Override
-    public boolean attackModifier(boolean speciesResult, Integer adjacencyPosition)
-    { return speciesResult; }
+    public boolean attackModifier(boolean speciesResult, Integer adjacencyPosition) {
+        return speciesResult;
+    }
+
     @Override
-    public boolean reproductionModifier(boolean speciesResult, Integer adjacencyPosition) 
-    { return speciesResult; }
+    public boolean reproductionModifier(boolean speciesResult, Integer adjacencyPosition) {
+        return speciesResult;
+    }
+
     @Override
-    public void independentAction(UnitInterface unit)
-    {
+    public void independentAction(UnitInterface unit) {
         unit.incrementHealth(-1);
     }
-    
+
 }

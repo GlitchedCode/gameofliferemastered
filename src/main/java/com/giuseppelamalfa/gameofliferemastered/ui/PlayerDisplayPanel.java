@@ -65,18 +65,19 @@ public class PlayerDisplayPanel extends javax.swing.JPanel {
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
-    
-    public void setToPlayer(PlayerData data){
-        if(data == null) reset();
-        else{
+
+    public void setToPlayer(PlayerData data) {
+        if (data == null) {
+            reset();
+        } else {
             nameLabel.setText(data.playerName);
             scoreLabel.setText(Integer.toString(data.score));
             scoreLabel.setBackground(data.color.getMainAWTColor());
             scoreLabel.setForeground(data.color.getTextAWTColor());
         }
     }
-    
-    public void reset(){
+
+    public void reset() {
         nameLabel.setText("");
         scoreLabel.setText("");
         scoreLabel.setBackground(PlayerData.TeamColor.NONE.getMainAWTColor());

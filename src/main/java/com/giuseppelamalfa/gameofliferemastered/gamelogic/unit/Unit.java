@@ -15,52 +15,51 @@ import java.io.Serializable;
  *
  * @author glitchedcode
  */
-public class Unit implements UnitInterface, Serializable, Cloneable
-{   
+public class Unit implements UnitInterface, Serializable, Cloneable {
+
     public final int speciesID;
-    
+
     protected State currentState = State.INVALID;
     protected State nextTurnState = State.INVALID;
 
-    protected Set<Integer> friendlySpecies;   
+    protected Set<Integer> friendlySpecies;
     protected Set<Integer> hostileSpecies;
 
     protected Integer health;
     protected boolean healthChanged = false;
 
-    protected RuleInterface<Integer> friendlyCountSelector;  
-    protected RuleInterface<Integer> hostileCountSelector;   
-    protected RuleInterface<Integer> reproductionSelector;   
-    
+    protected RuleInterface<Integer> friendlyCountSelector;
+    protected RuleInterface<Integer> hostileCountSelector;
+    protected RuleInterface<Integer> reproductionSelector;
+
     private int playerID;
     private boolean competitive = false;
 
-    private void initSpeciesData(SpeciesData data)
-    {
+    private void initSpeciesData(SpeciesData data) {
         health = data.health;
         nextTurnState = data.initialState;
-        
+
         friendlySpecies = data.friendlySpecies;
         hostileSpecies = data.hostileSpecies;
-        
+
         friendlyCountSelector = data.friendlyCountSelector;
         hostileCountSelector = data.hostileCountSelector;
         reproductionSelector = data.reproductionSelector;
     }
-    
+
     public Unit(SpeciesData data) {
         speciesID = data.speciesID;
         playerID = 0;
         initSpeciesData(data);
     }
-    
+
     public Unit(SpeciesData data, Integer playerID) {
         this.playerID = playerID;
         speciesID = data.speciesID;
 
         initSpeciesData(data);
     }
-    
+
     public Unit(SpeciesData data, Integer playerID, Boolean competitive) {
         this.playerID = playerID;
         speciesID = data.speciesID;
@@ -68,10 +67,21 @@ public class Unit implements UnitInterface, Serializable, Cloneable
         initSpeciesData(data);
     }
 
-    @Override public final int getPlayerID() { return playerID; }
-    @Override public final boolean isCompetitive() { return competitive; }
-    @Override public final void setCompetitive(boolean val) { competitive = val; }
-    
+    @Override
+    public final int getPlayerID() {
+        return playerID;
+    }
+
+    @Override
+    public final boolean isCompetitive() {
+        return competitive;
+    }
+
+    @Override
+    public final void setCompetitive(boolean val) {
+        competitive = val;
+    }
+
     /**
      * Intermediary function to compute the unit's state relative to the board
      *
@@ -85,21 +95,25 @@ public class Unit implements UnitInterface, Serializable, Cloneable
         for (int i = 0; i < 8; i++) // conto le unità ostili ed amichevoli
         {
             UnitInterface current = adjacentUnits[i];
-            if (!current.isAlive())
+            if (!current.isAlive()) {
                 continue;
+            }
 
             Integer oppositeDir = UnitInterface.getOppositeDirection(i);
 
-            if ( friendlySpecies.contains(current.getSpeciesID()) )
+            if (friendlySpecies.contains(current.getSpeciesID())) {
                 friendlyCount++;
+            }
 
             // additionally check if the adjacent cell can attack from 
             // their position relative to this cell
             boolean attacked = false;
-            if ( hostileSpecies.contains(current.getSpeciesID()) )
+            if (hostileSpecies.contains(current.getSpeciesID())) {
                 attacked = current.attack(oppositeDir);
-            if ( attacked )
+            }
+            if (attacked) {
                 hostileCount++;
+            }
         }
 
         // rule #1: population
@@ -107,21 +121,27 @@ public class Unit implements UnitInterface, Serializable, Cloneable
         boolean friendlyPenalty = !friendlyCountSelector.test(friendlyCount);
         boolean hostilePenalty = !hostileCountSelector.test(hostileCount);
 
-        if ( friendlyPenalty | hostilePenalty )
+        if (friendlyPenalty | hostilePenalty) {
             healthIncrement--;
+        }
 
-        if ( healthIncrement != 0 )
+        if (healthIncrement != 0) {
             incrementHealth(healthIncrement);
+        }
     }
 
     protected void endStep() {
-        if ( !healthChanged ) // rule #4: inactivity
+        if (!healthChanged) // rule #4: inactivity
+        {
             independentAction();
+        }
 
-        if ( health < 1 ) // rule #5: hp
+        if (health < 1) // rule #5: hp
+        {
             nextTurnState = State.DEAD;
-        else
+        } else {
             nextTurnState = currentState;
+        }
     }
 
     /**
@@ -140,7 +160,7 @@ public class Unit implements UnitInterface, Serializable, Cloneable
      */
     @Override
     public void update() {
-        if ( currentState != nextTurnState ) {
+        if (currentState != nextTurnState) {
             currentState.exit(this);
             currentState = nextTurnState;
             currentState.enter(this);
@@ -154,7 +174,7 @@ public class Unit implements UnitInterface, Serializable, Cloneable
         currentState = State.DEAD;
         nextTurnState = State.DEAD;
     }
-    
+
     @Override
     public boolean isAlive() {
         return currentState != State.DEAD & currentState != State.INVALID;
@@ -202,8 +222,7 @@ public class Unit implements UnitInterface, Serializable, Cloneable
      */
     @Override
     public State getNextTurnState() throws GameLogicException {
-        if ( nextTurnState == State.INVALID )
-        {
+        if (nextTurnState == State.INVALID) {
             throw new GameLogicException(this, "Invalid state.");
         }
         return nextTurnState;
@@ -214,56 +233,73 @@ public class Unit implements UnitInterface, Serializable, Cloneable
      *
      * @return
      */
-    @Override public final State getCurrentState() { return currentState; }
+    @Override
+    public final State getCurrentState() {
+        return currentState;
+    }
 
     /**
      * Get the unit's texture code
      *
      * @return
      */
-    @Override public final int getSpeciesID() { return speciesID; }
+    @Override
+    public final int getSpeciesID() {
+        return speciesID;
+    }
 
     /**
      * @return set with friendly species
      */
-    @Override public final Set<Integer> getFriendlySpecies() { return friendlySpecies; }
+    @Override
+    public final Set<Integer> getFriendlySpecies() {
+        return friendlySpecies;
+    }
 
     /**
      * @return set with hostile species
      */
-    @Override public final Set<Integer> getHostileSpecies() { return hostileSpecies; }
+    @Override
+    public final Set<Integer> getHostileSpecies() {
+        return hostileSpecies;
+    }
 
     /**
      *
      * @return lower bound of friendly units adjacent to this unit
      */
-    @Override public final RuleInterface<Integer> getReproductionSelector() { return reproductionSelector; }
+    @Override
+    public final RuleInterface<Integer> getReproductionSelector() {
+        return reproductionSelector;
+    }
 
     /**
      * @return unit's health points
      */
-    @Override public final Integer getHealth() { return health; }
+    @Override
+    public final Integer getHealth() {
+        return health;
+    }
 
     /**
      * Increments the unit's health
      *
      * @param increment health increment
      */
-    @Override 
+    @Override
     public void incrementHealth(int increment) {
         health = health + increment;
         healthChanged = true;
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         String ret = SpeciesLoader.getSpecies(speciesID).name;
         ret += "@" + hashCode();
         ret += " " + currentState.toString();
         return ret;
     }
-    
+
     @Override
     public Object clone() {
         try {

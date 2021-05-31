@@ -10,6 +10,7 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationS
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationInterface;
 import com.giuseppelamalfa.gameofliferemastered.utils.ImageManager;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.*;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.GameMode;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -27,49 +28,49 @@ import javax.swing.text.PlainDocument;
  *
  * @author glitchedcode
  */
-public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
-    static public final int             BOARD_UPDATE_MS = 150;
-    static public final int             MAX_PLAYER_NAME_LENGTH = 30;
-    static public final int             MAX_ROWS = 400;
-    static public final int             MAX_COLS = 400;
-    
-    private int                         localRowCount = 50;
-    private int                         localColumnCount = 70;
-    
-    private final SimulationInterface   localGrid;
-    private final ImageManager          tileManager;
-    
-    SimulationRemoteClient              client;
-    SimulationServer                    server;
-    
-    static ImageIcon                    icon;
-    static JTextArea                    mainStatusLog;
-    boolean                             isInMenu = true;
-    
-    String                              localPlayerName = "Player";
-    PlayerData                          localPlayerData = new PlayerData("Player", PlayerData.TeamColor.NONE);
-    
+public class ApplicationFrame extends javax.swing.JFrame implements KeyListener {
+
+    static public final int BOARD_UPDATE_MS = 150;
+    static public final int MAX_PLAYER_NAME_LENGTH = 30;
+    static public final int MAX_ROWS = 400;
+    static public final int MAX_COLS = 400;
+
+    private int localRowCount = 50;
+    private int localColumnCount = 70;
+
+    private final SimulationInterface localGrid;
+    private final ImageManager tileManager;
+
+    SimulationRemoteClient client;
+    SimulationServer server;
+
+    static ImageIcon icon;
+    static JTextArea mainStatusLog;
+    boolean isInMenu = true;
+
+    String localPlayerName = "Player";
+    PlayerData localPlayerData = new PlayerData("Player", PlayerData.TeamColor.NONE);
+
     /*
     * JFRAME CODE
-    */
-    
+     */
     /**
      * Creates new form ApplicationFrame
+     *
      * @throws java.lang.Exception
      */
-    public ApplicationFrame() throws Exception{
+    public ApplicationFrame() throws Exception {
         SpeciesLoader.loadUnitClasses();
         tileManager = new ImageManager("tiles.json");
         localGrid = new SimulationServer(localRowCount, localColumnCount);
         URL resource = getClass().getClassLoader().getResource("Tiles/tile_0083.png");
         icon = new ImageIcon(resource);
-        
+
         initComponents();
         localGrid.initializeGridPanel(gridPanel);
         mainStatusLog = statusLog;
-        
-        if (!tileManager.isInitialized())
-        {
+
+        if (!tileManager.isInitialized()) {
             throw new Exception("Failed to initialize tile manager.");
         }
     }
@@ -404,7 +405,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
     }// </editor-fold>//GEN-END:initComponents
 
     private void gridCanvasAncestorResized(java.awt.event.HierarchyEvent evt) {//GEN-FIRST:event_gridCanvasAncestorResized
-        
+
     }//GEN-LAST:event_gridCanvasAncestorResized
 
     private void gameStatusPanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_gameStatusPanelMouseClicked
@@ -422,33 +423,32 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
         swapCanvas();
     }//GEN-LAST:event_unpauseButtonMouseClicked
 
-    private boolean CheckPlayerName(){
+    private boolean CheckPlayerName() {
         int len = playerNameField.getText().length();
-        if(len < 1 | len > MAX_PLAYER_NAME_LENGTH)
-        {
+        if (len < 1 | len > MAX_PLAYER_NAME_LENGTH) {
             writeToStatusLog("Invalid player name.");
             return false;
         }
         return true;
     }
-    
-    private void JoinGameHandler(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_JoinGameHandler
-        if(server != null | !CheckPlayerName()) return;
 
-        if(client == null)
-        {
-            try{
-                client = new SimulationRemoteClient(playerNameField.getText(), 
+    private void JoinGameHandler(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_JoinGameHandler
+        if (server != null | !CheckPlayerName()) {
+            return;
+        }
+
+        if (client == null) {
+            try {
+                client = new SimulationRemoteClient(playerNameField.getText(),
                         serverAddress.getText(), Integer.parseInt(serverPortNumber.getText()));
-            }catch (Exception e){
+            } catch (Exception e) {
                 writeToStatusLog("Could not connect to  server at address "
-                    + serverAddress.getText() + ":" + serverPortNumber.getText());
+                        + serverAddress.getText() + ":" + serverPortNumber.getText());
                 writeToStatusLog(e.toString());
                 System.out.println(e);
                 client = null;
             }
-            if (client != null)
-            {
+            if (client != null) {
                 localGrid.setRunning(false);
                 client.initializeGridPanel(gridPanel);
                 joinGameButton.setText("Disconnect");
@@ -460,7 +460,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
                 client.initializeGridPanel(gridPanel);
                 gridPanel.setSimulation(client);
             }
-        }else{
+        } else {
             writeToStatusLog("Disconnecting...");
             client.close();
             client = null;
@@ -475,31 +475,32 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
     }//GEN-LAST:event_JoinGameHandler
 
     private void StartServerHandler(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_StartServerHandler
-        if(client != null | !CheckPlayerName()) return;
+        if (client != null | !CheckPlayerName()) {
+            return;
+        }
 
-        if(server == null)
-        {
-            try{
+        if (server == null) {
+            try {
                 server = new SimulationServer(playerNameField.getText(), Integer.parseInt(hostPortNumber.getText()),
-                    Integer.parseInt(maxPlayerCount.getText()), localRowCount, localColumnCount);
-            }catch(Exception e){
+                        Integer.parseInt(maxPlayerCount.getText()), localRowCount, localColumnCount,
+                        GameMode.COMPETITIVE);
+            } catch (Exception e) {
                 writeToStatusLog("Could not host server on port " + hostPortNumber.getText());
                 writeToStatusLog(e.toString());
                 server = null;
             }
-            if(server != null)
-            {
+            if (server != null) {
                 localGrid.setRunning(false);
                 hostGameButton.setText("Close Server");
                 hostPortNumber.setEditable(false);
                 maxPlayerCount.setEditable(false);
                 joinGameButton.setEnabled(false);
                 playerNameField.setEditable(false);
-                
+
                 server.initializeGridPanel(gridPanel);
                 gridPanel.setSimulation(server);
             }
-        }else{
+        } else {
             writeToStatusLog("Closing server...");
             server.close();
             server = null;
@@ -520,25 +521,28 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
         gridPanel.repaint();
     }//GEN-LAST:event_outerLayeredPaneAncestorResized
 
-    public static void writeToStatusLog(String string)
-    {
+    public static void writeToStatusLog(String string) {
         mainStatusLog.append(string + "\n");
     }
-    
-    public int getRowCount(){ return localRowCount; }
-    public int getColumnCount() { return localColumnCount; }
-    
-    public void setNextGridSize(int rows, int cols){
-        if(rows <= MAX_ROWS & rows > 0 & cols <= MAX_COLS & cols > 0)
-        {
+
+    public int getRowCount() {
+        return localRowCount;
+    }
+
+    public int getColumnCount() {
+        return localColumnCount;
+    }
+
+    public void setNextGridSize(int rows, int cols) {
+        if (rows <= MAX_ROWS & rows > 0 & cols <= MAX_COLS & cols > 0) {
             localRowCount = rows;
             localColumnCount = cols;
-        }else{
+        } else {
             rowField.setText(Integer.toString(localRowCount));
             colField.setText(Integer.toString(localRowCount));
         }
     }
-    
+
     /**
      * @param args the command line arguments
      */
@@ -560,7 +564,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
         }
         //</editor-fold>
         //</editor-fold>
-        
+
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(() -> {
             try {
@@ -572,51 +576,49 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
             }
         });
     }
-    
-    /**
-     * Invoked when a key has been typed.
-     * See the class description for {@link KeyEvent} for a definition of
-     * a key typed event.
-     * @param e the event to be processed
-     */
-    @Override
-    public void keyTyped(KeyEvent e) {}
 
     /**
-     * Invoked when a key has been pressed.
-     * See the class description for {@link KeyEvent} for a definition of
-     * a key pressed event.
+     * Invoked when a key has been typed. See the class description for
+     * {@link KeyEvent} for a definition of a key typed event.
+     *
      * @param e the event to be processed
      */
     @Override
-    public void keyPressed(KeyEvent e) {}
+    public void keyTyped(KeyEvent e) {
+    }
 
     /**
-     * Invoked when a key has been released.
-     * See the class description for {@link KeyEvent} for a definition of
-     * a key released event.
+     * Invoked when a key has been pressed. See the class description for
+     * {@link KeyEvent} for a definition of a key pressed event.
+     *
      * @param e the event to be processed
      */
     @Override
-    public void keyReleased(KeyEvent e) {  
-        if(e.getKeyCode() == KeyEvent.VK_ESCAPE)
-        {    
+    public void keyPressed(KeyEvent e) {
+    }
+
+    /**
+     * Invoked when a key has been released. See the class description for
+     * {@link KeyEvent} for a definition of a key released event.
+     *
+     * @param e the event to be processed
+     */
+    @Override
+    public void keyReleased(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
             swapCanvas();
         }
     }
-    
-    private void swapCanvas()
-    {
-        if(isInMenu)
-        {
+
+    private void swapCanvas() {
+        if (isInMenu) {
             outerLayeredPane.setLayer(menuPanel, JLayeredPane.DEFAULT_LAYER);
             localGrid.resize(localRowCount, localColumnCount);
-            if(server != null)
+            if (server != null) {
                 server.resize(localRowCount, localColumnCount);
+            }
             //gridPanel.requestFocus();
-        }
-        else
-        {
+        } else {
             outerLayeredPane.setLayer(menuPanel, JLayeredPane.DRAG_LAYER);
             //menuPanel.requestFocus();
         }
@@ -653,33 +655,37 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener{
     // End of variables declaration//GEN-END:variables
 }
 
-class GridSizeDocumentListener implements DocumentListener{
+class GridSizeDocumentListener implements DocumentListener {
 
     JTextField rowField;
     JTextField colField;
     ApplicationFrame frame;
-    public GridSizeDocumentListener(JTextField rowField, JTextField colField, ApplicationFrame frame) { 
+
+    public GridSizeDocumentListener(JTextField rowField, JTextField colField, ApplicationFrame frame) {
         this.rowField = rowField;
         this.colField = colField;
         this.frame = frame;
     }
-    
+
     @Override
     public void insertUpdate(DocumentEvent ev) {
-        try{
+        try {
             frame.setNextGridSize(Integer.parseInt(rowField.getText()), Integer.parseInt(colField.getText()));
-        } catch(Exception e) {
+        } catch (Exception e) {
             frame.setNextGridSize(frame.getRowCount(), frame.getColumnCount());
         }
     }
+
     @Override
     public void removeUpdate(DocumentEvent ev) {
-        try{
+        try {
             frame.setNextGridSize(Integer.parseInt(rowField.getText()), Integer.parseInt(colField.getText()));
-        } catch(Exception e) {
+        } catch (Exception e) {
             frame.setNextGridSize(frame.getRowCount(), frame.getColumnCount());
         }
     }
+
     @Override
-    public void changedUpdate(DocumentEvent e) {    }
+    public void changedUpdate(DocumentEvent e) {
+    }
 }

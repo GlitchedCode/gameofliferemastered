@@ -23,7 +23,7 @@ import java.util.HashMap;
 public class Grid implements Serializable, Cloneable {
 
     public final Integer SECTOR_SIDE_LENGTH = 32;
-    public final String GAMEMODE_NAME = "Sandbox";
+    protected String gameModeName = "Sandbox";
 
     private TwoDimensionalContainer<UnitInterface> board;
     private TwoDimensionalContainer<Boolean> sectorFlags;
@@ -100,15 +100,19 @@ public class Grid implements Serializable, Cloneable {
     public final boolean isRunning() {
         return isRunning;
     }
-    
+
     public final boolean isLocked() {
         return isLocked;
+    }
+
+    public final String getGameModeName() {
+        return gameModeName;
     }
 
     public final String getStatusString() {
         return gameStatus;
     }
-    
+
     public final int getCurrentTurn() {
         return turn;
     }
@@ -207,10 +211,11 @@ public class Grid implements Serializable, Cloneable {
 
     public void setRunning(boolean val) {
         isRunning = val;
-        if(val)
+        if (val) {
             gameStatus = "Running";
-        else
+        } else {
             gameStatus = "Paused";
+        }
     }
 
 

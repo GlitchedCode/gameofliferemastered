@@ -12,14 +12,15 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.Grid;
  * @author glitchedcode
  */
 public class SyncGridRequest extends Request {
+
     public Grid grid = null;
-    
+
     public SyncGridRequest() {
-        type = RequestType.SYNC_GRID;    
-    }    
-    
+        type = RequestType.SYNC_GRID;
+    }
+
     public SyncGridRequest(Grid grid) {
         type = RequestType.SYNC_GRID;
         this.grid = grid;
-    }    
+    }
 }

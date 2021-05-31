@@ -26,4 +26,15 @@ public class TimerWrapper {
      t.scheduleAtFixedRate(task, delay, period);
      return task;
   }
+  
+  public TimerTask scheduleAtFixedRate(final Runnable r, long delay, long period, long iterations) {
+     final TimerTask task = new TimerTask() { public void run() { r.run(); }};
+     t.scheduleAtFixedRate(task, delay, period);
+     return task; 
+  }
+  
+  public void cancel() {
+      t.cancel();
+      t.purge();
+  }
 }

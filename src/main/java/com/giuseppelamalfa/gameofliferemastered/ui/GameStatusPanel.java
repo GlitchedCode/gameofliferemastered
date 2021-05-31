@@ -23,16 +23,16 @@ public class GameStatusPanel extends javax.swing.JPanel implements MouseListener
 
     GridPanel gridPanel;
     ArrayList<PlayerDisplayPanel> playerPanels = new ArrayList<>();
-    
+
     /**
      * Creates new form GameStatusPanel
      */
     public GameStatusPanel() {
         initComponents();
-        Color col = new Color(0,0,0,0);
+        Color col = new Color(0, 0, 0, 0);
         setBackground(col);
         jPanel1.setBackground(col);
-        
+
         playerPanels.add(playerDisplayPanel1);
         playerPanels.add(playerDisplayPanel2);
         playerPanels.add(playerDisplayPanel3);
@@ -41,8 +41,7 @@ public class GameStatusPanel extends javax.swing.JPanel implements MouseListener
         playerPanels.add(playerDisplayPanel6);
         playerPanels.add(playerDisplayPanel7);
         playerPanels.add(playerDisplayPanel8);
-        
-        
+
         resetPlayerPanels();
     }
 
@@ -150,48 +149,77 @@ public class GameStatusPanel extends javax.swing.JPanel implements MouseListener
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    public void setPlayerPanels(ArrayList<PlayerData> list)
-    {
+    public void setPlayerPanels(ArrayList<PlayerData> list) {
         resetPlayerPanels();
-        if (list != null)
-            for(int i = 0; i < list.size() & i < playerPanels.size(); i++)
+        if (list != null) {
+            for (int i = 0; i < list.size() & i < playerPanels.size(); i++) {
                 playerPanels.get(i).setToPlayer(list.get(i));
+            }
+        }
     }
-    
-    public void resetPlayerPanels(){
-        for(PlayerDisplayPanel panel : playerPanels)
+
+    public void resetPlayerPanels() {
+        for (PlayerDisplayPanel panel : playerPanels) {
             panel.reset();
+        }
     }
-    
-    public void setTurnCount(int val){
+
+    public void setTurnCount(int val) {
         turnCountLabel.setText("Turn: " + val);
     }
-    
-    public void setGridPanel(GridPanel panel)
-    {
+
+    public void setGridPanel(GridPanel panel) {
         addMouseListener(this);
         gridPanel = panel;
     }
-    
-    public void setGameModeName(String name){
+
+    public void setGameModeName(String name) {
         gameModeLabel.setText(name);
     }
-    
-    public void setStatus(String status){
+
+    public void setStatus(String status) {
         gameStatusLabel.setText(status);
     }
-    
-   /*
+
+    /*
     * MOUSE INPUT HANDLING
      */
-    @Override public void mouseClicked(MouseEvent me){gridPanel.mouseClicked(me);}
-    @Override public void mouseMoved(MouseEvent me){gridPanel.mouseMoved(me);}
-    @Override public void mousePressed(MouseEvent me){gridPanel.mousePressed(me);}
-    @Override public void mouseDragged(MouseEvent me){gridPanel.mouseDragged(me);}
-    @Override public void mouseWheelMoved(MouseWheelEvent me){gridPanel.mouseWheelMoved(me);}
-    @Override public void mouseReleased(MouseEvent me){}
-    @Override public void mouseEntered(MouseEvent me){}
-    @Override public void mouseExited(MouseEvent me){}
+    @Override
+    public void mouseClicked(MouseEvent me) {
+        gridPanel.mouseClicked(me);
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent me) {
+        gridPanel.mouseMoved(me);
+    }
+
+    @Override
+    public void mousePressed(MouseEvent me) {
+        gridPanel.mousePressed(me);
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent me) {
+        gridPanel.mouseDragged(me);
+    }
+
+    @Override
+    public void mouseWheelMoved(MouseWheelEvent me) {
+        gridPanel.mouseWheelMoved(me);
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent me) {
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent me) {
+    }
+
+    @Override
+    public void mouseExited(MouseEvent me) {
+    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel gameModeLabel;
     private javax.swing.JLabel gameStatusLabel;

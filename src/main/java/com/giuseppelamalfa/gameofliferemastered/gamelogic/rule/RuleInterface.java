@@ -10,7 +10,7 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic.rule;
  * @author glitchedcode
  * @param <T> Type to be tested
  */
-public interface RuleInterface<T>
-{
+public interface RuleInterface<T> {
+
     public boolean test(T value);
 }

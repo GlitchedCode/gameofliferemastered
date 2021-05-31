@@ -11,12 +11,15 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
  *
  * @author glitchedcode
  */
-public interface StateInterface
-{
-    public void         enter(UnitInterface unit);
-    public void         exit(UnitInterface unit);
-    
-    public boolean      attackModifier(boolean speciesResult, Integer adjacencyPosition);
-    public boolean      reproductionModifier(boolean speciesResult, Integer adjacencyPosition);
-    public void         independentAction(UnitInterface unit);
+public interface StateInterface {
+
+    public void enter(UnitInterface unit);
+
+    public void exit(UnitInterface unit);
+
+    public boolean attackModifier(boolean speciesResult, Integer adjacencyPosition);
+
+    public boolean reproductionModifier(boolean speciesResult, Integer adjacencyPosition);
+
+    public void independentAction(UnitInterface unit);
 }

@@ -22,6 +22,7 @@ import org.json.JSONObject;
  * @author glitchedcode
  */
 public class SpeciesData {
+
     //public final Class<?>               implementingClass;
     public final Constructor<?> constructor;
     public final int speciesID;

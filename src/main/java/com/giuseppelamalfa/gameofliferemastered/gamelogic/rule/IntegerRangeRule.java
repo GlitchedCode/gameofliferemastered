@@ -12,34 +12,39 @@ import java.util.Collection;
  *
  * @author glitchedcode
  */
-public class IntegerRangeRule implements RuleInterface<Integer>, Serializable
-{
+public class IntegerRangeRule implements RuleInterface<Integer>, Serializable {
+
     private int min;
     private int max;
-    
-    public IntegerRangeRule(Collection<Integer> values){
+
+    public IntegerRangeRule(Collection<Integer> values) {
         int loops = 0;
-        for(Integer val: values) {
-            if(loops == 2) break;
-            if(loops == 0)
+        for (Integer val : values) {
+            if (loops == 2) {
+                break;
+            }
+            if (loops == 0) {
                 min = val;
-            else
+            } else {
                 max = val;
+            }
             loops++;
         }
-        if(loops < 2 | max < min)
+        if (loops < 2 | max < min) {
             throw new IllegalArgumentException();
+        }
     }
-    
+
     public IntegerRangeRule(int min, int max) {
-        if(max < min) throw new IllegalArgumentException();
+        if (max < min) {
+            throw new IllegalArgumentException();
+        }
         this.min = min;
         this.max = max;
     }
-    
+
     @Override
-    public boolean test(Integer value)
-    {
+    public boolean test(Integer value) {
         return min <= value & value <= max;
     }
 }

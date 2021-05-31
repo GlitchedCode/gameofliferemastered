@@ -5,16 +5,46 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.grid;
 
-import java.lang.reflect.Type;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author glitchedcode
  */
-public enum GameMode{
-    SANDBOX(Grid.class),
-    COMPETITIVE(CompetitiveGrid.class);
-        
-    public final Type type;
-    GameMode(Type type) { this.type = type; } 
+public enum GameMode {
+    SANDBOX(Grid.class, true),
+    COMPETITIVE(CompetitiveGrid.class, false);
+
+    public final Constructor<?> constructor;
+    public final boolean locallyControlled;
+
+    GameMode(Class<?> clazz, boolean locallyControlled) {
+        Constructor<?> tmp;
+        try {
+            tmp = clazz.getConstructor(Integer.class, Integer.class);
+        } catch (Exception ex) {
+            tmp = null;
+            Logger.getLogger(GameMode.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        constructor = tmp;
+        this.locallyControlled = locallyControlled;
+    }
+
+    public Grid getNewGrid(int rows, int cols) {
+        try {
+            return (Grid) constructor.newInstance(rows, cols);
+        } catch (InstantiationException ex) {
+            Logger.getLogger(GameMode.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            Logger.getLogger(GameMode.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalArgumentException ex) {
+            Logger.getLogger(GameMode.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InvocationTargetException ex) {
+            Logger.getLogger(GameMode.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
 }

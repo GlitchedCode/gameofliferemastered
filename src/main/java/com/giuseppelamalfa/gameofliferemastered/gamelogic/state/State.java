@@ -53,5 +53,5 @@ public enum State implements Serializable {
             stateImplementationInterface.independentAction(unit);
         }
     }
-    
+
 }

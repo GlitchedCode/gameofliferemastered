@@ -14,26 +14,24 @@ import java.util.Set;
  *
  * @author glitchedcode
  */
-public class IntegerSetRule implements RuleInterface<Integer>, Serializable
-{
+public class IntegerSetRule implements RuleInterface<Integer>, Serializable {
+
     public final Set<Integer> acceptedValues;
-    
-    public IntegerSetRule(Collection<Integer> values){
+
+    public IntegerSetRule(Collection<Integer> values) {
         acceptedValues = new HashSet<>(values);
     }
-    
-    public IntegerSetRule(){
+
+    public IntegerSetRule() {
         acceptedValues = new HashSet<>();
     }
-    
+
     @Override
-    public boolean test(Integer value)
-    {
+    public boolean test(Integer value) {
         return acceptedValues.contains(value);
     }
-    
-    public void add(Integer value)
-    {
+
+    public void add(Integer value) {
         acceptedValues.add(value);
     }
 }
