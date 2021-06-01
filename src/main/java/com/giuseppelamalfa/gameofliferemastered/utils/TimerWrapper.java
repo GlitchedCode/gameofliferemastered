@@ -5,6 +5,7 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.utils;
 
+import java.io.Serializable;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -12,8 +13,8 @@ import java.util.TimerTask;
  *
  * @author glitchedcode
  */
-public class TimerWrapper {
-  private final Timer t = new Timer();
+public class TimerWrapper implements Serializable {
+  private Timer t = new Timer();
 
   public TimerTask schedule(final Runnable r, long delay) {
      final TimerTask task = new TimerTask() { public void run() { r.run(); }};
@@ -35,6 +36,6 @@ public class TimerWrapper {
   
   public void cancel() {
       t.cancel();
-      t.purge();
+      t = new Timer();
   }
 }

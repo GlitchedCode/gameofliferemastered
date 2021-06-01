@@ -27,7 +27,7 @@ public class Grid implements Serializable, Cloneable {
 
     private TwoDimensionalContainer<UnitInterface> board;
     private TwoDimensionalContainer<Boolean> sectorFlags;
-
+    
     protected String gameStatus = "Paused";
     protected boolean isRunning = false;
     protected boolean isLocked = false;
@@ -125,6 +125,10 @@ public class Grid implements Serializable, Cloneable {
         return columnCount;
     }
 
+    public final int getPlayerCount() {
+        return players.size();
+    }
+
     /**
      * @return PlayerData objects ordered by score.
      */
@@ -174,8 +178,8 @@ public class Grid implements Serializable, Cloneable {
         UnitInterface found = board.get(row, col);
         if (found != null) {
             players.get(found.getPlayerID()).score -= getUnitScoreIncrement(found);
-            board.remove(row, col);
             orderPlayersByScore();
+            board.remove(row, col);
         }
     }
 
@@ -218,6 +222,8 @@ public class Grid implements Serializable, Cloneable {
         }
     }
 
+    public void afterSync() {        
+    }
 
     /*
      * GAME LOGIC CODE
@@ -285,8 +291,14 @@ public class Grid implements Serializable, Cloneable {
      *
      * @param player
      */
-    public final void addPlayer(PlayerData player) {
-        players.put(player.ID, player);
+    public void addPlayer(PlayerData player) {
+        if (!players.containsKey(player.ID)) {
+            players.put(player.ID, player);
+        } else {
+            PlayerData data = players.get(player.ID);
+            if(player.playerName != null) data.playerName = player.playerName;
+        }
+
         orderPlayersByScore();
     }
 
@@ -295,7 +307,7 @@ public class Grid implements Serializable, Cloneable {
      *
      * @param id player's ID
      */
-    public final void removePlayer(int id) {
+    public void removePlayer(int id) {
         for (int r = 0; r < rowCount; r++) {
             for (int c = 0; c < columnCount; c++) {
                 UnitInterface unit = getUnit(r, c);
@@ -329,7 +341,7 @@ public class Grid implements Serializable, Cloneable {
             return PlayerData.TeamColor.NONE;
         }
     }
-
+    
     /**
      * Sets a given unit to the given coordinates on the game board
      *

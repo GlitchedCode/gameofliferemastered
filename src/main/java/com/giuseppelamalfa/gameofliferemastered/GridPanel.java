@@ -77,12 +77,13 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
     public void mouseClicked(MouseEvent me) {
         synchronized (simulation) {
             int button = me.getButton();
-            if (button == MouseEvent.BUTTON1) {
+            if (button == MouseEvent.BUTTON1 & !simulation.isLocked()) {
                 setUnit(me.getPoint());
             } else if (button == MouseEvent.BUTTON3) {
                 try {
                     if (simulation.isLocallyControlled() & !simulation.isLocked()) {
                         simulation.computeNextTurn();
+                        gameStatusPanel.setPlayerPanels(simulation.getPlayerRankings());
                     }
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -191,6 +192,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
             } else {
                 simulation.setUnit(row, col, palette.getNewUnit(simulation.getLocalPlayerID()));
             }
+            gameStatusPanel.setPlayerPanels(simulation.getPlayerRankings());
         } catch (Exception ex) {
             Logger.getLogger(GridPanel.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -356,10 +358,14 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
             return;
         }
 
+        gameStatusPanel = (GameStatusPanel) getComponent(0);
+        this.palette = palette;
+        initialized = true;
         addMouseListener(this);
         addMouseMotionListener(this);
         addMouseWheelListener(this);
         addKeyListener(this);
+        
         // repaint 60 times a secound
         timer.scheduleAtFixedRate(() -> {
             repaint();
@@ -374,15 +380,12 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
             }
             try {
                 simulation.computeNextTurn();
+                gameStatusPanel.setPlayerPanels(simulation.getPlayerRankings());
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }, 0, ApplicationFrame.BOARD_UPDATE_MS);
 
         ToolTipManager.sharedInstance().setInitialDelay(TOOLTIP_INITIAL_DELAY_MS);
-
-        gameStatusPanel = (GameStatusPanel) getComponent(0);
-        this.palette = palette;
-        initialized = true;
     }
 }

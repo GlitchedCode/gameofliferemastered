@@ -125,6 +125,7 @@ public class SimulationServer implements SimulationInterface {
 
         this.rowCount = rowCount;
         this.columnCount = columnCount;
+        currentGrid = syncGrid;
         currentGrid = mode.getNewGrid(rowCount, columnCount);
 
         // Spawn a thread to accept client connections.
@@ -164,7 +165,7 @@ public class SimulationServer implements SimulationInterface {
                                 }
 
                                 while (true) {
-                                    handleRequest(inputStream.readObject(), clientData.playerData.ID);
+                                    handleRequest((Request)inputStream.readObject(), clientData.playerData.ID);
                                 }
                             } // These exceptions are caught when the client disconnects
                             catch (EOFException e) {
@@ -281,7 +282,14 @@ public class SimulationServer implements SimulationInterface {
 
     @Override
     public void removeUnit(int row, int col) {
-        currentGrid.removeUnit(row, col);
+        SetUnitRequest req = new SetUnitRequest(row, col, null);
+        try {
+            handleRequest(req, -1);
+        } catch (IOException ex) {
+            Logger.getLogger(SimulationServer.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InvalidRequestException ex) {
+            Logger.getLogger(SimulationServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @Override
@@ -294,7 +302,6 @@ public class SimulationServer implements SimulationInterface {
         } catch (InvalidRequestException ex) {
             Logger.getLogger(SimulationServer.class.getName()).log(Level.SEVERE, null, ex);
         }
-        panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
     }
 
     @Override
@@ -304,10 +311,9 @@ public class SimulationServer implements SimulationInterface {
 
             // Syncronize grid and player data at regular intervals.
             if (currentGrid.getCurrentTurn() % GRYD_SYNC_TURN_COUNT == 0 | !isRunning()) {
-                synchronize();
+                //synchronize();
             }
         }
-        panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
     }
 
     @Override
@@ -347,15 +353,11 @@ public class SimulationServer implements SimulationInterface {
     }
 
     public void sendToAll(Request req) {
-        for (ClientData client : connectedClients.values())
-            try {
-            client.stream.writeObject(req);
-        } catch (IOException ex) {
-            Logger.getLogger(SimulationServer.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        sendToAll(req, -1);
     }
 
     public void sendToAll(Request req, int excludeID) {
+        System.out.println(req.getClass());
         for (ClientData client : connectedClients.values()) {
             if (client.playerData.ID != excludeID)
                 try {
@@ -364,6 +366,8 @@ public class SimulationServer implements SimulationInterface {
                 Logger.getLogger(SimulationServer.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+        System.out.println("sent");
+
     }
 
     @Override
@@ -387,11 +391,10 @@ public class SimulationServer implements SimulationInterface {
     }
 
     @Override
-    public synchronized void handleRequest(Object requestObject, int clientID) throws IOException, InvalidRequestException {
-        Request tmp = (Request) requestObject;
+    public synchronized void handleRequest(Request request, int clientID) throws IOException, InvalidRequestException {
         ClientData clientData;
         clientData = connectedClients.get(clientID);
-        switch (tmp.getType()) {
+        switch (request.getType()) {
             case SYNC_GRID:
                 if (clientData != null) {
                     synchronize(clientData.stream);
@@ -401,7 +404,7 @@ public class SimulationServer implements SimulationInterface {
                 if (clientData == null) {
                     break;
                 }
-                UpdatePlayerDataRequest updateRequest = (UpdatePlayerDataRequest) tmp;
+                UpdatePlayerDataRequest updateRequest = (UpdatePlayerDataRequest) request;
                 PlayerData playerData = updateRequest.playerData;
 
                 if (!updateRequest.connected) {
@@ -435,19 +438,19 @@ public class SimulationServer implements SimulationInterface {
                 if (clientData == null) {
                     break;
                 }
-                DisconnectRequest disconnect = (DisconnectRequest) tmp;
+                DisconnectRequest disconnect = (DisconnectRequest) request;
                 ApplicationFrame.writeToStatusLog(clientData.socket.getRemoteSocketAddress() + " disconnected: " + disconnect.message);
                 connectedClients.remove(clientID);
                 clientData.socket.close();
                 break;
             case SET_UNIT:
-                SetUnitRequest setUnit = (SetUnitRequest) tmp;
-                for (Integer key : connectedClients.keySet()) {
-                    if (key != clientID | clientID < 0) {
-                        connectedClients.get(key).stream.writeObject(requestObject);
-                    }
+                SetUnitRequest setUnit = (SetUnitRequest) request;
+                sendToAll(request, clientID);
+                if (setUnit.unit != null) {
+                    currentGrid.setUnit(setUnit.row, setUnit.col, setUnit.unit);
+                } else {
+                    currentGrid.removeUnit(setUnit.row, setUnit.col);
                 }
-                currentGrid.setUnit(setUnit.row, setUnit.col, setUnit.unit);
                 panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
                 break;
         }

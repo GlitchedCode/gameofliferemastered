@@ -12,6 +12,7 @@ import com.giuseppelamalfa.gameofliferemastered.utils.ImageManager;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.*;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.GameMode;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
+import com.giuseppelamalfa.gameofliferemastered.utils.TimerWrapper;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.ImageIcon;
@@ -44,8 +45,10 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
     SimulationRemoteClient client;
     SimulationServer server;
 
+    static SimulationInterface currentSimulation;
     static ImageIcon icon;
     static JTextArea mainStatusLog;
+    static 
     boolean isInMenu = true;
 
     String localPlayerName = "Player";
@@ -63,6 +66,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
         SpeciesLoader.loadUnitClasses();
         tileManager = new ImageManager("tiles.json");
         localGrid = new SimulationServer(localRowCount, localColumnCount);
+        currentSimulation = localGrid;
         URL resource = getClass().getClassLoader().getResource("Tiles/tile_0083.png");
         icon = new ImageIcon(resource);
 
@@ -459,6 +463,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
 
                 client.initializeGridPanel(gridPanel);
                 gridPanel.setSimulation(client);
+                currentSimulation = client;
             }
         } else {
             writeToStatusLog("Disconnecting...");
@@ -471,6 +476,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
             playerNameField.setEditable(true);
 
             gridPanel.setSimulation(localGrid);
+            currentSimulation = localGrid;
         }
     }//GEN-LAST:event_JoinGameHandler
 
@@ -499,6 +505,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
 
                 server.initializeGridPanel(gridPanel);
                 gridPanel.setSimulation(server);
+                currentSimulation = server;
             }
         } else {
             writeToStatusLog("Closing server...");
@@ -511,6 +518,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
             playerNameField.setEditable(true);
 
             gridPanel.setSimulation(localGrid);
+            currentSimulation = localGrid;
         }
     }//GEN-LAST:event_StartServerHandler
 
@@ -523,6 +531,10 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
 
     public static void writeToStatusLog(String string) {
         mainStatusLog.append(string + "\n");
+    }
+    
+    public static void forceSynchronize(){
+        currentSimulation.synchronize();
     }
 
     public int getRowCount() {

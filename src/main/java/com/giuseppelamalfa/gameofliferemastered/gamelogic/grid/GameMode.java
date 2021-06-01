@@ -5,6 +5,7 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.grid;
 
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationInterface;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Level;

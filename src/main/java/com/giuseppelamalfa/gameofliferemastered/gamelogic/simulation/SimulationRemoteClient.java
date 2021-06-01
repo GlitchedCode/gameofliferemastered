@@ -56,7 +56,7 @@ public class SimulationRemoteClient implements SimulationInterface {
             try {
                 ObjectInputStream input = new ObjectInputStream(clientSocket.getInputStream());
                 while (true) {
-                    handleRequest(input.readObject(), 0);
+                    handleRequest((Request)input.readObject(), 0);
                 }
             } catch (EOFException | SocketException e) {
             } catch (InvalidRequestException | IOException | ClassNotFoundException e) {
@@ -139,6 +139,12 @@ public class SimulationRemoteClient implements SimulationInterface {
 
     @Override
     public void removeUnit(int row, int col) {
+        try {
+            outputStream.writeObject(new SetUnitRequest(row, col, null));
+        } catch (IOException ex) {
+            Logger.getLogger(SimulationRemoteClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
         currentGrid.removeUnit(row, col);
     }
 
@@ -151,13 +157,11 @@ public class SimulationRemoteClient implements SimulationInterface {
         }
 
         currentGrid.setUnit(row, col, unit);
-        panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
     }
 
     @Override
     public synchronized void computeNextTurn() throws Exception {
         currentGrid.computeNextTurn();
-        panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
     }
 
     @Override
@@ -174,10 +178,8 @@ public class SimulationRemoteClient implements SimulationInterface {
     }
 
     @Override
-    public void handleRequest(Object requestObject, int ID)
+    public void handleRequest(Request request, int ID)
             throws IOException, InvalidRequestException {
-        Request request = (Request) requestObject;
-
         switch (request.getType()) {
             case LOG_MESSAGE:
                 ApplicationFrame.writeToStatusLog(((LogMessageRequest) request).message);
@@ -199,6 +201,7 @@ public class SimulationRemoteClient implements SimulationInterface {
                     currentGrid = tmpGrid;
                     currentGrid.setPlayerIDCheckNextTurn();
                     currentGrid.addPlayer(localPlayerData);
+                    currentGrid.afterSync();
                     currentGrid.calculateScore();
                 }
                 panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
@@ -242,7 +245,11 @@ public class SimulationRemoteClient implements SimulationInterface {
                 break;
             case SET_UNIT:
                 SetUnitRequest setUnit = (SetUnitRequest) request;
-                currentGrid.setUnit(setUnit.row, setUnit.col, setUnit.unit);
+                if (setUnit.unit != null) {
+                    currentGrid.setUnit(setUnit.row, setUnit.col, setUnit.unit);
+                } else {
+                    currentGrid.removeUnit(setUnit.row, setUnit.col);
+                }
                 panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
                 break;
         }
@@ -250,12 +257,12 @@ public class SimulationRemoteClient implements SimulationInterface {
 
     @Override
     public void synchronize() {
-        SyncGridRequest req = new SyncGridRequest();
+       /* SyncGridRequest req = new SyncGridRequest();
         try {
             outputStream.writeObject(req);
         } catch (IOException ex) {
             Logger.getLogger(SimulationRemoteClient.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        }*/
     }
 
     @Override
