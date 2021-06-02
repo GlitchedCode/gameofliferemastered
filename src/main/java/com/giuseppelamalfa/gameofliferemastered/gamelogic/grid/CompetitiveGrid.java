@@ -62,6 +62,8 @@ public class CompetitiveGrid extends Grid {
     int currentPhaseNumber = 0;
     int secondsPassed = 0;
     State currentState;
+    boolean showWinner = false;
+    boolean started = false;
 
     /**
      * Constructor
@@ -86,6 +88,10 @@ public class CompetitiveGrid extends Grid {
         if (getCurrentTurn() % SIMULATION_PHASE_LENGTH == 0) {
             endPhase();
         }
+    }
+
+    public boolean showWinner() {
+        return showWinner;
     }
 
     /**
@@ -129,13 +135,13 @@ public class CompetitiveGrid extends Grid {
     private void resetGame() {
         isLocked = true;
         isRunning = false;
+        started = false;
         gameStatus = "Waiting for players...";
         clearBoard();
     }
 
     private void startGame() {
         isRunning = false;
-        isLocked = true;
 
         globalTimer.scheduleAtFixedRate(() -> {
             int remaining = GAME_START_WAIT_TIME - secondsPassed;
@@ -152,6 +158,7 @@ public class CompetitiveGrid extends Grid {
     private void startPhase() {
         isRunning = true;
         isLocked = true;
+        ApplicationFrame.setShowWinner(false);
 
         currentPhaseNumber++;
         gameStatus = "Running phase " + currentPhaseNumber;
@@ -160,6 +167,13 @@ public class CompetitiveGrid extends Grid {
     private void endPhase() {
         isRunning = false;
         isLocked = false;
+        
+        if (!started) {
+            started = true;
+        } else {
+            ApplicationFrame.setShowWinner(true);
+        }
+        clearBoard(false);
 
         globalTimer.scheduleAtFixedRate(() -> {
             int remaining = PLACEMENT_PHASE_TIME - secondsPassed;
@@ -177,7 +191,7 @@ public class CompetitiveGrid extends Grid {
     protected void finalize() {
         globalTimer.cancel();
     }
-    
+
     @Override
     @SuppressWarnings({"unchecked"})
     public Object clone() throws CloneNotSupportedException {

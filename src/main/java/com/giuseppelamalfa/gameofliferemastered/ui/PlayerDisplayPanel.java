@@ -6,6 +6,7 @@
 package com.giuseppelamalfa.gameofliferemastered.ui;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
+import java.awt.Color;
 
 /**
  *
@@ -75,6 +76,22 @@ public class PlayerDisplayPanel extends javax.swing.JPanel {
             scoreLabel.setBackground(data.color.getMainAWTColor());
             scoreLabel.setForeground(data.color.getTextAWTColor());
         }
+    }
+    
+    public int getScore() {
+        return Integer.parseInt(scoreLabel.getText());
+    }
+    
+    public String getPlayerName() {
+        return nameLabel.getText();
+    }
+    
+    public Color getPlayerForegroundColor() {
+        return scoreLabel.getForeground();
+    }
+    
+    public Color getPlayerBackgroundColor() {
+        return scoreLabel.getBackground();
     }
 
     public void reset() {

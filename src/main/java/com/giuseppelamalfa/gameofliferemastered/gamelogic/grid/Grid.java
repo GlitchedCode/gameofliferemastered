@@ -27,7 +27,7 @@ public class Grid implements Serializable, Cloneable {
 
     private TwoDimensionalContainer<UnitInterface> board;
     private TwoDimensionalContainer<Boolean> sectorFlags;
-    
+
     protected String gameStatus = "Paused";
     protected boolean isRunning = false;
     protected boolean isLocked = false;
@@ -129,6 +129,10 @@ public class Grid implements Serializable, Cloneable {
         return players.size();
     }
 
+    public boolean showWinner() {
+        return false;
+    }
+
     /**
      * @return PlayerData objects ordered by score.
      */
@@ -206,10 +210,17 @@ public class Grid implements Serializable, Cloneable {
      * Removes all units from the board.
      */
     public final void clearBoard() {
-        players.values().forEach(data -> {
-            data.score = 0;
-        });
-        orderPlayersByScore();
+        clearBoard(true);
+    }
+
+    public final void clearBoard(boolean orderPlayers) {
+        if (orderPlayers) {
+            players.values().forEach(data -> {
+                data.score = 0;
+            });
+
+            orderPlayersByScore();
+        }
         board.clear();
     }
 
@@ -222,7 +233,7 @@ public class Grid implements Serializable, Cloneable {
         }
     }
 
-    public void afterSync() {        
+    public void afterSync() {
     }
 
     /*
@@ -296,7 +307,9 @@ public class Grid implements Serializable, Cloneable {
             players.put(player.ID, player);
         } else {
             PlayerData data = players.get(player.ID);
-            if(player.playerName != null) data.playerName = player.playerName;
+            if (player.playerName != null) {
+                data.playerName = player.playerName;
+            }
         }
 
         orderPlayersByScore();
@@ -341,7 +354,7 @@ public class Grid implements Serializable, Cloneable {
             return PlayerData.TeamColor.NONE;
         }
     }
-    
+
     /**
      * Sets a given unit to the given coordinates on the game board
      *

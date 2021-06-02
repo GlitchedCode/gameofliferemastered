@@ -32,6 +32,7 @@ public class GameStatusPanel extends javax.swing.JPanel implements MouseListener
         Color col = new Color(0, 0, 0, 0);
         setBackground(col);
         jPanel1.setBackground(col);
+        playerWinLabel.setText("");
 
         playerPanels.add(playerDisplayPanel1);
         playerPanels.add(playerDisplayPanel2);
@@ -66,6 +67,7 @@ public class GameStatusPanel extends javax.swing.JPanel implements MouseListener
         playerDisplayPanel7 = new com.giuseppelamalfa.gameofliferemastered.ui.PlayerDisplayPanel();
         playerDisplayPanel8 = new com.giuseppelamalfa.gameofliferemastered.ui.PlayerDisplayPanel();
         gameStatusLabel = new javax.swing.JLabel();
+        playerWinLabel = new javax.swing.JLabel();
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -92,6 +94,12 @@ public class GameStatusPanel extends javax.swing.JPanel implements MouseListener
         gameStatusLabel.setText("Status");
         gameStatusLabel.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
 
+        playerWinLabel.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
+        playerWinLabel.setForeground(new java.awt.Color(255, 255, 255));
+        playerWinLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        playerWinLabel.setText("PlayerName wins!");
+        playerWinLabel.setOpaque(true);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -99,6 +107,7 @@ public class GameStatusPanel extends javax.swing.JPanel implements MouseListener
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(playerWinLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(gameStatusLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(gameModeLabel)
@@ -145,6 +154,8 @@ public class GameStatusPanel extends javax.swing.JPanel implements MouseListener
                 .addComponent(playerDisplayPanel8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(gameStatusLabel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(playerWinLabel)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -179,6 +190,22 @@ public class GameStatusPanel extends javax.swing.JPanel implements MouseListener
 
     public void setStatus(String status) {
         gameStatusLabel.setText(status);
+    }
+    
+    public void setShowWinner(boolean val){
+        if(val){
+            if(playerDisplayPanel1.getScore() == playerDisplayPanel2.getScore()){
+                playerWinLabel.setText("Tie!");
+                playerWinLabel.setBackground(new Color(0,0,0,0));
+                playerWinLabel.setForeground(Color.WHITE);
+            }else{
+            playerWinLabel.setText(playerDisplayPanel1.getPlayerName() + " wins!");
+            playerWinLabel.setBackground(playerDisplayPanel1.getPlayerBackgroundColor());
+            playerWinLabel.setForeground(playerDisplayPanel1.getPlayerForegroundColor());}
+        }else {
+            playerWinLabel.setText("");
+            playerWinLabel.setBackground(new Color(0,0,0,0));
+        }
     }
 
     /*
@@ -232,6 +259,7 @@ public class GameStatusPanel extends javax.swing.JPanel implements MouseListener
     private com.giuseppelamalfa.gameofliferemastered.ui.PlayerDisplayPanel playerDisplayPanel6;
     private com.giuseppelamalfa.gameofliferemastered.ui.PlayerDisplayPanel playerDisplayPanel7;
     private com.giuseppelamalfa.gameofliferemastered.ui.PlayerDisplayPanel playerDisplayPanel8;
+    private javax.swing.JLabel playerWinLabel;
     private javax.swing.JLabel turnCountLabel;
     // End of variables declaration//GEN-END:variables
 }
