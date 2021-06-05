@@ -5,7 +5,6 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.ui;
 
-import com.giuseppelamalfa.gameofliferemastered.GridPanel;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
 import java.awt.Color;
 import java.awt.event.MouseEvent;

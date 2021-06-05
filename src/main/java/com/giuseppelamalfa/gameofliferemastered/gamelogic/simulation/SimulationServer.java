@@ -6,7 +6,7 @@
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation;
 
 import com.giuseppelamalfa.gameofliferemastered.ApplicationFrame;
-import com.giuseppelamalfa.gameofliferemastered.GridPanel;
+import com.giuseppelamalfa.gameofliferemastered.ui.GridPanel;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.Grid;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.GameMode;

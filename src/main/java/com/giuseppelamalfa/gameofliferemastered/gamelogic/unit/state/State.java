@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.giuseppelamalfa.gameofliferemastered.gamelogic.state;
+package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.state;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
 import java.io.Serializable;
@@ -13,7 +13,7 @@ import java.io.Serializable;
  * @author glitchedcode
  */
 public enum State implements Serializable {
-    INVALID(null), DEAD(null), ALIVE(null), ALIVE_AGING(new AgingStateInterface());
+    INVALID(null), DEAD(null), ALIVE(null), ALIVE_AGING(new AgingState());
     private final StateInterface stateImplementationInterface;
 
     private State(StateInterface iface) {

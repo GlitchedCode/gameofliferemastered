@@ -5,7 +5,7 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation;
 
-import com.giuseppelamalfa.gameofliferemastered.GridPanel;
+import com.giuseppelamalfa.gameofliferemastered.ui.GridPanel;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.requests.InvalidRequestException;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.requests.Request;

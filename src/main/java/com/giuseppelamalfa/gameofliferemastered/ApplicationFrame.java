@@ -92,9 +92,9 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
     private void initComponents() {
 
         outerLayeredPane = new javax.swing.JLayeredPane();
-        gridPanel = gridPanel = new com.giuseppelamalfa.gameofliferemastered.GridPanel(tileManager);
+        gridPanel = gridPanel = new com.giuseppelamalfa.gameofliferemastered.ui.GridPanel(tileManager);
         gameStatusPanel = new com.giuseppelamalfa.gameofliferemastered.ui.GameStatusPanel();
-        menuPanel = new com.giuseppelamalfa.gameofliferemastered.MenuPanel();
+        menuPanel = new com.giuseppelamalfa.gameofliferemastered.ui.MenuPanel();
         titleLabel = new javax.swing.JLabel();
         hostPortNumber = new javax.swing.JTextField();
         serverAddress = new javax.swing.JTextField();
@@ -648,7 +648,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField colField;
     private com.giuseppelamalfa.gameofliferemastered.ui.GameStatusPanel gameStatusPanel;
-    private com.giuseppelamalfa.gameofliferemastered.GridPanel gridPanel;
+    private com.giuseppelamalfa.gameofliferemastered.ui.GridPanel gridPanel;
     private javax.swing.JButton hostGameButton;
     private javax.swing.JTextField hostPortNumber;
     private javax.swing.JLabel jLabel1;
@@ -661,7 +661,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JButton joinGameButton;
     private javax.swing.JTextField maxPlayerCount;
-    private com.giuseppelamalfa.gameofliferemastered.MenuPanel menuPanel;
+    private com.giuseppelamalfa.gameofliferemastered.ui.MenuPanel menuPanel;
     private javax.swing.JLayeredPane outerLayeredPane;
     private javax.swing.JTextField playerNameField;
     private javax.swing.JTextField rowField;

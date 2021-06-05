@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.giuseppelamalfa.gameofliferemastered.gamelogic.state;
+package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.state;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
 
@@ -11,7 +11,7 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
  *
  * @author glitchedcode
  */
-public class AgingStateInterface implements StateInterface {
+public class AgingState implements StateInterface {
 
     @Override
     public void enter(UnitInterface unit) {

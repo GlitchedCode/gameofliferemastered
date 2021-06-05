@@ -5,7 +5,7 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.grid;
 
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.state.State;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.state.State;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.GameLogicException;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.*;

@@ -188,11 +188,6 @@ public class CompetitiveGrid extends Grid {
     }
 
     @Override
-    protected void finalize() {
-        globalTimer.cancel();
-    }
-
-    @Override
     @SuppressWarnings({"unchecked"})
     public Object clone() throws CloneNotSupportedException {
         try {

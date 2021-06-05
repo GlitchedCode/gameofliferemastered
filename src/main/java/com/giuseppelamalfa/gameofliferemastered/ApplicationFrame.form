@@ -93,7 +93,7 @@
         </DimensionLayout>
       </Layout>
       <SubComponents>
-        <Container class="com.giuseppelamalfa.gameofliferemastered.GridPanel" name="gridPanel">
+        <Container class="com.giuseppelamalfa.gameofliferemastered.ui.GridPanel" name="gridPanel">
           <Properties>
             <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
               <Color blue="41" green="3f" red="3d" type="rgb"/>
@@ -107,7 +107,7 @@
           </Properties>
           <AuxValues>
             <AuxValue name="JLayeredPane.layer" type="java.lang.Integer" value="100"/>
-            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="gridPanel = new com.giuseppelamalfa.gameofliferemastered.GridPanel(tileManager);"/>
+            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="gridPanel = new com.giuseppelamalfa.gameofliferemastered.ui.GridPanel(tileManager);"/>
             <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="gridPanel.init(unitPalette);&#xa;gridPanel.setSimulation(localGrid);&#xa;addKeyListener(gridPanel);"/>
           </AuxValues>
 
@@ -140,7 +140,7 @@
             </Component>
           </SubComponents>
         </Container>
-        <Container class="com.giuseppelamalfa.gameofliferemastered.MenuPanel" name="menuPanel">
+        <Container class="com.giuseppelamalfa.gameofliferemastered.ui.MenuPanel" name="menuPanel">
           <Properties>
             <Property name="inheritsPopupMenu" type="boolean" value="true"/>
             <Property name="opaque" type="boolean" value="false"/>
