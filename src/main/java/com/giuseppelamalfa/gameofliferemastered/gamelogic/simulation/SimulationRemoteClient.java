@@ -199,6 +199,7 @@ public class SimulationRemoteClient implements SimulationInterface {
                 }
                 synchronized (currentGrid) {
                     currentGrid = tmpGrid;
+                    currentGrid.setSimulation(this);
                     currentGrid.setPlayerIDCheckNextTurn();
                     currentGrid.addPlayer(localPlayerData);
                     currentGrid.afterSync();

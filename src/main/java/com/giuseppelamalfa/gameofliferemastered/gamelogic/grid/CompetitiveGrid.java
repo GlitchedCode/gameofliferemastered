@@ -7,6 +7,7 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic.grid;
 
 import com.giuseppelamalfa.gameofliferemastered.ApplicationFrame;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationInterface;
 import com.giuseppelamalfa.gameofliferemastered.utils.TimerWrapper;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -53,8 +54,6 @@ public class CompetitiveGrid extends Grid {
 
     }
 
-    static public final TimerWrapper globalTimer = new TimerWrapper();
-
     public final static int SIMULATION_PHASE_LENGTH = 80;
     public final static int PLACEMENT_PHASE_TIME = 60;
     public final static int GAME_START_WAIT_TIME = 20;
@@ -64,6 +63,9 @@ public class CompetitiveGrid extends Grid {
     State currentState;
     boolean showWinner = false;
     boolean started = false;
+    
+    private transient TimerWrapper timer = new TimerWrapper();
+
 
     /**
      * Constructor
@@ -122,16 +124,20 @@ public class CompetitiveGrid extends Grid {
 
     @Override
     public void afterSync() {
+        timer = new TimerWrapper();
         setState(currentState);
     }
 
     private void setState(State state) {
-        globalTimer.cancel();
+        timer.cancel();
         currentState = state;
-        ApplicationFrame.forceSynchronize();
+        
+        SimulationInterface sim = getSimulation();
+        if(sim != null) sim.synchronize();
+        
         state.predicate(this);
     }
-
+    
     private void resetGame() {
         isLocked = true;
         isRunning = false;
@@ -143,7 +149,7 @@ public class CompetitiveGrid extends Grid {
     private void startGame() {
         isRunning = false;
 
-        globalTimer.scheduleAtFixedRate(() -> {
+        timer.scheduleAtFixedRate(() -> {
             int remaining = GAME_START_WAIT_TIME - secondsPassed;
             if (remaining <= 0) {
                 secondsPassed = 0;
@@ -175,7 +181,7 @@ public class CompetitiveGrid extends Grid {
         }
         clearBoard(false);
 
-        globalTimer.scheduleAtFixedRate(() -> {
+        timer.scheduleAtFixedRate(() -> {
             int remaining = PLACEMENT_PHASE_TIME - secondsPassed;
             if (remaining <= 0) {
                 secondsPassed = 0;

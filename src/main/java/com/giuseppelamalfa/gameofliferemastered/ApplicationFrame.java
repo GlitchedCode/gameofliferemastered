@@ -46,10 +46,8 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
     SimulationServer server;
 
     static GameStatusPanel globalStatusPanel;
-    static SimulationInterface globalCurrentSimulation;
     static ImageIcon icon;
     static JTextArea mainStatusLog;
-    static 
     boolean isInMenu = true;
 
     String localPlayerName = "Player";
@@ -58,6 +56,11 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
     /*
     * JFRAME CODE
      */
+    public static void staticInit() {
+        URL resource = ApplicationFrame.class.getClassLoader().getResource("Tiles/tile_0083.png");
+        icon = new ImageIcon(resource);
+    }
+
     /**
      * Creates new form ApplicationFrame
      *
@@ -67,8 +70,6 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
         SpeciesLoader.loadUnitClasses();
         tileManager = new ImageManager("tiles.json");
         localGrid = new SimulationServer(localRowCount, localColumnCount);
-        URL resource = getClass().getClassLoader().getResource("Tiles/tile_0083.png");
-        icon = new ImageIcon(resource);
 
         initComponents();
         localGrid.initializeGridPanel(gridPanel);
@@ -77,8 +78,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
         if (!tileManager.isInitialized()) {
             throw new Exception("Failed to initialize tile manager.");
         }
-        
-        globalCurrentSimulation = localGrid;
+
         globalStatusPanel = gameStatusPanel;
     }
 
@@ -104,7 +104,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         maxPlayerCount = new javax.swing.JTextField();
-        hostGameButton = new javax.swing.JButton();
+        hostSandboxGameButton = new javax.swing.JButton();
         joinGameButton = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         statusLog = new javax.swing.JTextArea();
@@ -115,6 +115,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
         rowField = new javax.swing.JTextField();
         colField = new javax.swing.JTextField();
         unpauseButton = new javax.swing.JButton();
+        hostCompetitiveGameButton = new javax.swing.JButton();
         unitPalette = new com.giuseppelamalfa.gameofliferemastered.ui.UnitPalette();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -156,7 +157,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
             gridPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(gridPanelLayout.createSequentialGroup()
                 .addComponent(gameStatusPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(360, Short.MAX_VALUE))
+                .addContainerGap(354, Short.MAX_VALUE))
         );
 
         gameStatusPanel.setGridPanel(gridPanel);
@@ -202,11 +203,16 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
         maxPlayerCount.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
         maxPlayerCount.setText("8");
 
-        hostGameButton.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
-        hostGameButton.setText("Start Server");
-        hostGameButton.addMouseListener(new java.awt.event.MouseAdapter() {
+        hostSandboxGameButton.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
+        hostSandboxGameButton.setText("Host Sandbox Game");
+        hostSandboxGameButton.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                StartServerHandler(evt);
+                StartSandboxServerHandler(evt);
+            }
+        });
+        hostSandboxGameButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                hostSandboxGameButtonActionPerformed(evt);
             }
         });
 
@@ -257,6 +263,14 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
             }
         });
 
+        hostCompetitiveGameButton.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
+        hostCompetitiveGameButton.setText("Host Competitive Game");
+        hostCompetitiveGameButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                StartCompetitiveServerHandler(evt);
+            }
+        });
+
         javax.swing.GroupLayout menuPanelLayout = new javax.swing.GroupLayout(menuPanel);
         menuPanel.setLayout(menuPanelLayout);
         menuPanelLayout.setHorizontalGroup(
@@ -283,9 +297,10 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(maxPlayerCount, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(63, 63, 63)
-                        .addGroup(menuPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(joinGameButton, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(hostGameButton)))
+                        .addGroup(menuPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(hostSandboxGameButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(hostCompetitiveGameButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(joinGameButton, javax.swing.GroupLayout.DEFAULT_SIZE, 243, Short.MAX_VALUE)))
                     .addComponent(titleLabel)
                     .addGroup(menuPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING)
@@ -311,14 +326,16 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
             .addGroup(menuPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(titleLabel)
-                .addGap(159, 159, 159)
+                .addGap(130, 130, 130)
+                .addComponent(hostCompetitiveGameButton)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(menuPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(hostPortNumber, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel1)
                     .addComponent(jLabel2)
                     .addComponent(jLabel4)
                     .addComponent(maxPlayerCount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(hostGameButton))
+                    .addComponent(hostSandboxGameButton))
                 .addGap(18, 18, 18)
                 .addGroup(menuPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(serverAddress, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -461,12 +478,11 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
                 joinGameButton.setText("Disconnect");
                 serverAddress.setEditable(false);
                 serverPortNumber.setEditable(false);
-                hostGameButton.setEnabled(false);
+                hostSandboxGameButton.setEnabled(false);
                 playerNameField.setEditable(false);
 
                 client.initializeGridPanel(gridPanel);
                 gridPanel.setSimulation(client);
-                globalCurrentSimulation = client;
             }
         } else {
             writeToStatusLog("Disconnecting...");
@@ -474,56 +490,31 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
             client = null;
             serverAddress.setEditable(true);
             serverPortNumber.setEditable(true);
-            hostGameButton.setEnabled(true);
+            hostSandboxGameButton.setEnabled(true);
             joinGameButton.setText("Join Game");
             playerNameField.setEditable(true);
 
             gridPanel.setSimulation(localGrid);
-            globalCurrentSimulation = localGrid;
         }
     }//GEN-LAST:event_JoinGameHandler
 
-    private void StartServerHandler(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_StartServerHandler
-        if (client != null | !CheckPlayerName()) {
+    private void StartSandboxServerHandler(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_StartSandboxServerHandler
+        if (!hostSandboxGameButton.isEnabled()) {
             return;
         }
 
-        if (server == null) {
-            try {
-                server = new SimulationServer(playerNameField.getText(), Integer.parseInt(hostPortNumber.getText()),
-                        Integer.parseInt(maxPlayerCount.getText()), localRowCount, localColumnCount,
-                        GameMode.COMPETITIVE);
-            } catch (Exception e) {
-                writeToStatusLog("Could not host server on port " + hostPortNumber.getText());
-                writeToStatusLog(e.toString());
-                server = null;
-            }
-            if (server != null) {
-                localGrid.setRunning(false);
-                hostGameButton.setText("Close Server");
-                hostPortNumber.setEditable(false);
-                maxPlayerCount.setEditable(false);
-                joinGameButton.setEnabled(false);
-                playerNameField.setEditable(false);
-
-                server.initializeGridPanel(gridPanel);
-                gridPanel.setSimulation(server);
-                globalCurrentSimulation = server;
-            }
+        toggleServer(GameMode.SANDBOX);
+        if (server != null) {
+            hostSandboxGameButton.setText("Close Server");
+            hostCompetitiveGameButton.setEnabled(false);
+            joinGameButton.setEnabled(false);
         } else {
-            writeToStatusLog("Closing server...");
-            server.close();
-            server = null;
-            hostGameButton.setText("Start Server");
-            hostPortNumber.setEditable(true);
-            maxPlayerCount.setEditable(true);
+            hostSandboxGameButton.setText("Host Competitive Game");
+            hostCompetitiveGameButton.setEnabled(true);
             joinGameButton.setEnabled(true);
-            playerNameField.setEditable(true);
-
-            gridPanel.setSimulation(localGrid);
-            globalCurrentSimulation = localGrid;
         }
-    }//GEN-LAST:event_StartServerHandler
+    }//GEN-LAST:event_StartSandboxServerHandler
+
 
     private void outerLayeredPaneAncestorResized(java.awt.event.HierarchyEvent evt) {//GEN-FIRST:event_outerLayeredPaneAncestorResized
         gridPanel.setSize(getSize());
@@ -532,14 +523,63 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
         gridPanel.repaint();
     }//GEN-LAST:event_outerLayeredPaneAncestorResized
 
+    private void StartCompetitiveServerHandler(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_StartCompetitiveServerHandler
+        if (!hostCompetitiveGameButton.isEnabled()) {
+            return;
+        }
+
+        toggleServer(GameMode.COMPETITIVE);
+        if (server != null) {
+            hostCompetitiveGameButton.setText("Close Server");
+            hostSandboxGameButton.setEnabled(false);
+            joinGameButton.setEnabled(false);
+        } else {
+            hostCompetitiveGameButton.setText("Host Competitive Game");
+            hostSandboxGameButton.setEnabled(true);
+            joinGameButton.setEnabled(true);
+        }
+    }//GEN-LAST:event_StartCompetitiveServerHandler
+
+    private void hostSandboxGameButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hostSandboxGameButtonActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_hostSandboxGameButtonActionPerformed
+
+    private void toggleServer(GameMode mode) {
+        if (server == null) {
+            try {
+                server = new SimulationServer(playerNameField.getText(), Integer.parseInt(hostPortNumber.getText()),
+                        Integer.parseInt(maxPlayerCount.getText()), localRowCount, localColumnCount,
+                        mode);
+            } catch (Exception e) {
+                writeToStatusLog("Could not host server on port " + hostPortNumber.getText());
+                writeToStatusLog(e.toString());
+                server = null;
+            }
+            if (server != null) {
+                localGrid.setRunning(false);
+                hostPortNumber.setEditable(false);
+                maxPlayerCount.setEditable(false);
+                playerNameField.setEditable(false);
+
+                server.initializeGridPanel(gridPanel);
+                gridPanel.setSimulation(server);
+            }
+        } else {
+            writeToStatusLog("Closing server...");
+            server.close();
+            server = null;
+            hostPortNumber.setEditable(true);
+            maxPlayerCount.setEditable(true);
+            playerNameField.setEditable(true);
+
+            gridPanel.setSimulation(localGrid);
+        }
+    }
+
     public static void writeToStatusLog(String string) {
         mainStatusLog.append(string + "\n");
     }
-    
-    public static void forceSynchronize(){
-        globalCurrentSimulation.synchronize();
-    }
-    
+
     public static void setShowWinner(boolean val) {
         globalStatusPanel.setShowWinner(val);
     }
@@ -587,6 +627,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(() -> {
             try {
+                ApplicationFrame.staticInit();
                 ApplicationFrame frame = new ApplicationFrame();
                 frame.addKeyListener(frame);
                 frame.setVisible(true);
@@ -649,8 +690,9 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
     private javax.swing.JTextField colField;
     private com.giuseppelamalfa.gameofliferemastered.ui.GameStatusPanel gameStatusPanel;
     private com.giuseppelamalfa.gameofliferemastered.ui.GridPanel gridPanel;
-    private javax.swing.JButton hostGameButton;
+    private javax.swing.JButton hostCompetitiveGameButton;
     private javax.swing.JTextField hostPortNumber;
+    private javax.swing.JButton hostSandboxGameButton;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

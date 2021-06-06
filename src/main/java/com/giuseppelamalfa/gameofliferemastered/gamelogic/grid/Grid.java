@@ -8,6 +8,7 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic.grid;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.state.State;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.GameLogicException;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationInterface;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.*;
 import com.giuseppelamalfa.gameofliferemastered.utils.*;
 import java.awt.Point;
@@ -49,6 +50,8 @@ public class Grid implements Serializable, Cloneable {
     private final HashMap<Integer, PlayerData> players = new HashMap<>();
     private ArrayList<PlayerData> orderedPlayers = new ArrayList<>(); // players ordered by their ranking
     private boolean runPlayerIDCheck = false;
+    
+    private transient SimulationInterface simulation;
 
     /**
      * Constructor
@@ -353,6 +356,14 @@ public class Grid implements Serializable, Cloneable {
         } catch (Exception e) {
             return PlayerData.TeamColor.NONE;
         }
+    }
+    
+    public final void setSimulation(SimulationInterface iface){
+        simulation = iface;
+    }
+    
+    public final SimulationInterface getSimulation(){
+        return simulation;
     }
 
     /**

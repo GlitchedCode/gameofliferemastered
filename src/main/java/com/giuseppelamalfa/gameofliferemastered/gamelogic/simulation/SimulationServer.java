@@ -93,6 +93,7 @@ public class SimulationServer implements SimulationInterface {
     public SimulationServer(int rowCount, int columnCount) throws Exception {
         mode = GameMode.SANDBOX;
         currentGrid = new Grid(rowCount, columnCount);
+        currentGrid.setSimulation(this);
         localPlayerData = new PlayerData();
         localPlayerData.ID = 0;
         currentGrid.addPlayer(localPlayerData);
@@ -127,6 +128,7 @@ public class SimulationServer implements SimulationInterface {
         this.columnCount = columnCount;
         currentGrid = syncGrid;
         currentGrid = mode.getNewGrid(rowCount, columnCount);
+        currentGrid.setSimulation(this);
 
         // Spawn a thread to accept client connections.
         acceptConnectionThread = new Thread(() -> {
