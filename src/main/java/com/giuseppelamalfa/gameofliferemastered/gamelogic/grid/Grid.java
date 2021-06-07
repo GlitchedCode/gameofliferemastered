@@ -32,6 +32,7 @@ public class Grid implements Serializable, Cloneable {
     protected String gameStatus = "Paused";
     protected boolean isRunning = false;
     protected boolean isLocked = false;
+    protected boolean competitive = false;
     private int turn = 0;
 
     private Integer rowCount;
@@ -107,7 +108,11 @@ public class Grid implements Serializable, Cloneable {
     public final boolean isLocked() {
         return isLocked;
     }
-
+    
+    public final boolean isCompetitive() {
+        return competitive;
+    }
+    
     public final String getGameModeName() {
         return gameModeName;
     }
@@ -201,6 +206,7 @@ public class Grid implements Serializable, Cloneable {
         if (unit == null) {
             return;
         }
+        unit.setCompetitive(competitive);
         if (!players.containsKey(unit.getPlayerID())) {
             return;
         }

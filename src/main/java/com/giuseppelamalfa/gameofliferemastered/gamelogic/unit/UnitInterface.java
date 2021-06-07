@@ -32,9 +32,9 @@ public abstract interface UnitInterface {
 
     public void kill();
 
-    public boolean reproduce(Integer adjacencyPosition);
+    public boolean reproduce(int adjacencyPosition);
 
-    public boolean attack(Integer adjacencyPosition);
+    public boolean attack(int adjacencyPosition);
 
     public void independentAction();
 

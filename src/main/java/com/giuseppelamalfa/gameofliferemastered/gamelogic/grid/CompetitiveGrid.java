@@ -76,6 +76,7 @@ public class CompetitiveGrid extends Grid {
      */
     public CompetitiveGrid(Integer rows, Integer cols) throws Exception {
         super(rows, cols);
+        competitive = true;
         gameModeName = "Competitive";
         setState(State.WAITING);
     }

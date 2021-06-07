@@ -167,12 +167,12 @@ public class DeadUnit implements UnitInterface, Serializable, Cloneable {
     }
 
     @Override
-    public boolean reproduce(Integer a) {
+    public boolean reproduce(int a) {
         return false;
     }
 
     @Override
-    public boolean attack(Integer a) {
+    public boolean attack(int a) {
         return false;
     }
 

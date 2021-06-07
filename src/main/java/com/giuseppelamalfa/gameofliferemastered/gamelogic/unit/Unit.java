@@ -108,7 +108,8 @@ public class Unit implements UnitInterface, Serializable, Cloneable {
             // additionally check if the adjacent cell can attack from 
             // their position relative to this cell
             boolean attacked = false;
-            if (hostileSpecies.contains(current.getSpeciesID())) {
+            if ((competitive & current.getPlayerID() != playerID) |
+                    hostileSpecies.contains(current.getSpeciesID())) {
                 attacked = current.attack(oppositeDir);
             }
             if (attacked) {
@@ -188,7 +189,7 @@ public class Unit implements UnitInterface, Serializable, Cloneable {
      * @return
      */
     @Override
-    public boolean reproduce(Integer adjacencyPostition) {
+    public boolean reproduce(int adjacencyPostition) {
         return currentState.reproductionModifier(isAlive(), adjacencyPostition);
     }
 
@@ -200,7 +201,7 @@ public class Unit implements UnitInterface, Serializable, Cloneable {
      * @return
      */
     @Override
-    public boolean attack(Integer adjacencyPosition) {
+    public boolean attack(int adjacencyPosition) {
         return currentState.attackModifier(isAlive(), adjacencyPosition);
     }
 

@@ -32,7 +32,7 @@
             },
             "hostileCountSelector" : {
                 "ruleClassName" : "IntegerRangeRule",
-                "args" : [0,9]
+                "args" : [0,1]
             },
             "reproductionSelector" : {
                 "ruleClassName" : "IntegerSetRule",

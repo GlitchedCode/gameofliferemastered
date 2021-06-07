@@ -45,7 +45,7 @@ public class SpeciesData {
             implementingTypeName = "Unit";
         }
         Class<?> implementingClass = Class.forName(SpeciesLoader.UNIT_CLASS_PATH + implementingTypeName);
-        constructor = implementingClass.getConstructor(SpeciesData.class, Integer.class, Boolean.class);
+        constructor = implementingClass.getConstructor(SpeciesData.class, Integer.class);
         speciesID = ID;
         name = obj.getString("name");
         textureCode = obj.getString("textureCode");

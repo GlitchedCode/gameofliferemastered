@@ -312,8 +312,8 @@ public class SimulationServer implements SimulationInterface {
             currentGrid.computeNextTurn();
 
             // Syncronize grid and player data at regular intervals.
-            if (currentGrid.getCurrentTurn() % GRYD_SYNC_TURN_COUNT == 0 | !isRunning()) {
-                //synchronize();
+            if (/*currentGrid.getCurrentTurn() % GRYD_SYNC_TURN_COUNT == 0 | */!isRunning()) {
+                synchronize();
             }
         }
     }
