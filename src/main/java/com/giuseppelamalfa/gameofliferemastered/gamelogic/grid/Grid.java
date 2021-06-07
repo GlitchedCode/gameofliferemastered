@@ -310,8 +310,8 @@ public class Grid implements Serializable, Cloneable {
             players.put(player.ID, player);
         } else {
             PlayerData data = players.get(player.ID);
-            if (player.playerName != null) {
-                data.playerName = player.playerName;
+            if (player.name != null) {
+                data.name = player.name;
             }
         }
 

@@ -43,7 +43,7 @@ class ClientData {
         this.socket = socket;
         this.stream = stream;
         this.playerData.ID = ID;
-        this.playerData.playerName = playerName;
+        this.playerData.name = playerName;
     }
 }
 
@@ -185,7 +185,7 @@ public class SimulationServer implements SimulationInterface {
                             } catch (IOException e) {
                             }
 
-                            sendLogMessage(clientData.playerData.playerName + " left the game.");
+                            sendLogMessage(clientData.playerData.name + " left the game.");
                             if (clientData.playerData.color != PlayerData.TeamColor.NONE) {
                                 availableColors.add(clientData.playerData.color);
                             }
@@ -359,7 +359,6 @@ public class SimulationServer implements SimulationInterface {
     }
 
     public void sendToAll(Request req, int excludeID) {
-        System.out.println(req.getClass());
         for (ClientData client : connectedClients.values()) {
             if (client.playerData.ID != excludeID)
                 try {
@@ -414,11 +413,11 @@ public class SimulationServer implements SimulationInterface {
                     UpdatePlayerDataRequest disconnectRequest = new UpdatePlayerDataRequest(playerData, false);
                     sendToAll(disconnectRequest, playerData.ID);
                 } else if (updateRequest.updateLocal) {
-                    if (playerData.playerName != null) {
-                        if (clientData.playerData.playerName == null) {
-                            sendLogMessage(playerData.playerName + " joined the game.");
+                    if (playerData.name != null) {
+                        if (clientData.playerData.name == null) {
+                            sendLogMessage(playerData.name + " joined the game.");
                         }
-                        clientData.playerData.playerName = playerData.playerName;
+                        clientData.playerData.name = playerData.name;
                     }
                     if (playerData.color != PlayerData.TeamColor.NONE
                             & availableColors.contains(playerData.color)) {

@@ -71,7 +71,7 @@ public class PlayerDisplayPanel extends javax.swing.JPanel {
         if (data == null) {
             reset();
         } else {
-            nameLabel.setText(data.playerName);
+            nameLabel.setText(data.name);
             scoreLabel.setText(Integer.toString(data.score));
             scoreLabel.setBackground(data.color.getMainAWTColor());
             scoreLabel.setForeground(data.color.getTextAWTColor());

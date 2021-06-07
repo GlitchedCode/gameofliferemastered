@@ -189,10 +189,6 @@ public class UnitPalette extends JPanel implements MouseListener {
         return items.get(selectedIndex).count;
     }
 
-    public int getItemCount() {
-        return items.size();
-    }
-
     public Object getPaletteObject() {
         return items;
     }

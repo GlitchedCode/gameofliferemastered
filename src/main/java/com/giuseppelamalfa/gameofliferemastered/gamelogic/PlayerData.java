@@ -43,17 +43,17 @@ public class PlayerData implements Serializable {
     }
 
     public int ID = -1;
-    public String playerName = null;
+    public String name = null;
     public TeamColor color = TeamColor.NONE;
     public int score = 0;
 
     public PlayerData(String playerName, TeamColor color) {
-        this.playerName = playerName;
+        this.name = playerName;
         this.color = color;
     }
 
     public PlayerData(String playerName) {
-        this.playerName = playerName;
+        this.name = playerName;
     }
 
     public PlayerData() {
@@ -61,7 +61,7 @@ public class PlayerData implements Serializable {
 
     public PlayerData(PlayerData other) {
         ID = other.ID;
-        playerName = other.playerName;
+        name = other.name;
         color = other.color;
         score = other.score;
     }
