@@ -33,6 +33,7 @@ public class Grid implements Serializable, Cloneable {
     protected boolean isRunning = false;
     protected boolean isLocked = false;
     protected boolean competitive = false;
+    protected int syncTurnCount = 40;
     private int turn = 0;
 
     private Integer rowCount;
@@ -281,6 +282,10 @@ public class Grid implements Serializable, Cloneable {
         orderPlayersByScore();
         runPlayerIDCheck = false;
         turn += 1;
+        
+        if(syncTurnCount != 0 & simulation != null)
+            if(turn % syncTurnCount == 0)
+                simulation.synchronize();
     }
 
     public synchronized void computeNextTurn() throws Exception {

@@ -308,13 +308,10 @@ public class SimulationServer implements SimulationInterface {
 
     @Override
     public void computeNextTurn() throws Exception {
-        synchronized (currentGrid) {
-            currentGrid.computeNextTurn();
-
-            // Syncronize grid and player data at regular intervals.
-            if (/*currentGrid.getCurrentTurn() % GRYD_SYNC_TURN_COUNT == 0 | */!isRunning()) {
-                synchronize();
-            }
+        currentGrid.computeNextTurn();
+        // Syncronize grid and player data if the simulation is stepped forward manually
+        if (!isRunning()) {
+            synchronize();
         }
     }
 
