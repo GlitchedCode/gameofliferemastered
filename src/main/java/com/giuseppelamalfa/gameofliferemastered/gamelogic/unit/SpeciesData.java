@@ -7,7 +7,6 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.StubRule;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.state.State;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;

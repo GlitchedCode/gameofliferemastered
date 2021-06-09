@@ -5,7 +5,6 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.state.State;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;

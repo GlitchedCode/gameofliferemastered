@@ -13,6 +13,6 @@ public class StubRule<T> implements RuleInterface<T> {
 
     @Override
     public boolean test(T value) {
-        return true;
+        return false;
     }
 }

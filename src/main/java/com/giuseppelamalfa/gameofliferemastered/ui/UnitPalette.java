@@ -229,7 +229,7 @@ public class UnitPalette extends JPanel implements MouseListener {
             AffineTransform xform = new AffineTransform();
             xform.translate(offset, 1);
             xform.scale(ICON_SCALE, ICON_SCALE);
-            Image img = tileManager.getImage(SpeciesLoader.getSpecies(item.speciesID).textureCode);
+            Image img = tileManager.getImage(SpeciesLoader.getSpeciesData(item.speciesID).textureCode);
             g2.drawImage(img, xform, this);
 
             g2.setColor(getForeground());

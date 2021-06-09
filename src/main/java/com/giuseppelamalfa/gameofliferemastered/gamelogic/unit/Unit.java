@@ -5,7 +5,6 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.state.State;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.GameLogicException;
 import java.util.Set;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
@@ -295,7 +294,7 @@ public class Unit implements UnitInterface, Serializable, Cloneable {
 
     @Override
     public String toString() {
-        String ret = SpeciesLoader.getSpecies(speciesID).name;
+        String ret = SpeciesLoader.getSpeciesData(speciesID).name;
         ret += "@" + hashCode();
         ret += " " + currentState.toString();
         return ret;

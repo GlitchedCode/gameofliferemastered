@@ -21,51 +21,47 @@ public class CompetitiveGrid extends Grid {
 
     enum State implements Serializable {
 
-        WAITING,
-        GAME_STARTED,
-        PLACEMENT_PHASE,
-        SIMULATION_PHASE;
-
-        private static final ArrayList<Predicate<CompetitiveGrid>> PREDICATES
-                = new ArrayList<Predicate<CompetitiveGrid>>() {
-            {
-                add((g) -> {
-                    g.resetGame();
-                    return true;
-                });
-                add((g) -> {
-                    g.startGame();
-                    return true;
-                });
-                add((g) -> {
-                    g.endPhase();
-                    return true;
-                });
-                add((g) -> {
-                    g.startPhase();
-                    return true;
-                });
+        WAITING {
+            @Override
+            public void enter(CompetitiveGrid g) {
+                g.resetGame();
+            }
+        },
+        GAME_STARTED {
+            @Override
+            public void enter(CompetitiveGrid g) {
+                g.startGame();
+            }
+        },
+        PLACEMENT_PHASE {
+            @Override
+            public void enter(CompetitiveGrid g) {
+                g.endPhase();
+            }
+        },
+        SIMULATION_PHASE {
+            @Override
+            public void enter(CompetitiveGrid g) {
+                g.startPhase();
             }
         };
 
-        public boolean predicate(CompetitiveGrid g) {
-            return PREDICATES.get(ordinal()).test(g);
+        public void enter(CompetitiveGrid g) {
         }
 
     }
 
     public final static int SIMULATION_PHASE_LENGTH = 80;
-    public final static int PLACEMENT_PHASE_TIME = 60;
-    public final static int GAME_START_WAIT_TIME = 20;
+    public final static int PLACEMENT_PHASE_TIME = 20;
+    public final static int GAME_START_WAIT_TIME = 10;
 
     int currentPhaseNumber = 0;
     int secondsPassed = 0;
     State currentState;
     boolean showWinner = false;
     boolean started = false;
-    
-    private transient TimerWrapper timer = new TimerWrapper();
 
+    private transient TimerWrapper timer = new TimerWrapper();
 
     /**
      * Constructor
@@ -89,7 +85,7 @@ public class CompetitiveGrid extends Grid {
     public synchronized void computeNextTurn() throws Exception {
         advance();
         if (getCurrentTurn() % SIMULATION_PHASE_LENGTH == 0) {
-            endPhase();
+            setState(State.PLACEMENT_PHASE);
         }
     }
 
@@ -132,13 +128,15 @@ public class CompetitiveGrid extends Grid {
     private void setState(State state) {
         timer.cancel();
         currentState = state;
-        
+
         SimulationInterface sim = getSimulation();
-        if(sim != null) sim.synchronize();
-        
-        state.predicate(this);
+        if (sim != null) {
+            sim.synchronize();
+        }
+
+        state.enter(this);
     }
-    
+
     private void resetGame() {
         isLocked = true;
         isRunning = false;
@@ -162,23 +160,14 @@ public class CompetitiveGrid extends Grid {
         }, 0, 1000);
     }
 
-    private void startPhase() {
-        isRunning = true;
-        isLocked = true;
-        ApplicationFrame.setShowWinner(false);
-
-        currentPhaseNumber++;
-        gameStatus = "Running phase " + currentPhaseNumber;
-    }
-
     private void endPhase() {
         isRunning = false;
         isLocked = false;
-        
+
         if (!started) {
             started = true;
         } else {
-            ApplicationFrame.setShowWinner(true);
+            showWinner = true;
         }
         clearBoard(false);
 
@@ -192,6 +181,15 @@ public class CompetitiveGrid extends Grid {
                 gameStatus = "Placement: " + remaining + " seconds left.";
             }
         }, 0, 1000);
+    }
+    
+    private void startPhase() {
+        isRunning = true;
+        isLocked = true;
+        showWinner = false;
+
+        currentPhaseNumber++;
+        gameStatus = "Running phase " + currentPhaseNumber;
     }
 
     @Override

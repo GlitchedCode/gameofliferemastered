@@ -3,37 +3,41 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.state;
+package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
+import java.io.Serializable;
 
 /**
  *
  * @author glitchedcode
  */
-public class AgingState implements StateInterface {
+public enum State implements Serializable {
+    INVALID,
+    DEAD,
+    ALIVE,
+    ALIVE_AGING {
+        @Override
+        public void independentAction(UnitInterface unit) {
+            unit.incrementHealth(-1);
+        }
+    };
 
-    @Override
     public void enter(UnitInterface unit) {
     }
 
-    @Override
     public void exit(UnitInterface unit) {
     }
 
-    @Override
     public boolean attackModifier(boolean speciesResult, Integer adjacencyPosition) {
         return speciesResult;
     }
 
-    @Override
     public boolean reproductionModifier(boolean speciesResult, Integer adjacencyPosition) {
         return speciesResult;
     }
 
-    @Override
     public void independentAction(UnitInterface unit) {
-        unit.incrementHealth(-1);
     }
 
 }

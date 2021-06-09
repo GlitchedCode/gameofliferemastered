@@ -67,7 +67,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
      * @throws java.lang.Exception
      */
     public ApplicationFrame() throws Exception {
-        SpeciesLoader.loadUnitClasses();
+        SpeciesLoader.loadSpeciesFromJSON();
         tileManager = new ImageManager("tiles.json");
         localGrid = new SimulationServer(localRowCount, localColumnCount);
 
@@ -479,6 +479,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
                 serverAddress.setEditable(false);
                 serverPortNumber.setEditable(false);
                 hostSandboxGameButton.setEnabled(false);
+                hostCompetitiveGameButton.setEnabled(false);
                 playerNameField.setEditable(false);
 
                 client.initializeGridPanel(gridPanel);
@@ -491,6 +492,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
             serverAddress.setEditable(true);
             serverPortNumber.setEditable(true);
             hostSandboxGameButton.setEnabled(true);
+            hostCompetitiveGameButton.setEnabled(true);
             joinGameButton.setText("Join Game");
             playerNameField.setEditable(true);
 
@@ -509,7 +511,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
             hostCompetitiveGameButton.setEnabled(false);
             joinGameButton.setEnabled(false);
         } else {
-            hostSandboxGameButton.setText("Host Competitive Game");
+            hostSandboxGameButton.setText("Host Sandbox Game");
             hostCompetitiveGameButton.setEnabled(true);
             joinGameButton.setEnabled(true);
         }
@@ -578,10 +580,6 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
 
     public static void writeToStatusLog(String string) {
         mainStatusLog.append(string + "\n");
-    }
-
-    public static void setShowWinner(boolean val) {
-        globalStatusPanel.setShowWinner(val);
     }
 
     public int getRowCount() {

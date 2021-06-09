@@ -25,7 +25,7 @@ public class SpeciesLoader {
 
     static HashMap<Integer, SpeciesData> speciesData;
 
-    public static synchronized void loadUnitClasses()
+    public static synchronized void loadSpeciesFromJSON()
             throws IOException, ClassNotFoundException, InstantiationException,
             IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
 
@@ -54,7 +54,7 @@ public class SpeciesLoader {
         }
     }
 
-    public static synchronized SpeciesData getSpecies(int index) {
+    public static synchronized SpeciesData getSpeciesData(int index) {
         return speciesData.get(index);
     }
 

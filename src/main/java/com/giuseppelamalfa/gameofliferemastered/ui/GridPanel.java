@@ -313,7 +313,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
     }
 
     public void drawUnit(Graphics2D g, AffineTransform xform, ImageObserver obs, UnitInterface unit) {
-        Image img = tileManager.getImage(SpeciesLoader.getSpecies(unit.getSpeciesID()).textureCode);
+        Image img = tileManager.getImage(SpeciesLoader.getSpeciesData(unit.getSpeciesID()).textureCode);
         g.setColor(simulation.getPlayerColor(unit.getPlayerID()).getMainAWTColor());
         g.fillRect((int) xform.getTranslateX(), (int) xform.getTranslateY(),
                 (int) (xform.getScaleX() * 8), (int) (xform.getScaleY() * 8));

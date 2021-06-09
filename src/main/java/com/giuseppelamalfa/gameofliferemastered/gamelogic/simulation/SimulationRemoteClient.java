@@ -27,11 +27,7 @@ import java.util.logging.Logger;
  */
 public class SimulationRemoteClient implements SimulationInterface {
 
-    int playerCount;
-    int rowCount = 1;
-    int columnCount = 1;
     Grid currentGrid;
-    Grid syncGrid = new Grid(1, 1);
 
     GridPanel panel;
     Socket clientSocket;
@@ -56,7 +52,7 @@ public class SimulationRemoteClient implements SimulationInterface {
             try {
                 ObjectInputStream input = new ObjectInputStream(clientSocket.getInputStream());
                 while (true) {
-                    handleRequest((Request)input.readObject(), 0);
+                    handleRequest((Request) input.readObject(), 0);
                 }
             } catch (EOFException | SocketException e) {
             } catch (InvalidRequestException | IOException | ClassNotFoundException e) {
@@ -109,12 +105,12 @@ public class SimulationRemoteClient implements SimulationInterface {
 
     @Override
     public int getRowCount() {
-        return rowCount;
+        return currentGrid.getRowCount();
     }
 
     @Override
     public int getColumnCount() {
-        return columnCount;
+        return currentGrid.getColumnCount();
     }
 
     @Override
@@ -185,27 +181,16 @@ public class SimulationRemoteClient implements SimulationInterface {
                 ApplicationFrame.writeToStatusLog(((LogMessageRequest) request).message);
                 break;
             case SYNC_GRID:
-                synchronized (syncGrid) {
-                    syncGrid = ((SyncGridRequest) request).grid;
-                }
-                rowCount = syncGrid.getRowCount();
-                columnCount = syncGrid.getColumnCount();
-                Grid tmpGrid;
-                try {
-                    tmpGrid = (Grid) syncGrid.clone();
-                } catch (CloneNotSupportedException ex) {
-                    Logger.getLogger(SimulationRemoteClient.class.getName()).log(Level.SEVERE, null, ex);
-                    break;
-                }
-                synchronized (currentGrid) {
-                    currentGrid = tmpGrid;
-                    currentGrid.setSimulation(this);
-                    currentGrid.setPlayerIDCheckNextTurn();
-                    currentGrid.addPlayer(localPlayerData);
-                    currentGrid.afterSync();
+                currentGrid = (Grid) ((SyncGridRequest) request).grid;
+                currentGrid.setSimulation(this);
+                currentGrid.setPlayerIDCheckNextTurn();
+                currentGrid.addPlayer(localPlayerData);
+                currentGrid.afterSync();
+                if (!currentGrid.showWinner()) {
                     currentGrid.calculateScore();
                 }
                 panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
+                panel.getGameStatusPanel().setShowWinner(currentGrid.showWinner());
                 break;
             case UPDATE_PLAYER_DATA:
                 UpdatePlayerDataRequest updateRequest = (UpdatePlayerDataRequest) request;
@@ -258,12 +243,6 @@ public class SimulationRemoteClient implements SimulationInterface {
 
     @Override
     public void synchronize() {
-       /* SyncGridRequest req = new SyncGridRequest();
-        try {
-            outputStream.writeObject(req);
-        } catch (IOException ex) {
-            Logger.getLogger(SimulationRemoteClient.class.getName()).log(Level.SEVERE, null, ex);
-        }*/
     }
 
     @Override

@@ -31,7 +31,7 @@ public class IntegerSetRule implements RuleInterface<Integer>, Serializable {
         return acceptedValues.contains(value);
     }
 
-    public void add(Integer value) {
+    public void add(int value) {
         acceptedValues.add(value);
     }
 }

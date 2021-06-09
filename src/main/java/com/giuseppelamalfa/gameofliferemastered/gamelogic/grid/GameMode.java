@@ -20,7 +20,7 @@ public enum GameMode {
     COMPETITIVE(CompetitiveGrid.class, false);
 
     public final Constructor<?> constructor;
-    public final boolean locallyControlled;
+    public final boolean controlledByHost;
 
     GameMode(Class<?> clazz, boolean locallyControlled) {
         Constructor<?> tmp;
@@ -31,7 +31,7 @@ public enum GameMode {
             Logger.getLogger(GameMode.class.getName()).log(Level.SEVERE, null, ex);
         }
         constructor = tmp;
-        this.locallyControlled = locallyControlled;
+        this.controlledByHost = locallyControlled;
     }
 
     public Grid getNewGrid(int rows, int cols) {

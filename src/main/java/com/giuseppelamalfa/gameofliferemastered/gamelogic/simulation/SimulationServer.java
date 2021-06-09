@@ -167,7 +167,7 @@ public class SimulationServer implements SimulationInterface {
                                 }
 
                                 while (true) {
-                                    handleRequest((Request)inputStream.readObject(), clientData.playerData.ID);
+                                    handleRequest((Request) inputStream.readObject(), clientData.playerData.ID);
                                 }
                             } // These exceptions are caught when the client disconnects
                             catch (EOFException e) {
@@ -225,7 +225,7 @@ public class SimulationServer implements SimulationInterface {
 
     @Override
     public boolean isLocallyControlled() {
-        return mode.locallyControlled;
+        return mode.controlledByHost;
     }
 
     @Override
@@ -319,7 +319,7 @@ public class SimulationServer implements SimulationInterface {
     }
 
     @Override
-    public synchronized void synchronize() {
+    public void synchronize() {
         if (syncGrid.equals(currentGrid)) {
             return;
         }
@@ -329,18 +329,21 @@ public class SimulationServer implements SimulationInterface {
         } catch (CloneNotSupportedException ex) {
             Logger.getLogger(SimulationServer.class.getName()).log(Level.SEVERE, null, ex);
         }
+        panel.getGameStatusPanel().setShowWinner(currentGrid.showWinner());
 
-        SyncGridRequest syncRequest = new SyncGridRequest(syncGrid);
-        try {
-            for (Integer key : connectedClients.keySet()) {
-                connectedClients.get(key).stream.writeObject(syncRequest);
+        synchronized (this) {
+            SyncGridRequest syncRequest = new SyncGridRequest(syncGrid);
+            try {
+                for (Integer key : connectedClients.keySet()) {
+                    connectedClients.get(key).stream.writeObject(syncRequest);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
-    public synchronized void synchronize(ObjectOutputStream output) {
+    public void synchronize(ObjectOutputStream output) {
         try {
             syncGrid = (Grid) currentGrid.clone();
         } catch (CloneNotSupportedException ex) {
@@ -367,8 +370,6 @@ public class SimulationServer implements SimulationInterface {
                 Logger.getLogger(SimulationServer.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        System.out.println("sent");
-
     }
 
     @Override
@@ -471,9 +472,9 @@ public class SimulationServer implements SimulationInterface {
 
     @Override
     public void resize(int rows, int cols) {
+        if(remoteInstance) return;
         try {
             currentGrid.resize(rows, cols);
-            synchronize();
         } catch (Exception ex) {
             ApplicationFrame.writeToStatusLog(ex.toString());
         }

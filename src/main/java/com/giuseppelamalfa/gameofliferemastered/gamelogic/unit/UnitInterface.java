@@ -5,7 +5,6 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.state.State;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.GameLogicException;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
 import java.util.Set;
