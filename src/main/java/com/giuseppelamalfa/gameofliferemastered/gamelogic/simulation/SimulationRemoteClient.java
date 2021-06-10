@@ -135,6 +135,14 @@ public class SimulationRemoteClient implements SimulationInterface {
 
     @Override
     public void removeUnit(int row, int col) {
+        UnitInterface unit = currentGrid.getUnit(row, col);
+        if (unit != null) {
+            return;
+        }
+        if (unit.getPlayerID() != localPlayerData.ID) {
+            return;
+        }
+
         try {
             outputStream.writeObject(new SetUnitRequest(row, col, null));
         } catch (IOException ex) {
@@ -146,6 +154,11 @@ public class SimulationRemoteClient implements SimulationInterface {
 
     @Override
     public void setUnit(int row, int col, UnitInterface unit) {
+
+        if (currentGrid.getUnit(row, col) != null) {
+            return;
+        }
+
         try {
             outputStream.writeObject(new SetUnitRequest(row, col, unit));
         } catch (IOException ex) {
@@ -180,6 +193,7 @@ public class SimulationRemoteClient implements SimulationInterface {
             case LOG_MESSAGE:
                 ApplicationFrame.writeToStatusLog(((LogMessageRequest) request).message);
                 break;
+
             case SYNC_GRID:
                 currentGrid = (Grid) ((SyncGridRequest) request).grid;
                 currentGrid.setSimulation(this);
@@ -189,9 +203,11 @@ public class SimulationRemoteClient implements SimulationInterface {
                 if (!currentGrid.showWinner()) {
                     currentGrid.calculateScore();
                 }
+
                 panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
                 panel.getGameStatusPanel().setShowWinner(currentGrid.showWinner());
                 break;
+
             case UPDATE_PLAYER_DATA:
                 UpdatePlayerDataRequest updateRequest = (UpdatePlayerDataRequest) request;
                 PlayerData playerData = updateRequest.playerData;
@@ -219,6 +235,7 @@ public class SimulationRemoteClient implements SimulationInterface {
                     // IDK DUDE XDDDDDDDDDD
                 }
                 break;
+
             case DISCONNECT:
                 String msg = ((DisconnectRequest) request).message;
                 ApplicationFrame.writeToStatusLog("Disconnected from " + clientSocket.getRemoteSocketAddress()
@@ -226,9 +243,11 @@ public class SimulationRemoteClient implements SimulationInterface {
                 clientSocket.close();
                 setRunning(false);
                 break;
+
             case PAUSE:
                 setRunning(((GameStatusRequest) request).running);
                 break;
+
             case SET_UNIT:
                 SetUnitRequest setUnit = (SetUnitRequest) request;
                 if (setUnit.unit != null) {
