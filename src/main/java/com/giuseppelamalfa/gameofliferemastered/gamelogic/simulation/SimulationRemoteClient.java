@@ -136,7 +136,7 @@ public class SimulationRemoteClient implements SimulationInterface {
     @Override
     public void removeUnit(int row, int col) {
         UnitInterface unit = currentGrid.getUnit(row, col);
-        if (unit != null) {
+        if (unit == null) {
             return;
         }
         if (unit.getPlayerID() != localPlayerData.ID) {
@@ -195,13 +195,24 @@ public class SimulationRemoteClient implements SimulationInterface {
                 break;
 
             case SYNC_GRID:
-                currentGrid = (Grid) ((SyncGridRequest) request).grid;
-                currentGrid.setSimulation(this);
-                currentGrid.setPlayerIDCheckNextTurn();
-                currentGrid.addPlayer(localPlayerData);
-                currentGrid.afterSync();
-                if (!currentGrid.showWinner()) {
-                    currentGrid.calculateScore();
+                SyncGridRequest sync = (SyncGridRequest) request;
+                if (sync.grid != null) {
+                    currentGrid = (Grid) sync.grid;
+                    currentGrid.setSimulation(this);
+                    currentGrid.setPlayerIDCheckNextTurn();
+                    currentGrid.addPlayer(localPlayerData);
+                    currentGrid.afterSync();
+                    if (!currentGrid.showWinner()) {
+                        currentGrid.calculateScore();
+                    }
+                }
+
+                if (sync.skipTurn) {
+                    try {
+                        computeNextTurn();
+                    } catch (Exception ex) {
+                        Logger.getLogger(SimulationRemoteClient.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
 
                 panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());

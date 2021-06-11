@@ -157,7 +157,7 @@ public class SimulationServer implements SimulationInterface {
                                 currentGrid.addPlayer(client.playerData);
                                 outputStream.writeObject(new UpdatePlayerDataRequest(tmp, true, true));
                                 outputStream.writeObject(new SyncGridRequest(currentGrid));
-                                outputStream.writeObject(new GameStatusRequest(isRunning()));
+                                outputStream.writeObject(new GameStatusRequest(isRunning(), getStatusString()));
 
                                 for (ClientData data : connectedClients.values()) {
                                     if (data.playerData.ID != clientID) {
@@ -311,7 +311,8 @@ public class SimulationServer implements SimulationInterface {
         currentGrid.computeNextTurn();
         // Syncronize grid and player data if the simulation is stepped forward manually
         if (!isRunning()) {
-            synchronize();
+            sendToAll(new SyncGridRequest(null, true));
+            panel.getGameStatusPanel().setShowWinner(currentGrid.showWinner());
         }
     }
 
@@ -326,18 +327,9 @@ public class SimulationServer implements SimulationInterface {
         } catch (CloneNotSupportedException ex) {
             Logger.getLogger(SimulationServer.class.getName()).log(Level.SEVERE, null, ex);
         }
-        panel.getGameStatusPanel().setShowWinner(currentGrid.showWinner());
 
-        synchronized (this) {
-            SyncGridRequest syncRequest = new SyncGridRequest(syncGrid);
-            try {
-                for (Integer key : connectedClients.keySet()) {
-                    connectedClients.get(key).stream.writeObject(syncRequest);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        panel.getGameStatusPanel().setShowWinner(currentGrid.showWinner());
+        sendToAll(new SyncGridRequest(syncGrid));
     }
 
     public void synchronize(ObjectOutputStream output) {
@@ -377,15 +369,7 @@ public class SimulationServer implements SimulationInterface {
     @Override
     public void setRunning(boolean val) {
         currentGrid.setRunning(val);
-        GameStatusRequest req = new GameStatusRequest(isRunning());
-        try {
-            for (Integer key : connectedClients.keySet()) {
-                connectedClients.get(key).stream.writeObject(req);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+        //sendToAll(new GameStatusRequest(isRunning()));
         synchronize();
     }
 
