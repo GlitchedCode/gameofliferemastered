@@ -26,7 +26,8 @@ import java.util.logging.Logger;
  *
  * @author glitchedcode
  */
-public class SimulationRemoteClient implements SimulationInterface {
+public class SimulationRemoteClient implements SimulationInterface
+{
 
     Grid currentGrid;
 
@@ -37,32 +38,44 @@ public class SimulationRemoteClient implements SimulationInterface {
     int portNumber;
     PlayerData localPlayerData;
 
-    public SimulationRemoteClient(String playerName, String host, int portNumber) throws IOException, Exception {
+    public SimulationRemoteClient(String playerName, String host, int portNumber) throws IOException, Exception
+    {
         localPlayerData = new PlayerData(playerName);
         init(host, portNumber);
     }
 
-    public void init(String host, int portNumber) throws IOException, Exception {
+    public void init(String host, int portNumber) throws IOException, Exception
+    {
         clientSocket = new Socket(host, portNumber);
         outputStream = new ObjectOutputStream(clientSocket.getOutputStream());
 
         outputStream.writeObject(new UpdatePlayerDataRequest(localPlayerData, true, true));
         ApplicationFrame.writeToStatusLog("Connected to " + host + ":" + portNumber);
 
-        new Thread(() -> {
-            try {
+        new Thread(() ->
+        {
+            try
+            {
                 ObjectInputStream input = new ObjectInputStream(clientSocket.getInputStream());
-                while (true) {
+                while ( true )
+                {
                     handleRequest((Request) input.readObject(), 0);
                 }
-            } catch (EOFException | SocketException e) {
-            } catch (InvalidRequestException | IOException | ClassNotFoundException e) {
+            }
+            catch (EOFException | SocketException e)
+            {
+            }
+            catch (InvalidRequestException | IOException | ClassNotFoundException e)
+            {
                 e.printStackTrace();
                 currentGrid.setRunning(false);
             }
-            try {
+            try
+            {
                 clientSocket.close();
-            } catch (IOException a) {
+            }
+            catch (IOException a)
+            {
             }
         }).start();
 
@@ -70,83 +83,102 @@ public class SimulationRemoteClient implements SimulationInterface {
     }
 
     @Override
-    public boolean isLocked() {
+    public boolean isLocked()
+    {
         return currentGrid.isLocked();
     }
 
     @Override
-    public boolean isRunning() {
+    public boolean isRunning()
+    {
         return currentGrid.isRunning();
     }
 
     @Override
-    public boolean isLocallyControlled() {
+    public boolean isLocallyControlled()
+    {
         return false;
     }
 
     @Override
-    public String getGameModeName() {
+    public String getGameModeName()
+    {
         return currentGrid.getGameModeName();
     }
 
     @Override
-    public int getLocalPlayerID() {
+    public int getLocalPlayerID()
+    {
         return localPlayerData.ID;
     }
 
     @Override
-    public PlayerData.TeamColor getPlayerColor(int ID) {
+    public PlayerData.TeamColor getPlayerColor(int ID)
+    {
         return currentGrid.getPlayerColor(ID);
     }
 
     @Override
-    public ArrayList<PlayerData> getPlayerRankings() {
+    public ArrayList<PlayerData> getPlayerRankings()
+    {
         return currentGrid.getPlayerRankings();
     }
 
     @Override
-    public int getRowCount() {
+    public int getRowCount()
+    {
         return currentGrid.getRowCount();
     }
 
     @Override
-    public int getColumnCount() {
+    public int getColumnCount()
+    {
         return currentGrid.getColumnCount();
     }
 
     @Override
-    public int getSectorSideLength() {
+    public int getSectorSideLength()
+    {
         return currentGrid.SECTOR_SIDE_LENGTH;
     }
 
     @Override
-    public String getStatusString() {
+    public String getStatusString()
+    {
         return currentGrid.getStatusString();
     }
 
     @Override
-    public int getCurrentTurn() {
+    public int getCurrentTurn()
+    {
         return currentGrid.getCurrentTurn();
     }
 
     @Override
-    public UnitInterface getUnit(int row, int col) {
+    public UnitInterface getUnit(int row, int col)
+    {
         return currentGrid.getUnit(row, col);
     }
 
     @Override
-    public void removeUnit(int row, int col) {
+    public void removeUnit(int row, int col)
+    {
         UnitInterface unit = currentGrid.getUnit(row, col);
-        if (unit == null) {
+        if ( unit == null )
+        {
             return;
         }
-        if (unit.getPlayerID() != localPlayerData.ID) {
+        if ( unit.getPlayerID() != localPlayerData.ID )
+        {
             return;
         }
 
-        try {
+        try
+        {
             outputStream.writeObject(new SetUnitRequest(row, col, null));
-        } catch (IOException ex) {
+        }
+        catch (IOException ex)
+        {
             Logger.getLogger(SimulationRemoteClient.class.getName()).log(Level.SEVERE, null, ex);
         }
 
@@ -154,15 +186,20 @@ public class SimulationRemoteClient implements SimulationInterface {
     }
 
     @Override
-    public void setUnit(int row, int col, UnitInterface unit) {
+    public void setUnit(int row, int col, UnitInterface unit)
+    {
 
-        if (currentGrid.getUnit(row, col) != null) {
+        if ( currentGrid.getUnit(row, col) != null )
+        {
             return;
         }
 
-        try {
+        try
+        {
             outputStream.writeObject(new SetUnitRequest(row, col, unit));
-        } catch (IOException ex) {
+        }
+        catch (IOException ex)
+        {
             Logger.getLogger(SimulationRemoteClient.class.getName()).log(Level.SEVERE, null, ex);
         }
 
@@ -170,18 +207,26 @@ public class SimulationRemoteClient implements SimulationInterface {
     }
 
     @Override
-    public synchronized void computeNextTurn() throws Exception {
+    public synchronized void computeNextTurn() throws Exception
+    {
         currentGrid.computeNextTurn();
     }
 
     @Override
-    public void setRunning(boolean val) {
-        if (isLocallyControlled()) {
+    public void setRunning(boolean val)
+    {
+        if ( isLocallyControlled() )
+        {
             setRunning(val);
-        } else {
-            try {
+        }
+        else
+        {
+            try
+            {
                 outputStream.writeObject(new GameStatusRequest(val));
-            } catch (IOException ex) {
+            }
+            catch (IOException ex)
+            {
                 Logger.getLogger(SimulationRemoteClient.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
@@ -189,29 +234,50 @@ public class SimulationRemoteClient implements SimulationInterface {
 
     @Override
     public void handleRequest(Request request, int ID)
-            throws IOException, InvalidRequestException {
-        switch (request.getType()) {
+            throws IOException, InvalidRequestException
+    {
+        switch ( request.getType() )
+        {
             case LOG_MESSAGE:
                 ApplicationFrame.writeToStatusLog(((LogMessageRequest) request).message);
                 break;
 
+            case SYNC_SPECIES_DATA:
+                SyncSpeciesDataRequest speciesData = (SyncSpeciesDataRequest) request;
+                try
+                {
+                    SpeciesLoader.loadJSONString(speciesData.jsonString);
+                    panel.getPalette().resetPaletteItems();
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+                break;
+
             case SYNC_GRID:
                 SyncGridRequest sync = (SyncGridRequest) request;
-                if (sync.grid != null) {
+                if ( sync.grid != null )
+                {
                     currentGrid = (Grid) sync.grid;
                     currentGrid.setSimulation(this);
                     currentGrid.setPlayerIDCheckNextTurn();
                     currentGrid.addPlayer(localPlayerData);
                     currentGrid.afterSync();
-                    if (!currentGrid.showWinner()) {
+                    if ( !currentGrid.showWinner() )
+                    {
                         currentGrid.calculateScore();
                     }
                 }
 
-                if (sync.skipTurn) {
-                    try {
+                if ( sync.skipTurn )
+                {
+                    try
+                    {
                         computeNextTurn();
-                    } catch (Exception ex) {
+                    }
+                    catch (Exception ex)
+                    {
                         Logger.getLogger(SimulationRemoteClient.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
@@ -224,26 +290,36 @@ public class SimulationRemoteClient implements SimulationInterface {
                 UpdatePlayerDataRequest updateRequest = (UpdatePlayerDataRequest) request;
                 PlayerData playerData = updateRequest.playerData;
 
-                if (updateRequest.updateLocal) {
-                    if (playerData.color != PlayerData.TeamColor.NONE) {
+                if ( updateRequest.updateLocal )
+                {
+                    if ( playerData.color != PlayerData.TeamColor.NONE )
+                    {
                         localPlayerData.color = playerData.color;
                     }
-                    if (playerData.ID != -1) {
+                    if ( playerData.ID != -1 )
+                    {
                         currentGrid.removePlayer(localPlayerData.ID);
                         localPlayerData.ID = playerData.ID;
                         currentGrid.addPlayer(localPlayerData);
                     }
                 }
-                if (playerData.ID != localPlayerData.ID) {
-                    if (updateRequest.connected) {
+                if ( playerData.ID != localPlayerData.ID )
+                {
+                    if ( updateRequest.connected )
+                    {
                         currentGrid.addPlayer(playerData);
-                    } else {
+                    }
+                    else
+                    {
                         currentGrid.removePlayer(playerData.ID);
                     }
                 }
-                try {
+                try
+                {
                     panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
-                } catch (Exception e) {
+                }
+                catch (Exception e)
+                {
                     // IDK DUDE XDDDDDDDDDD
                 }
                 break;
@@ -262,9 +338,12 @@ public class SimulationRemoteClient implements SimulationInterface {
 
             case SET_UNIT:
                 SetUnitRequest setUnit = (SetUnitRequest) request;
-                if (setUnit.unit != null) {
+                if ( setUnit.unit != null )
+                {
                     currentGrid.setUnit(setUnit.row, setUnit.col, setUnit.unit);
-                } else {
+                }
+                else
+                {
                     currentGrid.removeUnit(setUnit.row, setUnit.col);
                 }
                 panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
@@ -273,26 +352,33 @@ public class SimulationRemoteClient implements SimulationInterface {
     }
 
     @Override
-    public void synchronize() {
+    public void synchronize()
+    {
     }
 
     @Override
-    public void initializeGridPanel(GridPanel panel) {
+    public void initializeGridPanel(GridPanel panel)
+    {
         this.panel = panel;
     }
 
     @Override
-    public void close() {
-        try {
+    public void close()
+    {
+        try
+        {
             SpeciesLoader.loadJSONString(SpeciesLoader.getLocalSpeciesJSONString());
             panel.getPalette().resetPaletteItems();
             outputStream.writeObject(new UpdatePlayerDataRequest(localPlayerData, false));
             clientSocket.close();
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             System.err.println("e");
         }
     }
 
-    public void resize(int rows, int cols) {
+    public void resize(int rows, int cols)
+    {
     }
 }

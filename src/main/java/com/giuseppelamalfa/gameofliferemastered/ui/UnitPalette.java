@@ -249,7 +249,9 @@ public class UnitPalette extends JPanel implements MouseListener {
         }
     }
     
-    public void resetPaletteItems() throws Exception{
+    public void resetPaletteItems() throws Exception {
+        items.clear();
+        selectedIndex = 0;
         for (int c = 0; c < SpeciesLoader.getSpeciesCount(); c++) {
             addPaletteItem(c, true);
         }

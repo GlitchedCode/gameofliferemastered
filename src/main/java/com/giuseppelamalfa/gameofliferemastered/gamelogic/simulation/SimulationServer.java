@@ -11,6 +11,7 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.Grid;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.GameMode;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.requests.*;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
 import java.io.BufferedReader;
 import java.io.EOFException;
@@ -158,7 +159,8 @@ public class SimulationServer implements SimulationInterface {
                                 outputStream.writeObject(new UpdatePlayerDataRequest(tmp, true, true));
                                 outputStream.writeObject(new SyncGridRequest(currentGrid));
                                 outputStream.writeObject(new GameStatusRequest(isRunning(), getStatusString()));
-
+                                outputStream.writeObject(new SyncSpeciesDataRequest(SpeciesLoader.getLocalSpeciesJSONString()));
+                                
                                 for (ClientData data : connectedClients.values()) {
                                     if (data.playerData.ID != clientID) {
                                         UpdatePlayerDataRequest req = new UpdatePlayerDataRequest(data.playerData, true);
