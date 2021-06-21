@@ -45,7 +45,6 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
     SimulationRemoteClient client;
     SimulationServer server;
 
-    static GameStatusPanel globalStatusPanel;
     static ImageIcon icon;
     static JTextArea mainStatusLog;
     boolean isInMenu = true;
@@ -78,8 +77,6 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
         if (!tileManager.isInitialized()) {
             throw new Exception("Failed to initialize tile manager.");
         }
-
-        globalStatusPanel = gameStatusPanel;
     }
 
     /**

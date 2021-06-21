@@ -23,12 +23,15 @@ public class SpeciesLoader {
     static public final String RULE_CLASS_PATH = "com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.";
     static public final String UNIT_CLASS_PATH = "com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.";
 
+    static String localSpeciesDataJSON = "";
+    
     static HashMap<Integer, SpeciesData> speciesData;
 
     public static synchronized void loadSpeciesFromJSON()
             throws IOException, ClassNotFoundException, InstantiationException,
             IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
 
+        // Load species.json into localSpeciesDataJSON
         InputStream istream = new SpeciesLoader().getClass().
                 getClassLoader().getResourceAsStream("species.json");
         BufferedReader reader = new BufferedReader(new InputStreamReader(istream));
@@ -37,10 +40,18 @@ public class SpeciesLoader {
         while ((line = reader.readLine()) != null) {
             strBuilder.append(line);
         }
-
+        localSpeciesDataJSON = strBuilder.toString();
+        
+        loadJSONString(localSpeciesDataJSON);
+    }
+    
+    public static synchronized void loadJSONString(String jsonString) 
+            throws ClassNotFoundException, InstantiationException, IllegalAccessException, 
+            IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
+        
         speciesData = new HashMap<>();
         HashMap<String, Integer> speciesIDs = new HashMap<>();
-        JSONArray unitDataArray = new JSONObject(strBuilder.toString()).getJSONArray("speciesData");
+        JSONArray unitDataArray = new JSONObject(jsonString).getJSONArray("speciesData");
 
         // Correlate names to IDs
         for (int c = 0; c < unitDataArray.length(); c++) {
@@ -54,6 +65,10 @@ public class SpeciesLoader {
         }
     }
 
+    public static String getLocalSpeciesJSONString() {
+        return localSpeciesDataJSON;
+    }
+    
     public static synchronized SpeciesData getSpeciesData(int index) {
         return speciesData.get(index);
     }

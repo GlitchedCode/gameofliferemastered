@@ -14,6 +14,7 @@ import java.lang.reflect.Type;
 public enum RequestType {
     INVALID(null),
     LOG_MESSAGE(LogMessageRequest.class),
+    SYNC_SPECIES_DATA(SyncSpeciesDataRequest.class),
     SYNC_GRID(SyncGridRequest.class),
     UPDATE_PLAYER_DATA(UpdatePlayerDataRequest.class),
     DISCONNECT(DisconnectRequest.class),

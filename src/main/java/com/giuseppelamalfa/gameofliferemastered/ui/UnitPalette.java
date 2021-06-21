@@ -248,12 +248,16 @@ public class UnitPalette extends JPanel implements MouseListener {
             }
         }
     }
+    
+    public void resetPaletteItems() throws Exception{
+        for (int c = 0; c < SpeciesLoader.getSpeciesCount(); c++) {
+            addPaletteItem(c, true);
+        }
+    }
 
     public void init(ImageManager tileManager) throws Exception {
         addMouseListener(this);
         this.tileManager = tileManager;
-        for (int c = 0; c < SpeciesLoader.getSpeciesCount(); c++) {
-            addPaletteItem(c, true);
-        }
+        resetPaletteItems();
     }
 }

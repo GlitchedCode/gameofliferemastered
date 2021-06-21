@@ -10,6 +10,7 @@ import com.giuseppelamalfa.gameofliferemastered.ui.GridPanel;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.Grid;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.requests.*;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
 import java.io.EOFException;
 import java.io.IOException;
@@ -283,6 +284,8 @@ public class SimulationRemoteClient implements SimulationInterface {
     @Override
     public void close() {
         try {
+            SpeciesLoader.loadJSONString(SpeciesLoader.getLocalSpeciesJSONString());
+            panel.getPalette().resetPaletteItems();
             outputStream.writeObject(new UpdatePlayerDataRequest(localPlayerData, false));
             clientSocket.close();
         } catch (Exception e) {

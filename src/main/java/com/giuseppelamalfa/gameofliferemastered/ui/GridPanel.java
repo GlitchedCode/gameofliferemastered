@@ -348,6 +348,10 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
         return gridSize;
     }
 
+    public UnitPalette getPalette() {
+        return palette;
+    }
+    
     public GameStatusPanel getGameStatusPanel() {
         return gameStatusPanel;
     }

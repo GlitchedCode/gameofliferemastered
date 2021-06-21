@@ -16,8 +16,6 @@ public abstract class Request implements Serializable {
 
 
     protected RequestType type = RequestType.INVALID;
-
-    ;
     
     public RequestType getType() throws InvalidRequestException {
         if (type == RequestType.INVALID) {
