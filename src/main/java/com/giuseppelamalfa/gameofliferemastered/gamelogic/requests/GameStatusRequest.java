@@ -9,19 +9,22 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic.requests;
  *
  * @author glitchedcode
  */
-public class GameStatusRequest extends Request {
+public class GameStatusRequest extends Request
+{
 
     public boolean running;
     public String status;
 
-    public GameStatusRequest(boolean val) {
-        type = RequestType.PAUSE;
+    public GameStatusRequest(boolean val)
+    {
+        super(RequestType.PAUSE);
         running = val;
     }
 
-    public GameStatusRequest(boolean val, String status) {
-        type = RequestType.PAUSE;
-        running = val;
+    public GameStatusRequest(boolean val, String status)
+    {
+        super(RequestType.PAUSE);
+            running = val;
         this.status = status;
     }
 }

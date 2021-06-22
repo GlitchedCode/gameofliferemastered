@@ -31,7 +31,7 @@ public class Unit implements UnitInterface, Serializable, Cloneable {
     protected RuleInterface<Integer> hostileCountSelector;
     protected RuleInterface<Integer> reproductionSelector;
 
-    private int playerID;
+    private final int playerID;
     private boolean competitive = false;
 
     private void initSpeciesData(SpeciesData data) {

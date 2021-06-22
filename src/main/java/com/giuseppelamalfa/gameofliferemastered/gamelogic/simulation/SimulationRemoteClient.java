@@ -16,6 +16,8 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
@@ -232,122 +234,148 @@ public class SimulationRemoteClient implements SimulationInterface
         }
     }
 
+    private void handleLogMessageRequest(Request r, int ID)
+    {
+        ApplicationFrame.writeToStatusLog(((LogMessageRequest) r).message);
+    }
+
+    private void handleSyncSpeciesDataRequest(Request r, int ID)
+    {
+        SyncSpeciesDataRequest speciesData = (SyncSpeciesDataRequest) r;
+        try
+        {
+            SpeciesLoader.loadJSONString(speciesData.jsonString);
+            panel.getPalette().resetPaletteItems();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+    }
+
+    private void handleSyncGridRequest(Request r, int ID)
+    {
+        SyncGridRequest sync = (SyncGridRequest) r;
+        if ( sync.grid != null )
+        {
+            currentGrid = (Grid) sync.grid;
+            currentGrid.setSimulation(this);
+            currentGrid.setPlayerIDCheckNextTurn();
+            currentGrid.addPlayer(localPlayerData);
+            currentGrid.afterSync();
+            if ( !currentGrid.showWinner() )
+            {
+                currentGrid.calculateScore();
+            }
+        }
+
+        if ( sync.skipTurn )
+        {
+            try
+            {
+                computeNextTurn();
+            }
+            catch (Exception ex)
+            {
+                Logger.getLogger(SimulationRemoteClient.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+        panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
+        panel.getGameStatusPanel().setShowWinner(currentGrid.showWinner());
+
+    }
+
+    private void handleUpdatePlayerDataRequest(Request r, int ID)
+    {
+        UpdatePlayerDataRequest updateRequest = (UpdatePlayerDataRequest) r;
+        PlayerData playerData = updateRequest.playerData;
+
+        if ( updateRequest.updateLocal )
+        {
+            if ( playerData.color != PlayerData.TeamColor.NONE )
+            {
+                localPlayerData.color = playerData.color;
+            }
+            if ( playerData.ID != -1 )
+            {
+                currentGrid.removePlayer(localPlayerData.ID);
+                localPlayerData.ID = playerData.ID;
+                currentGrid.addPlayer(localPlayerData);
+            }
+        }
+        if ( playerData.ID != localPlayerData.ID )
+        {
+            if ( updateRequest.connected )
+            {
+                currentGrid.addPlayer(playerData);
+            }
+            else
+            {
+                currentGrid.removePlayer(playerData.ID);
+            }
+        }
+        try
+        {
+            panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
+        }
+        catch (Exception e)
+        {
+            // IDK DUDE XDDDDDDDDDD
+        }
+    }
+
+    private void handleDisconnectRequest(Request r, int ID)
+    {
+        String msg = ((DisconnectRequest) r).message;
+        ApplicationFrame.writeToStatusLog("Disconnected from " + clientSocket.getRemoteSocketAddress()
+                + ": " + msg);
+        try
+        {
+            clientSocket.close();
+        }
+        catch (IOException ex)
+        {
+            Logger.getLogger(SimulationRemoteClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        setRunning(false);
+
+    }
+
+    private void handlePauseRequest(Request r, int ID)
+    {
+        setRunning(((GameStatusRequest) r).running);
+    }
+
+    private void handleSetUnitRequest(Request r, int ID)
+    {
+        SetUnitRequest setUnit = (SetUnitRequest) r;
+        if ( setUnit.unit != null )
+        {
+            currentGrid.setUnit(setUnit.row, setUnit.col, setUnit.unit);
+        }
+        else
+        {
+            currentGrid.removeUnit(setUnit.row, setUnit.col);
+        }
+        panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
+
+    }
+
     @Override
     public void handleRequest(Request request, int ID)
             throws IOException, InvalidRequestException
     {
-        switch ( request.getType() )
+        try
         {
-            case LOG_MESSAGE:
-                ApplicationFrame.writeToStatusLog(((LogMessageRequest) request).message);
-                break;
-
-            case SYNC_SPECIES_DATA:
-                SyncSpeciesDataRequest speciesData = (SyncSpeciesDataRequest) request;
-                try
-                {
-                    SpeciesLoader.loadJSONString(speciesData.jsonString);
-                    panel.getPalette().resetPaletteItems();
-                }
-                catch (Exception e)
-                {
-                    e.printStackTrace();
-                }
-                break;
-
-            case SYNC_GRID:
-                SyncGridRequest sync = (SyncGridRequest) request;
-                if ( sync.grid != null )
-                {
-                    currentGrid = (Grid) sync.grid;
-                    currentGrid.setSimulation(this);
-                    currentGrid.setPlayerIDCheckNextTurn();
-                    currentGrid.addPlayer(localPlayerData);
-                    currentGrid.afterSync();
-                    if ( !currentGrid.showWinner() )
-                    {
-                        currentGrid.calculateScore();
-                    }
-                }
-
-                if ( sync.skipTurn )
-                {
-                    try
-                    {
-                        computeNextTurn();
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.getLogger(SimulationRemoteClient.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-
-                panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
-                panel.getGameStatusPanel().setShowWinner(currentGrid.showWinner());
-                break;
-
-            case UPDATE_PLAYER_DATA:
-                UpdatePlayerDataRequest updateRequest = (UpdatePlayerDataRequest) request;
-                PlayerData playerData = updateRequest.playerData;
-
-                if ( updateRequest.updateLocal )
-                {
-                    if ( playerData.color != PlayerData.TeamColor.NONE )
-                    {
-                        localPlayerData.color = playerData.color;
-                    }
-                    if ( playerData.ID != -1 )
-                    {
-                        currentGrid.removePlayer(localPlayerData.ID);
-                        localPlayerData.ID = playerData.ID;
-                        currentGrid.addPlayer(localPlayerData);
-                    }
-                }
-                if ( playerData.ID != localPlayerData.ID )
-                {
-                    if ( updateRequest.connected )
-                    {
-                        currentGrid.addPlayer(playerData);
-                    }
-                    else
-                    {
-                        currentGrid.removePlayer(playerData.ID);
-                    }
-                }
-                try
-                {
-                    panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
-                }
-                catch (Exception e)
-                {
-                    // IDK DUDE XDDDDDDDDDD
-                }
-                break;
-
-            case DISCONNECT:
-                String msg = ((DisconnectRequest) request).message;
-                ApplicationFrame.writeToStatusLog("Disconnected from " + clientSocket.getRemoteSocketAddress()
-                        + ": " + msg);
-                clientSocket.close();
-                setRunning(false);
-                break;
-
-            case PAUSE:
-                setRunning(((GameStatusRequest) request).running);
-                break;
-
-            case SET_UNIT:
-                SetUnitRequest setUnit = (SetUnitRequest) request;
-                if ( setUnit.unit != null )
-                {
-                    currentGrid.setUnit(setUnit.row, setUnit.col, setUnit.unit);
-                }
-                else
-                {
-                    currentGrid.removeUnit(setUnit.row, setUnit.col);
-                }
-                panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
-                break;
+            Method method = SimulationServer.class.getDeclaredMethod(request.type.procedureName,
+                    Request.class, Integer.class);
+            method.invoke(this, request, ID);
+        }
+        catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex)
+        {
+            //ex.printStackTrace();
         }
     }
 

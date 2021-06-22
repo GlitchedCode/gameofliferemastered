@@ -12,19 +12,24 @@ import java.lang.reflect.Type;
  * @author glitchedcode
  */
 public enum RequestType {
-    INVALID(null),
-    LOG_MESSAGE(LogMessageRequest.class),
-    SYNC_SPECIES_DATA(SyncSpeciesDataRequest.class),
-    SYNC_GRID(SyncGridRequest.class),
-    UPDATE_PLAYER_DATA(UpdatePlayerDataRequest.class),
-    DISCONNECT(DisconnectRequest.class),
-    PAUSE(GameStatusRequest.class),
-    SET_UNIT(SetUnitRequest.class);
+    
+    // procedure prototype:
+    // void procedureName(Request req, Integer clientID)
+    INVALID(null, ""),
+    LOG_MESSAGE(LogMessageRequest.class, "handleLogMessageRequest"),
+    SYNC_SPECIES_DATA(SyncSpeciesDataRequest.class, "handleSyncSpeciesDataRequest"),
+    SYNC_GRID(SyncGridRequest.class, "handleSyncGridRequest"),
+    UPDATE_PLAYER_DATA(UpdatePlayerDataRequest.class, "handleUpdatePlayerDataRequest"),
+    DISCONNECT(DisconnectRequest.class, "handleDisconnectRequest"),
+    PAUSE(GameStatusRequest.class, "handlePauseRequest"),
+    SET_UNIT(SetUnitRequest.class, "handleSetUnitRequest");
 
     public final Type requestObjectType;
+    public final String procedureName;
 
-    private RequestType(Type type) {
+    private RequestType(Type type, String name) {
         requestObjectType = type;
+        procedureName = name;
     }
 
 }

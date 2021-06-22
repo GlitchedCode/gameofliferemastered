@@ -207,7 +207,6 @@ public class Grid implements Serializable, Cloneable {
         if (unit == null) {
             return;
         }
-        unit.setCompetitive(competitive);
         if (!players.containsKey(unit.getPlayerID())) {
             return;
         }
@@ -391,6 +390,8 @@ public class Grid implements Serializable, Cloneable {
             board.remove(row, col);
         }
 
+        unit.setCompetitive(competitive);
+        
         players.get(unit.getPlayerID()).score += getUnitScoreIncrement(unit);
         board.put(row, col, unit);
         moveProcessBoundaryToInclude(row, col);

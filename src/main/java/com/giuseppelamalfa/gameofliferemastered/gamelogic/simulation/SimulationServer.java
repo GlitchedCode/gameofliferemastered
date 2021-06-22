@@ -20,6 +20,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
@@ -28,19 +30,22 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-class ClientData {
+class ClientData
+{
 
     public final Socket socket;
     public final ObjectOutputStream stream;
     public final PlayerData playerData = new PlayerData();
 
-    public ClientData(Socket socket, ObjectOutputStream stream, int ID) {
+    public ClientData(Socket socket, ObjectOutputStream stream, int ID)
+    {
         this.socket = socket;
         this.stream = stream;
         this.playerData.ID = ID;
     }
 
-    public ClientData(Socket socket, ObjectOutputStream stream, int ID, String playerName) {
+    public ClientData(Socket socket, ObjectOutputStream stream, int ID, String playerName)
+    {
         this.socket = socket;
         this.stream = stream;
         this.playerData.ID = ID;
@@ -52,7 +57,8 @@ class ClientData {
  *
  * @author glitchedcode
  */
-public class SimulationServer implements SimulationInterface {
+public class SimulationServer implements SimulationInterface
+{
 
     public static final Integer DEFAULT_PLAYER_COUNT = 4;
     public static final Integer MAX_PLAYER_COUNT = 8;
@@ -82,7 +88,8 @@ public class SimulationServer implements SimulationInterface {
     GridPanel panel;
 
     public SimulationServer(String playerName, int portNumber, int playerCount,
-            int rowCount, int columnCount, GameMode mode) throws Exception {
+            int rowCount, int columnCount, GameMode mode) throws Exception
+    {
         this.mode = mode;
         initializeRemoteServer(portNumber, playerCount, rowCount, columnCount);
         localPlayerData = new PlayerData(playerName, extractRandomColor());
@@ -91,7 +98,8 @@ public class SimulationServer implements SimulationInterface {
         currentGrid.addPlayer(localPlayerData);
     }
 
-    public SimulationServer(int rowCount, int columnCount) throws Exception {
+    public SimulationServer(int rowCount, int columnCount) throws Exception
+    {
         mode = GameMode.SANDBOX;
         currentGrid = new Grid(rowCount, columnCount);
         currentGrid.setSimulation(this);
@@ -101,15 +109,21 @@ public class SimulationServer implements SimulationInterface {
     }
 
     private void initializeRemoteServer(int portNumber, int playerCount,
-            int rowCount, int columnCount) throws IOException, Exception {
-        if (playerCount < 2 | playerCount > MAX_PLAYER_COUNT) {
+            int rowCount, int columnCount) throws IOException, Exception
+    {
+        if ( playerCount < 2 | playerCount > MAX_PLAYER_COUNT )
+        {
             this.playerCount = DEFAULT_PLAYER_COUNT;
-        } else {
+        }
+        else
+        {
             this.playerCount = playerCount;
         }
 
-        for (PlayerData.TeamColor color : PlayerData.TeamColor.values()) {
-            if (color != PlayerData.TeamColor.NONE) {
+        for (PlayerData.TeamColor color : PlayerData.TeamColor.values())
+        {
+            if ( color != PlayerData.TeamColor.NONE )
+            {
                 availableColors.add(color);
             }
         }
@@ -132,15 +146,19 @@ public class SimulationServer implements SimulationInterface {
         currentGrid.setSimulation(this);
 
         // Spawn a thread to accept client connections.
-        acceptConnectionThread = new Thread(() -> {
-            try {
-                while (true) {
+        acceptConnectionThread = new Thread(() ->
+        {
+            try
+            {
+                while ( true )
+                {
                     int clientID = nextClientID;
                     Socket conn = serverSocket.accept();
                     ObjectOutputStream outputStream = new ObjectOutputStream(conn.getOutputStream());
                     nextClientID++;
 
-                    if (connectedClients.size() + 1 < playerCount) {
+                    if ( connectedClients.size() + 1 < playerCount )
+                    {
                         ClientData client = new ClientData(conn, outputStream, clientID);
                         client.playerData.color = extractRandomColor();
                         client.playerData.ID = clientID;
@@ -148,9 +166,11 @@ public class SimulationServer implements SimulationInterface {
 
                         ApplicationFrame.writeToStatusLog("Accepting connection from" + conn.getRemoteSocketAddress());
                         // Make a thread for each client connection to handle their requests separately.
-                        new Thread(() -> {
+                        new Thread(() ->
+                        {
                             ClientData clientData = client;
-                            try {
+                            try
+                            {
                                 InputStream input = conn.getInputStream();
                                 ObjectInputStream inputStream = new ObjectInputStream(input);
 
@@ -160,20 +180,26 @@ public class SimulationServer implements SimulationInterface {
                                 outputStream.writeObject(new SyncGridRequest(currentGrid));
                                 outputStream.writeObject(new GameStatusRequest(isRunning(), getStatusString()));
                                 outputStream.writeObject(new SyncSpeciesDataRequest(SpeciesLoader.getLocalSpeciesJSONString()));
-                                
-                                for (ClientData data : connectedClients.values()) {
-                                    if (data.playerData.ID != clientID) {
+
+                                for (ClientData data : connectedClients.values())
+                                {
+                                    if ( data.playerData.ID != clientID )
+                                    {
                                         UpdatePlayerDataRequest req = new UpdatePlayerDataRequest(data.playerData, true);
                                         sendToAll(req);
                                     }
                                 }
 
-                                while (true) {
+                                while ( true )
+                                {
                                     handleRequest((Request) inputStream.readObject(), clientData.playerData.ID);
                                 }
                             } // These exceptions are caught when the client disconnects
-                            catch (EOFException e) {
-                            } catch (InvalidRequestException | IOException | ClassNotFoundException e) {
+                            catch (EOFException e)
+                            {
+                            }
+                            catch (InvalidRequestException | IOException | ClassNotFoundException e)
+                            {
                                 ApplicationFrame.writeToStatusLog(e.toString());
                             }
 
@@ -182,31 +208,41 @@ public class SimulationServer implements SimulationInterface {
                             currentGrid.removePlayer(clientData.playerData.ID);
                             connectedClients.remove(clientData.playerData.ID);
                             panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
-                            try {
+                            try
+                            {
                                 conn.close();
-                            } catch (IOException e) {
+                            }
+                            catch (IOException e)
+                            {
                             }
 
                             sendLogMessage(clientData.playerData.name + " left the game.");
-                            if (clientData.playerData.color != PlayerData.TeamColor.NONE) {
+                            if ( clientData.playerData.color != PlayerData.TeamColor.NONE )
+                            {
                                 availableColors.add(clientData.playerData.color);
                             }
                         }).start();
-                    } else {
+                    }
+                    else
+                    {
                         DisconnectRequest req = new DisconnectRequest("No player slots available. Closing connection.");
                         outputStream.writeObject(req);
                         conn.close();
                     }
                 }
-            } catch (IOException e) {
+            }
+            catch (IOException e)
+            {
                 System.out.println(e);
             }
         });
         acceptConnectionThread.start();
     }
 
-    public final PlayerData.TeamColor extractRandomColor() {
-        if (availableColors.isEmpty()) {
+    public final PlayerData.TeamColor extractRandomColor()
+    {
+        if ( availableColors.isEmpty() )
+        {
             return PlayerData.TeamColor.NONE;
         }
         int index = (int) (Math.random() * availableColors.size());
@@ -216,117 +252,152 @@ public class SimulationServer implements SimulationInterface {
     }
 
     @Override
-    public boolean isLocked() {
+    public boolean isLocked()
+    {
         return currentGrid.isLocked();
     }
 
     @Override
-    public boolean isRunning() {
+    public boolean isRunning()
+    {
         return currentGrid.isRunning();
     }
 
     @Override
-    public boolean isLocallyControlled() {
+    public boolean isLocallyControlled()
+    {
         return mode.controlledByHost;
     }
 
     @Override
-    public String getGameModeName() {
+    public String getGameModeName()
+    {
         return currentGrid.getGameModeName();
     }
 
     @Override
-    public int getLocalPlayerID() {
+    public int getLocalPlayerID()
+    {
         return localPlayerData.ID;
     }
 
     @Override
-    public PlayerData.TeamColor getPlayerColor(int ID) {
+    public PlayerData.TeamColor getPlayerColor(int ID)
+    {
         return currentGrid.getPlayerColor(ID);
     }
 
     @Override
-    public ArrayList<PlayerData> getPlayerRankings() {
-        if (remoteInstance) {
+    public ArrayList<PlayerData> getPlayerRankings()
+    {
+        if ( remoteInstance )
+        {
             return currentGrid.getPlayerRankings();
-        } else {
+        }
+        else
+        {
             return offlineRanking;
         }
     }
 
     @Override
-    public int getRowCount() {
+    public int getRowCount()
+    {
         return currentGrid.getRowCount();
     }
 
     @Override
-    public int getColumnCount() {
+    public int getColumnCount()
+    {
         return currentGrid.getColumnCount();
     }
 
     @Override
-    public int getSectorSideLength() {
+    public int getSectorSideLength()
+    {
         return currentGrid.SECTOR_SIDE_LENGTH;
     }
 
     @Override
-    public String getStatusString() {
+    public String getStatusString()
+    {
         return currentGrid.getStatusString();
     }
 
     @Override
-    public int getCurrentTurn() {
+    public int getCurrentTurn()
+    {
         return currentGrid.getCurrentTurn();
     }
 
     @Override
-    public UnitInterface getUnit(int row, int col) {
+    public UnitInterface getUnit(int row, int col)
+    {
         return currentGrid.getUnit(row, col);
     }
 
     @Override
-    public void removeUnit(int row, int col) {
+    public void removeUnit(int row, int col)
+    {
         SetUnitRequest req = new SetUnitRequest(row, col, null);
-        try {
+        try
+        {
             handleRequest(req, -1);
-        } catch (IOException ex) {
+        }
+        catch (IOException ex)
+        {
             Logger.getLogger(SimulationServer.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidRequestException ex) {
+        }
+        catch (InvalidRequestException ex)
+        {
             Logger.getLogger(SimulationServer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     @Override
-    public void setUnit(int row, int col, UnitInterface unit) {
+    public void setUnit(int row, int col, UnitInterface unit)
+    {
         SetUnitRequest req = new SetUnitRequest(row, col, unit);
-        try {
+        try
+        {
             handleRequest(req, -1);
-        } catch (IOException ex) {
+        }
+        catch (IOException ex)
+        {
             Logger.getLogger(SimulationServer.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidRequestException ex) {
+        }
+        catch (InvalidRequestException ex)
+        {
             Logger.getLogger(SimulationServer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     @Override
-    public void computeNextTurn() throws Exception {
+    public void computeNextTurn() throws Exception
+    {
         currentGrid.computeNextTurn();
         // Syncronize grid and player data if the simulation is stepped forward manually
-        if (!isRunning()) {
+        if ( !isRunning() )
+        {
             sendToAll(new SyncGridRequest(null, true));
             panel.getGameStatusPanel().setShowWinner(currentGrid.showWinner());
         }
     }
 
     @Override
-    public void synchronize() {
-        if (syncGrid.equals(currentGrid)) {
+    public void synchronize()
+    {
+        if ( syncGrid.equals(currentGrid) )
+        {
             return;
         }
 
-        try {
+        try
+        {
             syncGrid = (Grid) currentGrid.clone();
-        } catch (CloneNotSupportedException ex) {
+        }
+        catch (CloneNotSupportedException ex)
+        {
             Logger.getLogger(SimulationServer.class.getName()).log(Level.SEVERE, null, ex);
         }
 
@@ -334,171 +405,232 @@ public class SimulationServer implements SimulationInterface {
         sendToAll(new SyncGridRequest(syncGrid));
     }
 
-    public void synchronize(ObjectOutputStream output) {
-        try {
+    public void synchronize(ObjectOutputStream output)
+    {
+        try
+        {
             syncGrid = (Grid) currentGrid.clone();
-        } catch (CloneNotSupportedException ex) {
+        }
+        catch (CloneNotSupportedException ex)
+        {
             Logger.getLogger(SimulationServer.class.getName()).log(Level.SEVERE, null, ex);
         }
-        try {
+        try
+        {
             output.writeObject(new SyncGridRequest(syncGrid));
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             e.printStackTrace();
         }
 
     }
 
-    public void sendToAll(Request req) {
+    public void sendToAll(Request req)
+    {
         sendToAll(req, -1);
     }
 
-    public void sendToAll(Request req, int excludeID) {
-        for (ClientData client : connectedClients.values()) {
-            if (client.playerData.ID != excludeID)
-                try {
+    public void sendToAll(Request req, int excludeID)
+    {
+        for (ClientData client : connectedClients.values())
+        {
+            if ( client.playerData.ID != excludeID )
+                try
+            {
                 client.stream.writeObject(req);
-            } catch (IOException ex) {
+            }
+            catch (IOException ex)
+            {
                 Logger.getLogger(SimulationServer.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
 
     @Override
-    public void initializeGridPanel(GridPanel panel) {
+    public void initializeGridPanel(GridPanel panel)
+    {
         this.panel = panel;
     }
 
     @Override
-    public void setRunning(boolean val) {
+    public void setRunning(boolean val)
+    {
         currentGrid.setRunning(val);
         //sendToAll(new GameStatusRequest(isRunning()));
         synchronize();
     }
 
-    @Override
-    public synchronized void handleRequest(Request request, int clientID) throws IOException, InvalidRequestException {
-        ClientData clientData;
-        PlayerData playerData;
-        clientData = connectedClients.get(clientID);
-        if (clientID == -1) {
-            playerData = localPlayerData;
-        } else {
-            playerData = clientData.playerData;
+    private void handleSyncGridRequest(Request r, int clientID)
+    {
+        ClientData data = connectedClients.get(clientID);
+        if ( data != null )
+        {
+            synchronize(data.stream);
+        }
+    }
+
+    private void handleUpdatePlayerDataRequest(Request r, int clientID)
+    {
+        ClientData data = connectedClients.get(clientID);
+        if ( data == null )
+        {
+            return;
+        }
+        UpdatePlayerDataRequest updateRequest = (UpdatePlayerDataRequest) r;
+        PlayerData newPlayerData = updateRequest.playerData;
+
+        if ( !updateRequest.connected )
+        {
+            currentGrid.removePlayer(newPlayerData.ID);
+            UpdatePlayerDataRequest disconnectRequest = new UpdatePlayerDataRequest(newPlayerData, false);
+            sendToAll(disconnectRequest, newPlayerData.ID);
+        }
+        else if ( updateRequest.updateLocal )
+        {
+            if ( newPlayerData.name != null )
+            {
+                if ( data.playerData.name == null )
+                {
+                    sendLogMessage(newPlayerData.name + " joined the game.");
+                }
+                data.playerData.name = newPlayerData.name;
+            }
+            if ( newPlayerData.color != PlayerData.TeamColor.NONE
+                    & availableColors.contains(newPlayerData.color) )
+            {
+                if ( data.playerData.color != PlayerData.TeamColor.NONE )
+                {
+                    availableColors.add(data.playerData.color);
+                }
+                data.playerData.color = newPlayerData.color;
+                availableColors.remove(newPlayerData.color);
+            }
+
+            currentGrid.addPlayer(data.playerData);
+            UpdatePlayerDataRequest clientUpdateRequest
+                    = new UpdatePlayerDataRequest(data.playerData, true);
+            sendToAll(clientUpdateRequest, newPlayerData.ID);
+        }
+        panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
+    }
+
+    private void handleDisconnectRequest(Request r, int clientID)
+    {
+        ClientData data = connectedClients.get(clientID);
+        if ( data == null )
+        {
+            return;
+        }
+        DisconnectRequest disconnect = (DisconnectRequest) r;
+
+        ApplicationFrame.writeToStatusLog(data.playerData.name + " disconnected: " + disconnect.message);
+        connectedClients.remove(clientID);
+        try
+        {
+            data.socket.close();
+        }
+        catch (IOException ex)
+        {
+            Logger.getLogger(SimulationServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void handleSetUnitRequest(Request r, int clientID)
+    {
+        PlayerData playerData = connectedClients.get(clientID).playerData;
+        SetUnitRequest setUnit = (SetUnitRequest) r;
+        sendToAll(r, clientID);
+
+        if ( setUnit.unit != null )
+        { // set unit
+            if ( currentGrid.getUnit(setUnit.row, setUnit.col) != null )
+            {
+                return;
+            }
+            currentGrid.setUnit(setUnit.row, setUnit.col, setUnit.unit);
+
+        }
+        else
+        { // remove unit
+            UnitInterface unit = currentGrid.getUnit(setUnit.row, setUnit.col);
+            if ( unit == null )
+            {
+                return;
+            }
+            if ( unit.getPlayerID() != playerData.ID )
+            {
+                return;
+            }
+            currentGrid.removeUnit(setUnit.row, setUnit.col);
         }
 
-        switch (request.getType()) {
-            case SYNC_GRID:
-                if (clientData != null) {
-                    synchronize(clientData.stream);
-                }
-                break;
+        panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
 
-            case UPDATE_PLAYER_DATA:
-                if (clientData == null) {
-                    break;
-                }
-                UpdatePlayerDataRequest updateRequest = (UpdatePlayerDataRequest) request;
-                PlayerData newPlayerData = updateRequest.playerData;
+    }
 
-                if (!updateRequest.connected) {
-                    currentGrid.removePlayer(newPlayerData.ID);
-                    UpdatePlayerDataRequest disconnectRequest = new UpdatePlayerDataRequest(newPlayerData, false);
-                    sendToAll(disconnectRequest, newPlayerData.ID);
-                } else if (updateRequest.updateLocal) {
-                    if (newPlayerData.name != null) {
-                        if (clientData.playerData.name == null) {
-                            sendLogMessage(newPlayerData.name + " joined the game.");
-                        }
-                        clientData.playerData.name = newPlayerData.name;
-                    }
-                    if (newPlayerData.color != PlayerData.TeamColor.NONE
-                            & availableColors.contains(newPlayerData.color)) {
-                        if (clientData.playerData.color != PlayerData.TeamColor.NONE) {
-                            availableColors.add(clientData.playerData.color);
-                        }
-                        clientData.playerData.color = newPlayerData.color;
-                        availableColors.remove(newPlayerData.color);
-                    }
-
-                    currentGrid.addPlayer(clientData.playerData);
-                    UpdatePlayerDataRequest clientUpdateRequest
-                            = new UpdatePlayerDataRequest(clientData.playerData, true);
-                    sendToAll(clientUpdateRequest, newPlayerData.ID);
-                }
-                panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
-                break;
-
-            case DISCONNECT:
-                if (clientData == null) {
-                    break;
-                }
-                DisconnectRequest disconnect = (DisconnectRequest) request;
-
-                ApplicationFrame.writeToStatusLog(clientData.socket.getRemoteSocketAddress() + " disconnected: " + disconnect.message);
-                connectedClients.remove(clientID);
-                clientData.socket.close();
-                break;
-
-            case SET_UNIT:
-                SetUnitRequest setUnit = (SetUnitRequest) request;
-                sendToAll(request, clientID);
-
-                if (setUnit.unit != null) { // set unit
-                    if (currentGrid.getUnit(setUnit.row, setUnit.col) != null) {
-                        break;
-                    }
-                    currentGrid.setUnit(setUnit.row, setUnit.col, setUnit.unit);
-
-                } else { // remove unit
-
-                    UnitInterface unit = currentGrid.getUnit(setUnit.row, setUnit.col);
-                    if (unit == null) {
-                        break;
-                    }
-                    if (unit.getPlayerID() != playerData.ID) {
-                        break;
-                    }
-                    currentGrid.removeUnit(setUnit.row, setUnit.col);
-
-                }
-
-                panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
-                break;
+    @Override
+    public synchronized void handleRequest(Request request, int clientID) throws IOException, InvalidRequestException
+    {
+        try
+        {
+            Method method = SimulationServer.class.getDeclaredMethod(request.getType().procedureName,
+                    Request.class, Integer.class);
+            method.invoke(this, request, clientID);
+        }
+        catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex)
+        {
+            //ex.printStackTrace();
         }
     }
 
     @Override
-    public void close() {
-        try {
-            for (int i = 0; i < connectedClients.size(); i++) {
+        public void close()
+    {
+        try
+        {
+            for (int i = 0; i < connectedClients.size(); i++)
+            {
                 connectedClients.get(i).socket.close();
             }
             serverSocket.close();
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             System.out.println(e);
         }
     }
 
     @Override
-    public void resize(int rows, int cols) {
-        if (remoteInstance) {
+        public void resize(int rows, int cols)
+    {
+        if ( remoteInstance )
+        {
             return;
         }
-        try {
+        try
+        {
             currentGrid.resize(rows, cols);
-        } catch (Exception ex) {
+        }
+        catch (Exception ex)
+        {
             ApplicationFrame.writeToStatusLog(ex.toString());
         }
     }
 
-    public void sendLogMessage(String msg) {
+    public void sendLogMessage(String msg)
+    {
         ApplicationFrame.writeToStatusLog(msg);
         LogMessageRequest req = new LogMessageRequest(msg);
-        try {
-            for (Integer key : connectedClients.keySet()) {
+        try
+        {
+            for (Integer key : connectedClients.keySet())
+            {
                 connectedClients.get(key).stream.writeObject(req);
             }
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             e.printStackTrace();
         }
     }

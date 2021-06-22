@@ -9,12 +9,14 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic.requests;
  *
  * @author glitchedcode
  */
-public class DisconnectRequest extends Request {
+public class DisconnectRequest extends Request
+{
 
     public String message;
 
-    public DisconnectRequest(String message) {
-        type = RequestType.DISCONNECT;
+    public DisconnectRequest(String message)
+    {
+        super(RequestType.DISCONNECT);
         this.message = message;
     }
 }

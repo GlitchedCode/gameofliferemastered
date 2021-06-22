@@ -9,12 +9,14 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic.requests;
  *
  * @author glitchedcode
  */
-public class LogMessageRequest extends Request {
+public class LogMessageRequest extends Request
+{
 
     public final String message;
 
-    public LogMessageRequest(String msg) {
-        type = RequestType.LOG_MESSAGE;
+    public LogMessageRequest(String msg)
+    {
+        super(RequestType.LOG_MESSAGE);
         message = msg;
     }
 }

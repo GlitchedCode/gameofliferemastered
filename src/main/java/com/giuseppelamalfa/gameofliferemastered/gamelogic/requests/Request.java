@@ -6,7 +6,6 @@
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.requests;
 
 import java.io.Serializable;
-import java.lang.reflect.Type;
 
 /**
  *
@@ -15,7 +14,15 @@ import java.lang.reflect.Type;
 public abstract class Request implements Serializable {
 
 
-    protected RequestType type = RequestType.INVALID;
+    public final RequestType type;
+    
+    public Request(){
+        type = RequestType.INVALID;
+    }
+    
+    public Request(RequestType t){
+        type = t;
+    }
     
     public RequestType getType() throws InvalidRequestException {
         if (type == RequestType.INVALID) {
