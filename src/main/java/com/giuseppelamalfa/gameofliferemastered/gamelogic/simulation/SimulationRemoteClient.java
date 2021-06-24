@@ -234,12 +234,12 @@ public class SimulationRemoteClient implements SimulationInterface
         }
     }
 
-    private void handleLogMessageRequest(Request r, int ID)
+    private void handleLogMessageRequest(Request r, Integer ID)
     {
         ApplicationFrame.writeToStatusLog(((LogMessageRequest) r).message);
     }
 
-    private void handleSyncSpeciesDataRequest(Request r, int ID)
+    private void handleSyncSpeciesDataRequest(Request r, Integer ID)
     {
         SyncSpeciesDataRequest speciesData = (SyncSpeciesDataRequest) r;
         try
@@ -254,7 +254,7 @@ public class SimulationRemoteClient implements SimulationInterface
 
     }
 
-    private void handleSyncGridRequest(Request r, int ID)
+    private void handleSyncGridRequest(Request r, Integer ID)
     {
         SyncGridRequest sync = (SyncGridRequest) r;
         if ( sync.grid != null )
@@ -287,7 +287,7 @@ public class SimulationRemoteClient implements SimulationInterface
 
     }
 
-    private void handleUpdatePlayerDataRequest(Request r, int ID)
+    private void handleUpdatePlayerDataRequest(Request r, Integer ID)
     {
         UpdatePlayerDataRequest updateRequest = (UpdatePlayerDataRequest) r;
         PlayerData playerData = updateRequest.playerData;
@@ -326,7 +326,7 @@ public class SimulationRemoteClient implements SimulationInterface
         }
     }
 
-    private void handleDisconnectRequest(Request r, int ID)
+    private void handleDisconnectRequest(Request r, Integer ID)
     {
         String msg = ((DisconnectRequest) r).message;
         ApplicationFrame.writeToStatusLog("Disconnected from " + clientSocket.getRemoteSocketAddress()
@@ -343,12 +343,12 @@ public class SimulationRemoteClient implements SimulationInterface
 
     }
 
-    private void handlePauseRequest(Request r, int ID)
+    private void handlePauseRequest(Request r, Integer ID)
     {
         setRunning(((GameStatusRequest) r).running);
     }
 
-    private void handleSetUnitRequest(Request r, int ID)
+    private void handleSetUnitRequest(Request r, Integer ID)
     {
         SetUnitRequest setUnit = (SetUnitRequest) r;
         if ( setUnit.unit != null )
@@ -369,13 +369,13 @@ public class SimulationRemoteClient implements SimulationInterface
     {
         try
         {
-            Method method = SimulationServer.class.getDeclaredMethod(request.type.procedureName,
+            Method method = SimulationRemoteClient.class.getDeclaredMethod(request.type.procedureName,
                     Request.class, Integer.class);
             method.invoke(this, request, ID);
         }
         catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex)
         {
-            //ex.printStackTrace();
+            ex.printStackTrace();
         }
     }
 

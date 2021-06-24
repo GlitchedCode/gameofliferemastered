@@ -5,6 +5,7 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation;
 
+import com.giuseppelamalfa.gameofliferemastered.ApplicationFrame;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.GameMode;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.Grid;
@@ -25,6 +26,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
@@ -400,98 +403,107 @@ public class SimulationCLIServer implements SimulationInterface {
         synchronize();
     }
 
-    @Override
-    public synchronized void handleRequest(Request request, int clientID) throws IOException, InvalidRequestException {
-        ClientData clientData;
-        PlayerData playerData;
-        clientData = connectedClients.get(clientID);
-        if (clientID == -1) {
-            playerData = null;
-        } else {
-            playerData = clientData.playerData;
-        }
-
-        switch (request.getType()) {
-            case SYNC_GRID:
-                if (clientData != null) {
-                    synchronize(clientData.stream);
-                }
-                break;
-
-            case UPDATE_PLAYER_DATA:
-                if (clientData == null) {
-                    break;
-                }
-                UpdatePlayerDataRequest updateRequest = (UpdatePlayerDataRequest) request;
-                PlayerData newPlayerData = updateRequest.playerData;
-
-                if (!updateRequest.connected) {
-                    currentGrid.removePlayer(newPlayerData.ID);
-                    UpdatePlayerDataRequest disconnectRequest = new UpdatePlayerDataRequest(newPlayerData, false);
-                    sendToAll(disconnectRequest, newPlayerData.ID);
-                } else if (updateRequest.updateLocal) {
-                    if (newPlayerData.name != null) {
-                        if (clientData.playerData.name == null) {
-                            sendLogMessage(newPlayerData.name + " joined the game.");
-                        }
-                        clientData.playerData.name = newPlayerData.name;
-                    }
-                    if (newPlayerData.color != PlayerData.TeamColor.NONE
-                            & availableColors.contains(newPlayerData.color)) {
-                        if (clientData.playerData.color != PlayerData.TeamColor.NONE) {
-                            availableColors.add(clientData.playerData.color);
-                        }
-                        clientData.playerData.color = newPlayerData.color;
-                        availableColors.remove(newPlayerData.color);
-                    }
-
-                    currentGrid.addPlayer(clientData.playerData);
-                    UpdatePlayerDataRequest clientUpdateRequest
-                            = new UpdatePlayerDataRequest(clientData.playerData, true);
-                    sendToAll(clientUpdateRequest, newPlayerData.ID);
-                }
-                panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
-                break;
-
-            case DISCONNECT:
-                if (clientData == null) {
-                    break;
-                }
-                DisconnectRequest disconnect = (DisconnectRequest) request;
-
-                writeToStatusLog(clientData.socket.getRemoteSocketAddress() + " disconnected: " + disconnect.message);
-                connectedClients.remove(clientID);
-                clientData.socket.close();
-                break;
-
-            case SET_UNIT:
-                SetUnitRequest setUnit = (SetUnitRequest) request;
-                sendToAll(request, clientID);
-
-                if (setUnit.unit != null) { // set unit
-                    if (currentGrid.getUnit(setUnit.row, setUnit.col) != null) {
-                        break;
-                    }
-                    currentGrid.setUnit(setUnit.row, setUnit.col, setUnit.unit);
-
-                } else { // remove unit
-
-                    UnitInterface unit = currentGrid.getUnit(setUnit.row, setUnit.col);
-                    if (unit == null) {
-                        break;
-                    }
-                    if (unit.getPlayerID() != playerData.ID) {
-                        break;
-                    }
-                    currentGrid.removeUnit(setUnit.row, setUnit.col);
-
-                }
-
-                panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
-                break;
+    private void handleSyncGridRequest(Request r, Integer clientID) {
+        ClientData data = connectedClients.get(clientID);
+        if (data != null) {
+            synchronize(data.stream);
         }
     }
 
+    private void handleUpdatePlayerDataRequest(Request r, Integer clientID) {
+        ClientData data = connectedClients.get(clientID);
+        if (data == null) {
+            return;
+        }
+        UpdatePlayerDataRequest updateRequest = (UpdatePlayerDataRequest) r;
+        PlayerData newPlayerData = updateRequest.playerData;
+
+        if (!updateRequest.connected) {
+            currentGrid.removePlayer(newPlayerData.ID);
+            UpdatePlayerDataRequest disconnectRequest = new UpdatePlayerDataRequest(newPlayerData, false);
+            sendToAll(disconnectRequest, newPlayerData.ID);
+        } else if (updateRequest.updateLocal) {
+            if (newPlayerData.name != null) {
+                if (data.playerData.name == null) {
+                    sendLogMessage(newPlayerData.name + " joined the game.");
+                }
+                data.playerData.name = newPlayerData.name;
+            }
+            if (newPlayerData.color != PlayerData.TeamColor.NONE
+                    & availableColors.contains(newPlayerData.color)) {
+                if (data.playerData.color != PlayerData.TeamColor.NONE) {
+                    availableColors.add(data.playerData.color);
+                }
+                data.playerData.color = newPlayerData.color;
+                availableColors.remove(newPlayerData.color);
+            }
+
+            currentGrid.addPlayer(data.playerData);
+            UpdatePlayerDataRequest clientUpdateRequest
+                    = new UpdatePlayerDataRequest(data.playerData, true);
+            sendToAll(clientUpdateRequest, newPlayerData.ID);
+        }
+        panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
+    }
+
+    private void handleDisconnectRequest(Request r, Integer clientID) {
+        ClientData data = connectedClients.get(clientID);
+        if (data == null) {
+            return;
+        }
+        DisconnectRequest disconnect = (DisconnectRequest) r;
+
+        ApplicationFrame.writeToStatusLog(data.playerData.name + " disconnected: " + disconnect.message);
+        connectedClients.remove(clientID);
+        try {
+            data.socket.close();
+        } catch (IOException ex) {
+            Logger.getLogger(SimulationServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void handleSetUnitRequest(Request r, Integer clientID) {
+        ClientData data = connectedClients.get(clientID);
+        PlayerData playerData;
+        if(data == null){
+            return;
+        }
+        playerData = data.playerData;
+        
+        SetUnitRequest setUnit = (SetUnitRequest) r;
+        sendToAll(r, clientID);
+
+        if (setUnit.unit != null) { // set unit
+            if (currentGrid.getUnit(setUnit.row, setUnit.col) != null) {
+                return;
+            }
+            currentGrid.setUnit(setUnit.row, setUnit.col, setUnit.unit);
+
+        } else { // remove unit
+            UnitInterface unit = currentGrid.getUnit(setUnit.row, setUnit.col);
+            if (unit == null) {
+                return;
+            }
+            if (unit.getPlayerID() != playerData.ID) {
+                return;
+            }
+            currentGrid.removeUnit(setUnit.row, setUnit.col);
+        }
+
+        panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
+
+    }
+
+    @Override
+    public synchronized void handleRequest(Request request, int clientID) throws IOException, InvalidRequestException {
+        try {
+            Method method = SimulationServer.class.getDeclaredMethod(request.type.procedureName,
+                    Request.class, Integer.class);
+            method.invoke(this, request, clientID);
+        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+            ex.printStackTrace();
+        }
+    }
     @Override
     public void close() {
         try {
