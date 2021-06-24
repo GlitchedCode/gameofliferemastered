@@ -3,4 +3,3 @@ rootProject.name = 'gameofliferemastered'
 include ':core'
 include ':frontend'
 include ':headless'
-
