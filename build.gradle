@@ -14,35 +14,17 @@ targetCompatibility = "1.8"
 
 repositories
 {
-    jcenter()
+    mavenCentral()
 }
 
+//sourceSets {
+    //main {
+        //java {
+      //      srcDir 'srcDir'
+    //    }
+  //  }
+//}
 
-tasks.withType(JavaCompile) {
-    println "Compiler args: " + options.compilerArgs
-}
-
-jar {
-    manifest {
-        attributes 'Main-Class': 'com.giuseppelamalfa.gameofliferemastered.ApplicationFrame'
-    }
-    
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-}
-
-jar {
-    manifest {
-        attributes 'Main-Class': 'com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationCLIServer'
-    }
-    archiveBaseName = "liferemastered_server"
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    exclude('com/giuseppelamalfa/gameofliferemastered/ui/**')   
-    exclude('com/giuseppelamalfa/gameofliferemastered/gamelogic/simulation/SimulationRemoteClient**')   
-    exclude('com/giuseppelamalfa/gameofliferemastered/gamelogic/simulation/SimulationServer**')   
-    exclude('Tiles/**')
-    exclude('tiles.json')
-   
-}
 
 compileJava {
     options.compilerArgs += ["-Xlint:deprecation", "-Xlint:unchecked"]
@@ -52,6 +34,43 @@ compileTestJava {
     options.compilerArgs += ["-Xlint:deprecation", "-Xlint:unchecked"]
 }
 
+
+ext.headlessExcludes = [
+    'com/giuseppelamalfa/gameofliferemastered/ui/**',
+    'com/giuseppelamalfa/gameofliferemastered/gamelogic/simulation/SimulationRemoteClient**',
+    'com/giuseppelamalfa/gameofliferemastered/gamelogic/simulation/SimulationServer**',
+    'Tiles/**',
+    'tiles.json'
+]
+
+ext.frontendExcludes = [
+    'com/giuseppelamalfa/gameofliferemastered/gamelogic/simulation/SimulationCLIServer**'
+]
+
+tasks.withType(JavaCompile) {
+    println "Compiler args: " + options.compilerArgs
+}
+
+tasks.withType(Jar) {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+}
+
+task headless(type: Jar) {
+    manifest {
+        attributes 'Main-Class': 'com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationCLIServer'
+    }
+    archiveBaseName = "liferemastered_server"
+    exclude project.ext.headlessExcludes
+    with jar
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.giuseppelamalfa.gameofliferemastered.ApplicationFrame'
+    }
+    finalizedBy headless
+}
 
 dependencies {
     testImplementation     'junit:junit:4.13'
