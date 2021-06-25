@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.giuseppelamalfa.gameofliferemastered.gamelogic.requests;
+package com.giuseppelamalfa.gameofliferemastered.gamelogic.request;
 
 import java.io.Serializable;
 

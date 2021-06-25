@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.giuseppelamalfa.gameofliferemastered.gamelogic.requests;
+package com.giuseppelamalfa.gameofliferemastered.gamelogic.request;
 
 import java.lang.reflect.Type;
 
@@ -21,7 +21,7 @@ public enum RequestType {
     SYNC_GRID(SyncGridRequest.class, "handleSyncGridRequest"),
     UPDATE_PLAYER_DATA(UpdatePlayerDataRequest.class, "handleUpdatePlayerDataRequest"),
     DISCONNECT(DisconnectRequest.class, "handleDisconnectRequest"),
-    PAUSE(GameStatusRequest.class, "handlePauseRequest"),
+    PAUSE(GameStatusRequest.class, "handleGameStatusRequest"),
     SET_UNIT(SetUnitRequest.class, "handleSetUnitRequest");
 
     public final Type requestObjectType;

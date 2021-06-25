@@ -1,4 +1,4 @@
-    plugins {
+plugins {
     id 'com.github.johnrengelman.shadow' version '5.2.0'
     id 'java'
     id 'jacoco'
@@ -36,8 +36,21 @@ jar {
     manifest {
         attributes 'Main-Class': 'com.giuseppelamalfa.gameofliferemastered.ApplicationFrame'
     }
+    archiveBaseName = "liferemastered"
 }
 
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationCLIServer'
+    }
+    archiveBaseName = "liferemastered_server"
+    exclude('com/giuseppelamalfa/gameofliferemastered/ui/**')   
+    exclude('com/giuseppelamalfa/gameofliferemastered/gamelogic/simulation/SimulationRemoteClient**')   
+    exclude('com/giuseppelamalfa/gameofliferemastered/gamelogic/simulation/SimulationServer**')   
+    exclude('Tiles/**')
+    exclude('tiles.json')
+}
+    
 shadowJar {
     zip64   true
     minimize()

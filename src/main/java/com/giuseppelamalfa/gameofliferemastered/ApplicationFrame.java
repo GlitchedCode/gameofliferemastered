@@ -67,10 +67,11 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
     public ApplicationFrame() throws Exception {
         SpeciesLoader.loadSpeciesFromJSON();
         tileManager = new ImageManager("tiles.json");
-        localGrid = new SimulationServer(localRowCount, localColumnCount);
+        SimulationServer tmp = new SimulationServer(localRowCount, localColumnCount);
+        localGrid = tmp;
 
         initComponents();
-        localGrid.initializeGridPanel(gridPanel);
+        tmp.initializeGridPanel(gridPanel);
         mainStatusLog = statusLog;
 
         if (!tileManager.isInitialized()) {
@@ -172,13 +173,13 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
         titleLabel.setToolTipText("");
 
         hostPortNumber.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
-        hostPortNumber.setText("33333");
+        hostPortNumber.setText("7777");
 
         serverAddress.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
         serverAddress.setText("localhost");
 
         serverPortNumber.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
-        serverPortNumber.setText("33333");
+        serverPortNumber.setText("7777");
 
         jLabel1.setFont(new java.awt.Font("sansserif", 0, 18)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(255, 255, 255));
@@ -287,7 +288,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
                             .addGroup(menuPanelLayout.createSequentialGroup()
                                 .addComponent(jLabel2)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(hostPortNumber, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(hostPortNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jLabel4)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -296,7 +297,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
                         .addGroup(menuPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                             .addComponent(hostSandboxGameButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(hostCompetitiveGameButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(joinGameButton, javax.swing.GroupLayout.DEFAULT_SIZE, 243, Short.MAX_VALUE)))
+                            .addComponent(joinGameButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addComponent(titleLabel)
                     .addGroup(menuPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING)

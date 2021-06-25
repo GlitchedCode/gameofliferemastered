@@ -5,10 +5,9 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation;
 
-import com.giuseppelamalfa.gameofliferemastered.ui.GridPanel;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.requests.InvalidRequestException;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.requests.Request;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.InvalidRequestException;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.Request;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -58,8 +57,6 @@ public interface SimulationInterface {
     void handleRequest(Request requestObject, int ID) throws IOException, InvalidRequestException;
 
     void synchronize();
-
-    void initializeGridPanel(GridPanel panel);
 
     void close();
 }

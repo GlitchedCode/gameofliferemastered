@@ -9,16 +9,15 @@ import com.giuseppelamalfa.gameofliferemastered.ApplicationFrame;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.GameMode;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.Grid;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.requests.DisconnectRequest;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.requests.GameStatusRequest;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.requests.InvalidRequestException;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.requests.LogMessageRequest;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.requests.Request;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.requests.SetUnitRequest;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.requests.SyncGridRequest;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.requests.UpdatePlayerDataRequest;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.DisconnectRequest;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.GameStatusRequest;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.InvalidRequestException;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.LogMessageRequest;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.Request;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.SetUnitRequest;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.SyncGridRequest;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.UpdatePlayerDataRequest;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
-import com.giuseppelamalfa.gameofliferemastered.ui.GridPanel;
 import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.IOException;
@@ -33,6 +32,7 @@ import java.net.Socket;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -45,7 +45,7 @@ public class SimulationCLIServer implements SimulationInterface {
     public static void writeToStatusLog(String msg) {
         System.out.println(msg + "\n");
     }
-    
+
     public static void printUsage() {
         System.out.println(
                 "usage: java -jar liferemastered-headless.jar <args>\n"
@@ -140,7 +140,6 @@ public class SimulationCLIServer implements SimulationInterface {
     int portNumber;
 
     ArrayList<PlayerData.TeamColor> availableColors = new ArrayList<>();
-    GridPanel panel;
 
     public SimulationCLIServer(int portNumber, int playerCount,
             int rowCount, int columnCount, GameMode mode) throws Exception {
@@ -229,7 +228,6 @@ public class SimulationCLIServer implements SimulationInterface {
 
                             currentGrid.removePlayer(clientData.playerData.ID);
                             connectedClients.remove(clientData.playerData.ID);
-                            panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
                             try {
                                 conn.close();
                             } catch (IOException e) {
@@ -342,7 +340,6 @@ public class SimulationCLIServer implements SimulationInterface {
         // Syncronize grid and player data if the simulation is stepped forward manually
         if (!isRunning()) {
             sendToAll(new SyncGridRequest(null, true));
-            panel.getGameStatusPanel().setShowWinner(currentGrid.showWinner());
         }
     }
 
@@ -357,8 +354,6 @@ public class SimulationCLIServer implements SimulationInterface {
         } catch (CloneNotSupportedException ex) {
             Logger.getLogger(SimulationServer.class.getName()).log(Level.SEVERE, null, ex);
         }
-
-        panel.getGameStatusPanel().setShowWinner(currentGrid.showWinner());
         sendToAll(new SyncGridRequest(syncGrid));
     }
 
@@ -392,15 +387,13 @@ public class SimulationCLIServer implements SimulationInterface {
     }
 
     @Override
-    public void initializeGridPanel(GridPanel panel) {
-        this.panel = panel;
-    }
-
-    @Override
     public void setRunning(boolean val) {
         currentGrid.setRunning(val);
         //sendToAll(new GameStatusRequest(isRunning()));
         synchronize();
+        if (val != isRunning()) {
+            clientsRequestingPauseFlip.clear();
+        }
     }
 
     private void handleSyncGridRequest(Request r, Integer clientID) {
@@ -443,7 +436,6 @@ public class SimulationCLIServer implements SimulationInterface {
                     = new UpdatePlayerDataRequest(data.playerData, true);
             sendToAll(clientUpdateRequest, newPlayerData.ID);
         }
-        panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
     }
 
     private void handleDisconnectRequest(Request r, Integer clientID) {
@@ -465,11 +457,11 @@ public class SimulationCLIServer implements SimulationInterface {
     private void handleSetUnitRequest(Request r, Integer clientID) {
         ClientData data = connectedClients.get(clientID);
         PlayerData playerData;
-        if(data == null){
+        if (data == null) {
             return;
         }
         playerData = data.playerData;
-        
+
         SetUnitRequest setUnit = (SetUnitRequest) r;
         sendToAll(r, clientID);
 
@@ -489,21 +481,35 @@ public class SimulationCLIServer implements SimulationInterface {
             }
             currentGrid.removeUnit(setUnit.row, setUnit.col);
         }
+    }
 
-        panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
+    HashSet<Integer> clientsRequestingPauseFlip = new HashSet<>();
+
+    private void handleGameStatusRequest(Request r, Integer clientID) {
+        if (!connectedClients.containsKey(clientID) || ((GameStatusRequest) r).running == isRunning()) {
+            return;
+        }
+
+        clientsRequestingPauseFlip.add(clientID);
+        float diff = (clientsRequestingPauseFlip.size() / connectedClients.size()) - 0.5f;
+        if (diff >= 0) {
+            setRunning(!isRunning());
+        }
 
     }
 
     @Override
-    public synchronized void handleRequest(Request request, int clientID) throws IOException, InvalidRequestException {
+    public void handleRequest(Request request, int clientID) throws IOException, InvalidRequestException {
         try {
-            Method method = SimulationServer.class.getDeclaredMethod(request.type.procedureName,
+            Method method = SimulationCLIServer.class.getDeclaredMethod(request.type.procedureName,
                     Request.class, Integer.class);
             method.invoke(this, request, clientID);
-        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+        } catch (NoSuchMethodException e) {
+        } catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             ex.printStackTrace();
         }
     }
+
     @Override
     public void close() {
         try {

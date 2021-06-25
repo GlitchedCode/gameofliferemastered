@@ -5,12 +5,20 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation;
 
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.UpdatePlayerDataRequest;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.SetUnitRequest;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.SyncGridRequest;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.InvalidRequestException;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.Request;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.SyncSpeciesDataRequest;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.LogMessageRequest;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.GameStatusRequest;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.DisconnectRequest;
 import com.giuseppelamalfa.gameofliferemastered.ApplicationFrame;
 import com.giuseppelamalfa.gameofliferemastered.ui.GridPanel;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.Grid;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.GameMode;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.requests.*;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
 import java.io.BufferedReader;
@@ -27,6 +35,7 @@ import java.net.Socket;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -367,7 +376,6 @@ public class SimulationServer implements SimulationInterface {
         }
     }
 
-    @Override
     public void initializeGridPanel(GridPanel panel) {
         this.panel = panel;
     }
@@ -377,6 +385,10 @@ public class SimulationServer implements SimulationInterface {
         currentGrid.setRunning(val);
         //sendToAll(new GameStatusRequest(isRunning()));
         synchronize();
+        if (val != isRunning()) {
+            clientsRequestingPauseFlip.clear();
+        }
+
     }
 
     private void handleSyncGridRequest(Request r, Integer clientID) {
@@ -441,12 +453,12 @@ public class SimulationServer implements SimulationInterface {
     private void handleSetUnitRequest(Request r, Integer clientID) {
         ClientData data = connectedClients.get(clientID);
         PlayerData playerData;
-        if(data == null){
+        if (data == null) {
             playerData = localPlayerData;
-        }else{
+        } else {
             playerData = data.playerData;
         }
-        
+
         SetUnitRequest setUnit = (SetUnitRequest) r;
         sendToAll(r, clientID);
 
@@ -471,13 +483,29 @@ public class SimulationServer implements SimulationInterface {
 
     }
 
+    HashSet<Integer> clientsRequestingPauseFlip = new HashSet<>();
+
+    private void handleGameStatusRequest(Request r, Integer clientID) {
+        if (!connectedClients.containsKey(clientID) || ((GameStatusRequest) r).running == isRunning()) {
+            return;
+        }
+
+        clientsRequestingPauseFlip.add(clientID);
+        float diff = (clientsRequestingPauseFlip.size() / connectedClients.size()) - 0.5f;
+        if (diff >= 0) {
+            setRunning(!isRunning());
+        }
+
+    }
+
     @Override
-    public synchronized void handleRequest(Request request, int clientID) throws IOException, InvalidRequestException {
+    public void handleRequest(Request request, int clientID) throws IOException, InvalidRequestException {
         try {
             Method method = SimulationServer.class.getDeclaredMethod(request.type.procedureName,
                     Request.class, Integer.class);
             method.invoke(this, request, clientID);
-        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+        } catch (NoSuchMethodException e) {
+        } catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             ex.printStackTrace();
         }
     }
