@@ -30,25 +30,31 @@ import org.json.JSONObject;
  */
 public class ImageManager {
 
-    private final ClassLoader loader = getClass().getClassLoader();
-    private JSONObject imageData;
+    protected class ImageData {
+
+        public Image image;
+        public String path;
+    }
+
+    protected final ClassLoader loader = getClass().getClassLoader();
+    protected JSONObject imageData;
     private boolean initialized = false;
 
-    private String imagePathTemplate;
-    private final HashMap<String, Image> imageMap = new HashMap<>();
+    protected String imagePathTemplate;
+    protected final HashMap<String, ImageData> imageMap = new HashMap<>();
 
-    private int colorKey = 0xff222323;
+    protected int colorKey = 0xff222323;
 
     // Read the images.json file to get the data we need to store
     // and retrieve the images
-    private boolean loadImageData(String path) {
+    protected boolean loadImageData(String path) {
 
         try {
             InputStream istream = loader.getResourceAsStream(path);
             BufferedReader reader = new BufferedReader(new InputStreamReader(istream));
             StringBuilder strBuilder = new StringBuilder();
             String line;
-            while ((line = reader.readLine()) != null) {
+            while ( (line = reader.readLine()) != null ) {
                 strBuilder.append(line);
             }
 
@@ -56,9 +62,11 @@ public class ImageManager {
             imagePathTemplate = imageData.getString("pathTemplate");
             try {
                 colorKey = Integer.decode(imageData.getString("colorKey"));
-            } catch (NumberFormatException | JSONException e) {
             }
-        } catch (IOException e) {
+            catch (NumberFormatException | JSONException e) {
+            }
+        }
+        catch (IOException e) {
             System.out.println(e.toString());
             return false;
         }
@@ -67,7 +75,7 @@ public class ImageManager {
 
     // Go through the JSONObject we read in loadImageData() and 
     // load all the images, then store them into imageDictionary
-    private boolean loadImages() {
+    protected boolean loadImages() {
         JSONArray imageDataArray = imageData.getJSONArray("imageData");
 
         // To avoid having to write a long path every time I insert a new
@@ -86,15 +94,19 @@ public class ImageManager {
                 ImageFilter filter = new RGBImageFilter() {
                     @Override
                     public final int filterRGB(int x, int y, int rgb) {
-                        if (rgb == colorKey) {
+                        if ( rgb == colorKey ) {
                             return rgb & 0x00FFFFFF;
                         }
                         return rgb;
                     }
                 };
                 ImageProducer ip = new FilteredImageSource(img.getSource(), filter);
-                imageMap.put(nameString, Toolkit.getDefaultToolkit().createImage(ip));
-            } catch (IOException e) {
+                ImageData data = new ImageData();
+                data.path = path;
+                data.image = Toolkit.getDefaultToolkit().createImage(ip);
+                imageMap.put(nameString, data);
+            }
+            catch (IOException e) {
                 System.err.println(e.toString());
                 return false;
             }
@@ -105,7 +117,7 @@ public class ImageManager {
     public ImageManager(String path) {
 
         initialized = loadImageData(path);
-        if (initialized) {
+        if ( initialized ) {
             initialized = initialized & loadImages();
         }
     }
@@ -115,6 +127,6 @@ public class ImageManager {
     }
 
     public Image getImage(String name) {
-        return imageMap.get(name);
+        return imageMap.get(name).image;
     }
 }
