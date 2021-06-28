@@ -35,7 +35,7 @@ public interface SimulationInterface {
     int getRowCount();
 
     int getColumnCount();
-    
+
     void resize(int rows, int cols);
 
     int getSectorSideLength();

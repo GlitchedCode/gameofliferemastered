@@ -11,15 +11,13 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
  *
  * @author glitchedcode
  */
-public class SetUnitRequest extends Request
-{
+public class SetUnitRequest extends Request {
 
     public final UnitInterface unit;
     public final int row;
     public final int col;
 
-    public SetUnitRequest(int row, int col, UnitInterface unit)
-    {
+    public SetUnitRequest(int row, int col, UnitInterface unit) {
         super(RequestType.SET_UNIT);
         this.row = row;
         this.col = col;

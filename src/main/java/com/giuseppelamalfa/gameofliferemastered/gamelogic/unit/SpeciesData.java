@@ -41,7 +41,8 @@ public class SpeciesData {
         String implementingTypeName;
         try {
             implementingTypeName = obj.getString("implementingType");
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             implementingTypeName = "Unit";
         }
         Class<?> implementingClass = Class.forName(SpeciesLoader.UNIT_CLASS_PATH + implementingTypeName);
@@ -62,8 +63,8 @@ public class SpeciesData {
         for (int i = 0; i < hostiles.length(); i++) {
             _hostileSpecies.add(speciesIDs.get(friendlies.getString(i)));
         }
-        this.friendlySpecies = (HashSet<Integer>)_friendlySpecies.clone();
-        this.hostileSpecies = (HashSet<Integer>)_hostileSpecies.clone();
+        this.friendlySpecies = (HashSet<Integer>) _friendlySpecies.clone();
+        this.hostileSpecies = (HashSet<Integer>) _hostileSpecies.clone();
         // Create rule objects
         RuleInterface<Integer> _friendlyCountSelector;
         RuleInterface<Integer> _hostileCountSelector;
@@ -72,21 +73,24 @@ public class SpeciesData {
             JSONObject friendlyCountJSON = obj.getJSONObject("friendlyCountSelector");
             Class<?> friendlyRuleClass = Class.forName(SpeciesLoader.RULE_CLASS_PATH + friendlyCountJSON.getString("ruleClassName"));
             _friendlyCountSelector = (RuleInterface<Integer>) friendlyRuleClass.getConstructor(Collection.class).newInstance(friendlyCountJSON.getJSONArray("args").toList());
-        } catch (ClassNotFoundException | IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException | JSONException e) {
+        }
+        catch (ClassNotFoundException | IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException | JSONException e) {
             _friendlyCountSelector = new StubRule<>();
         }
         try {
             JSONObject hostileCountJSON = obj.getJSONObject("hostileCountSelector");
             Class<?> hostileRuleClass = Class.forName(SpeciesLoader.RULE_CLASS_PATH + hostileCountJSON.getString("ruleClassName"));
             _hostileCountSelector = (RuleInterface<Integer>) hostileRuleClass.getConstructor(Collection.class).newInstance(hostileCountJSON.getJSONArray("args").toList());
-        } catch (ClassNotFoundException | IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException | JSONException e) {
+        }
+        catch (ClassNotFoundException | IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException | JSONException e) {
             _hostileCountSelector = new StubRule<>();
         }
         try {
             JSONObject reproductionCountJSON = obj.getJSONObject("reproductionSelector");
             Class<?> reproductionRuleClass = Class.forName(SpeciesLoader.RULE_CLASS_PATH + reproductionCountJSON.getString("ruleClassName"));
             _reproductionSelector = (RuleInterface<Integer>) reproductionRuleClass.getConstructor(Collection.class).newInstance(reproductionCountJSON.getJSONArray("args").toList());
-        } catch (ClassNotFoundException | IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException | JSONException e) {
+        }
+        catch (ClassNotFoundException | IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException | JSONException e) {
             _reproductionSelector = new StubRule<>();
         }
         this.friendlyCountSelector = _friendlyCountSelector;

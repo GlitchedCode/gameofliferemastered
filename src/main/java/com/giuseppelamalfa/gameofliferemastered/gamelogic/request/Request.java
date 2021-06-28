@@ -13,19 +13,18 @@ import java.io.Serializable;
  */
 public abstract class Request implements Serializable {
 
-
     public final RequestType type;
-    
-    public Request(){
+
+    public Request() {
         type = RequestType.INVALID;
     }
-    
-    public Request(RequestType t){
+
+    public Request(RequestType t) {
         type = t;
     }
-    
+
     public RequestType getType() throws InvalidRequestException {
-        if (type == RequestType.INVALID) {
+        if ( type == RequestType.INVALID ) {
             throw new InvalidRequestException();
         }
         return type;

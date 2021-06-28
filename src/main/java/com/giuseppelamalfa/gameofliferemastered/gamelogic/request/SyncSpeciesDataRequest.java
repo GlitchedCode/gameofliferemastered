@@ -9,13 +9,11 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic.request;
  *
  * @author glitchedcode
  */
-public class SyncSpeciesDataRequest extends Request
-{
+public class SyncSpeciesDataRequest extends Request {
 
     public final String jsonString;
 
-    public SyncSpeciesDataRequest(String jsonString)
-    {
+    public SyncSpeciesDataRequest(String jsonString) {
         super(RequestType.SYNC_SPECIES_DATA);
         this.jsonString = jsonString;
     }

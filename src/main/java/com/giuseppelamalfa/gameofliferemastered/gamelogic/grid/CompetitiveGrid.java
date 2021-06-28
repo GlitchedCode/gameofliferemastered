@@ -84,7 +84,7 @@ public class CompetitiveGrid extends Grid {
     @Override
     public synchronized void computeNextTurn() throws Exception {
         advance();
-        if (getCurrentTurn() % SIMULATION_PHASE_LENGTH == 0) {
+        if ( getCurrentTurn() % SIMULATION_PHASE_LENGTH == 0 ) {
             setState(State.PLACEMENT_PHASE);
         }
     }
@@ -101,7 +101,7 @@ public class CompetitiveGrid extends Grid {
     @Override
     public void addPlayer(PlayerData player) {
         super.addPlayer(player);
-        if (getPlayerCount() == 2 & currentState == State.WAITING) {
+        if ( getPlayerCount() == 2 & currentState == State.WAITING ) {
             setState(State.GAME_STARTED);
         }
     }
@@ -114,7 +114,7 @@ public class CompetitiveGrid extends Grid {
     @Override
     public void removePlayer(int id) {
         super.removePlayer(id);
-        if (getPlayerCount() == 1) {
+        if ( getPlayerCount() == 1 ) {
             setState(State.WAITING);
         }
     }
@@ -130,7 +130,7 @@ public class CompetitiveGrid extends Grid {
         currentState = state;
 
         SimulationInterface sim = getSimulation();
-        if (sim != null) {
+        if ( sim != null ) {
             sim.synchronize();
         }
 
@@ -150,10 +150,11 @@ public class CompetitiveGrid extends Grid {
 
         timer.scheduleAtFixedRate(() -> {
             int remaining = GAME_START_WAIT_TIME - secondsPassed;
-            if (remaining <= 0) {
+            if ( remaining <= 0 ) {
                 secondsPassed = 0;
                 setState(State.PLACEMENT_PHASE);
-            } else {
+            }
+            else {
                 secondsPassed++;
                 gameStatus = "Starting in " + remaining + " seconds.";
             }
@@ -164,25 +165,27 @@ public class CompetitiveGrid extends Grid {
         isRunning = false;
         isLocked = false;
 
-        if (!started) {
+        if ( !started ) {
             started = true;
-        } else {
+        }
+        else {
             showWinner = true;
         }
         clearBoard(false);
 
         timer.scheduleAtFixedRate(() -> {
             int remaining = PLACEMENT_PHASE_TIME - secondsPassed;
-            if (remaining <= 0) {
+            if ( remaining <= 0 ) {
                 secondsPassed = 0;
                 setState(State.SIMULATION_PHASE);
-            } else {
+            }
+            else {
                 secondsPassed++;
                 gameStatus = "Placement: " + remaining + " seconds left.";
             }
         }, 0, 1000);
     }
-    
+
     private void startPhase() {
         isRunning = true;
         isLocked = true;
@@ -198,7 +201,8 @@ public class CompetitiveGrid extends Grid {
         try {
             CompetitiveGrid ret = (CompetitiveGrid) super.clone();
             return ret;
-        } catch (CloneNotSupportedException e) {
+        }
+        catch (CloneNotSupportedException e) {
             System.out.println("com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid.clone() failed idk");
             return this;
         }

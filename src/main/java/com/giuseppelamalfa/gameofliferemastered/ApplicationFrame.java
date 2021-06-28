@@ -74,7 +74,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
         tmp.initializeGridPanel(gridPanel);
         mainStatusLog = statusLog;
 
-        if (!tileManager.isInitialized()) {
+        if ( !tileManager.isInitialized() ) {
             throw new Exception("Failed to initialize tile manager.");
         }
     }
@@ -446,7 +446,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
 
     private boolean CheckPlayerName() {
         int len = playerNameField.getText().length();
-        if (len < 1 | len > MAX_PLAYER_NAME_LENGTH) {
+        if ( len < 1 | len > MAX_PLAYER_NAME_LENGTH ) {
             writeToStatusLog("Invalid player name.");
             return false;
         }
@@ -454,22 +454,23 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
     }
 
     private void JoinGameHandler(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_JoinGameHandler
-        if (server != null | !CheckPlayerName()) {
+        if ( server != null | !CheckPlayerName() ) {
             return;
         }
 
-        if (client == null) {
+        if ( client == null ) {
             try {
                 client = new SimulationRemoteClient(playerNameField.getText(),
                         serverAddress.getText(), Integer.parseInt(serverPortNumber.getText()));
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 writeToStatusLog("Could not connect to  server at address "
                         + serverAddress.getText() + ":" + serverPortNumber.getText());
                 writeToStatusLog(e.toString());
                 System.out.println(e);
                 client = null;
             }
-            if (client != null) {
+            if ( client != null ) {
                 localGrid.setRunning(false);
                 client.initializeGridPanel(gridPanel);
                 joinGameButton.setText("Disconnect");
@@ -482,7 +483,8 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
                 client.initializeGridPanel(gridPanel);
                 gridPanel.setSimulation(client);
             }
-        } else {
+        }
+        else {
             writeToStatusLog("Disconnecting...");
             client.close();
             client = null;
@@ -498,22 +500,22 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
     }//GEN-LAST:event_JoinGameHandler
 
     private void StartSandboxServerHandler(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_StartSandboxServerHandler
-        if (!hostSandboxGameButton.isEnabled()) {
+        if ( !hostSandboxGameButton.isEnabled() ) {
             return;
         }
 
         toggleServer(GameMode.SANDBOX);
-        if (server != null) {
+        if ( server != null ) {
             hostSandboxGameButton.setText("Close Server");
             hostCompetitiveGameButton.setEnabled(false);
             joinGameButton.setEnabled(false);
-        } else {
+        }
+        else {
             hostSandboxGameButton.setText("Host Sandbox Game");
             hostCompetitiveGameButton.setEnabled(true);
             joinGameButton.setEnabled(true);
         }
     }//GEN-LAST:event_StartSandboxServerHandler
-
 
     private void outerLayeredPaneAncestorResized(java.awt.event.HierarchyEvent evt) {//GEN-FIRST:event_outerLayeredPaneAncestorResized
         gridPanel.setSize(getSize());
@@ -523,16 +525,17 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
     }//GEN-LAST:event_outerLayeredPaneAncestorResized
 
     private void StartCompetitiveServerHandler(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_StartCompetitiveServerHandler
-        if (!hostCompetitiveGameButton.isEnabled()) {
+        if ( !hostCompetitiveGameButton.isEnabled() ) {
             return;
         }
 
         toggleServer(GameMode.COMPETITIVE);
-        if (server != null) {
+        if ( server != null ) {
             hostCompetitiveGameButton.setText("Close Server");
             hostSandboxGameButton.setEnabled(false);
             joinGameButton.setEnabled(false);
-        } else {
+        }
+        else {
             hostCompetitiveGameButton.setText("Host Competitive Game");
             hostSandboxGameButton.setEnabled(true);
             joinGameButton.setEnabled(true);
@@ -544,17 +547,18 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
     }//GEN-LAST:event_hostSandboxGameButtonActionPerformed
 
     private void toggleServer(GameMode mode) {
-        if (server == null) {
+        if ( server == null ) {
             try {
                 server = new SimulationServer(playerNameField.getText(), Integer.parseInt(hostPortNumber.getText()),
                         Integer.parseInt(maxPlayerCount.getText()), localRowCount, localColumnCount,
                         mode);
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 writeToStatusLog("Could not host server on port " + hostPortNumber.getText());
                 writeToStatusLog(e.toString());
                 server = null;
             }
-            if (server != null) {
+            if ( server != null ) {
                 localGrid.setRunning(false);
                 hostPortNumber.setEditable(false);
                 maxPlayerCount.setEditable(false);
@@ -563,7 +567,8 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
                 server.initializeGridPanel(gridPanel);
                 gridPanel.setSimulation(server);
             }
-        } else {
+        }
+        else {
             writeToStatusLog("Closing server...");
             server.close();
             server = null;
@@ -588,10 +593,11 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
     }
 
     public void setNextGridSize(int rows, int cols) {
-        if (rows <= MAX_ROWS & rows > 0 & cols <= MAX_COLS & cols > 0) {
+        if ( rows <= MAX_ROWS & rows > 0 & cols <= MAX_COLS & cols > 0 ) {
             localRowCount = rows;
             localColumnCount = cols;
-        } else {
+        }
+        else {
             rowField.setText(Integer.toString(localRowCount));
             colField.setText(Integer.toString(localRowCount));
         }
@@ -608,12 +614,13 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
          */
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
+                if ( "Nimbus".equals(info.getName()) ) {
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
                     break;
                 }
             }
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
+        }
+        catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
             ex.printStackTrace();
         }
         //</editor-fold>
@@ -626,7 +633,8 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
                 ApplicationFrame frame = new ApplicationFrame();
                 frame.addKeyListener(frame);
                 frame.setVisible(true);
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 ex.printStackTrace();
             }
         });
@@ -660,20 +668,21 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
      */
     @Override
     public void keyReleased(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+        if ( e.getKeyCode() == KeyEvent.VK_ESCAPE ) {
             swapCanvas();
         }
     }
 
     private void swapCanvas() {
-        if (isInMenu) {
+        if ( isInMenu ) {
             outerLayeredPane.setLayer(menuPanel, JLayeredPane.DEFAULT_LAYER);
             localGrid.resize(localRowCount, localColumnCount);
-            if (server != null) {
+            if ( server != null ) {
                 server.resize(localRowCount, localColumnCount);
             }
             //gridPanel.requestFocus();
-        } else {
+        }
+        else {
             outerLayeredPane.setLayer(menuPanel, JLayeredPane.DRAG_LAYER);
             //menuPanel.requestFocus();
         }
@@ -727,7 +736,8 @@ class GridSizeDocumentListener implements DocumentListener {
     public void insertUpdate(DocumentEvent ev) {
         try {
             frame.setNextGridSize(Integer.parseInt(rowField.getText()), Integer.parseInt(colField.getText()));
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             frame.setNextGridSize(frame.getRowCount(), frame.getColumnCount());
         }
     }
@@ -736,7 +746,8 @@ class GridSizeDocumentListener implements DocumentListener {
     public void removeUpdate(DocumentEvent ev) {
         try {
             frame.setNextGridSize(Integer.parseInt(rowField.getText()), Integer.parseInt(colField.getText()));
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             frame.setNextGridSize(frame.getRowCount(), frame.getColumnCount());
         }
     }

@@ -24,7 +24,7 @@ public class SpeciesLoader {
     static public final String UNIT_CLASS_PATH = "com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.";
 
     static String localSpeciesDataJSON = "";
-    
+
     static HashMap<Integer, SpeciesData> speciesData;
 
     public static synchronized void loadSpeciesFromJSON()
@@ -37,18 +37,18 @@ public class SpeciesLoader {
         BufferedReader reader = new BufferedReader(new InputStreamReader(istream));
         StringBuilder strBuilder = new StringBuilder();
         String line;
-        while ((line = reader.readLine()) != null) {
+        while ( (line = reader.readLine()) != null ) {
             strBuilder.append(line);
         }
         localSpeciesDataJSON = strBuilder.toString();
-        
+
         loadJSONString(localSpeciesDataJSON);
     }
-    
-    public static synchronized void loadJSONString(String jsonString) 
-            throws ClassNotFoundException, InstantiationException, IllegalAccessException, 
+
+    public static synchronized void loadJSONString(String jsonString)
+            throws ClassNotFoundException, InstantiationException, IllegalAccessException,
             IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
-        
+
         speciesData = new HashMap<>();
         HashMap<String, Integer> speciesIDs = new HashMap<>();
         JSONArray unitDataArray = new JSONObject(jsonString).getJSONArray("speciesData");
@@ -68,7 +68,7 @@ public class SpeciesLoader {
     public static String getLocalSpeciesJSONString() {
         return localSpeciesDataJSON;
     }
-    
+
     public static synchronized SpeciesData getSpeciesData(int index) {
         return speciesData.get(index);
     }
@@ -81,7 +81,8 @@ public class SpeciesLoader {
         try {
             SpeciesData data = speciesData.get(speciesID);
             return (UnitInterface) data.constructor.newInstance(data, playerID);
-        } catch (IllegalAccessException | IllegalArgumentException | InstantiationException
+        }
+        catch (IllegalAccessException | IllegalArgumentException | InstantiationException
                 | SecurityException | InvocationTargetException e) {
             return null;
         }
