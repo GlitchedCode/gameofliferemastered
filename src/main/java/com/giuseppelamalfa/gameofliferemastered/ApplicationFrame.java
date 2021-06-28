@@ -12,6 +12,7 @@ import com.giuseppelamalfa.gameofliferemastered.utils.ImageManager;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.*;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.GameMode;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
+import com.giuseppelamalfa.gameofliferemastered.utils.DeferredImageManager;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.ImageIcon;
@@ -66,7 +67,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
      */
     public ApplicationFrame() throws Exception {
         SpeciesLoader.loadSpeciesFromJSON();
-        tileManager = new ImageManager("tiles.json");
+        tileManager = new DeferredImageManager("tiles.json");
         SimulationServer tmp = new SimulationServer(localRowCount, localColumnCount);
         localGrid = tmp;
 
