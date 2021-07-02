@@ -18,6 +18,7 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.SetUnitRequest
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.SyncGridRequest;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.UpdatePlayerDataRequest;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
+import com.giuseppelamalfa.gameofliferemastered.utils.TimerWrapper;
 import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.IOException;
@@ -106,14 +107,29 @@ public class SimulationCLIServer implements SimulationInterface {
             }
 
             server = new SimulationCLIServer(port, playerCount, rows, cols, mode);
-
         }
         catch (Exception e) {
             printUsage();
+            server = null;
         }
         if ( server == null ) {
             printUsage();
         }
+
+        TimerWrapper timer = new TimerWrapper();
+        SimulationCLIServer finalServer = server;
+        
+        timer.scheduleAtFixedRate(() -> {
+            if ( !finalServer.isRunning() ) {
+                return;
+            }
+            try {
+                finalServer.computeNextTurn();
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }, 0, ApplicationFrame.BOARD_UPDATE_MS);
 
     }
 
@@ -351,30 +367,14 @@ public class SimulationCLIServer implements SimulationInterface {
 
     @Override
     public void synchronize() {
-        if ( syncGrid.equals(currentGrid) ) {
-            return;
-        }
-
-        try {
-            syncGrid = (Grid) currentGrid.clone();
-        }
-        catch (CloneNotSupportedException ex) {
-            Logger.getLogger(SimulationServer.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        sendToAll(new SyncGridRequest(syncGrid));
+        sendToAll(new SyncGridRequest(currentGrid));
     }
 
     public void synchronize(ObjectOutputStream output) {
         try {
-            syncGrid = (Grid) currentGrid.clone();
+            output.writeObject(new SyncGridRequest(currentGrid));
         }
-        catch (CloneNotSupportedException ex) {
-            Logger.getLogger(SimulationServer.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        try {
-            output.writeObject(new SyncGridRequest(syncGrid));
-        }
-        catch (Exception e) {
+        catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -391,18 +391,18 @@ public class SimulationCLIServer implements SimulationInterface {
                 client.stream.writeObject(req);
             }
             catch (IOException ex) {
-                Logger.getLogger(SimulationServer.class.getName()).log(Level.SEVERE, null, ex);
+                ex.printStackTrace();
             }
         }
     }
 
     @Override
     public void setRunning(boolean val) {
-        currentGrid.setRunning(val);
         //sendToAll(new GameStatusRequest(isRunning()));
-        synchronize();
         if ( val != isRunning() ) {
+            currentGrid.setRunning(val);
             clientsRequestingPauseFlip.clear();
+            synchronize();
         }
     }
 
@@ -462,7 +462,7 @@ public class SimulationCLIServer implements SimulationInterface {
             data.socket.close();
         }
         catch (IOException ex) {
-            Logger.getLogger(SimulationServer.class.getName()).log(Level.SEVERE, null, ex);
+            ex.printStackTrace();
         }
     }
 

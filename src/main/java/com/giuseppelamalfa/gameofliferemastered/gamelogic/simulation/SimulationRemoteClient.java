@@ -219,7 +219,7 @@ public class SimulationRemoteClient implements SimulationInterface {
     private void handleSyncGridRequest(Request r, Integer ID) {
         SyncGridRequest sync = (SyncGridRequest) r;
         if ( sync.grid != null ) {
-            currentGrid = (Grid) sync.grid;
+            currentGrid = sync.grid;
             currentGrid.setSimulation(this);
             currentGrid.setPlayerIDCheckNextTurn();
             currentGrid.addPlayer(localPlayerData);
@@ -288,7 +288,8 @@ public class SimulationRemoteClient implements SimulationInterface {
     }
 
     private void handleGameStatusRequest(Request r, Integer ID) {
-        setRunning(((GameStatusRequest) r).running);
+        GameStatusRequest req = ((GameStatusRequest) r);
+        currentGrid.setRunning(req.running);
     }
 
     private void handleSetUnitRequest(Request r, Integer ID) {
