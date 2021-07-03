@@ -171,7 +171,7 @@ public class DeadUnit implements UnitInterface, Serializable, Cloneable {
     }
 
     @Override
-    public boolean attack(int a) {
+    public boolean attack(int a, UnitInterface unit) {
         return false;
     }
 

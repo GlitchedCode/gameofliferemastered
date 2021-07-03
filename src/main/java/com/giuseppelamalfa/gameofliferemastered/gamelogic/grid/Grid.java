@@ -270,7 +270,7 @@ public class Grid implements Serializable, Cloneable {
                 bottomRightBoundary.x = Integer.min(bottomRightBoundary.x, bottomRightActive.x);
                 bottomRightBoundary.y = Integer.min(bottomRightBoundary.y, bottomRightActive.y);
 
-                boolean active = nextTurnStateComputationStep(topLeftBoundary, bottomRightBoundary);
+                boolean active = survivalStep(topLeftBoundary, bottomRightBoundary);
                 active = active | reproductionStep(topLeftBoundary, bottomRightBoundary);
                 sectorFlags.put(sectorRow, sectorColumn, active);
             }
@@ -510,7 +510,7 @@ public class Grid implements Serializable, Cloneable {
     }
 
     // Next turn computation helper functions.
-    private boolean nextTurnStateComputationStep(Point topLeftBoundary, Point bottomRightBoundary) throws GameLogicException {
+    private boolean survivalStep(Point topLeftBoundary, Point bottomRightBoundary) throws GameLogicException {
         boolean aliveNextTurn = false;
 
         for (int row = topLeftBoundary.y; row <= bottomRightBoundary.y; row++) {

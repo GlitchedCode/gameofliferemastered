@@ -107,9 +107,9 @@ public class Unit implements UnitInterface, Serializable, Cloneable {
             // additionally check if the adjacent cell can attack from 
             // their position relative to this cell
             boolean attacked = false;
-            if ((competitive & current.getPlayerID() != playerID) |
-                    hostileSpecies.contains(current.getSpeciesID())) {
-                attacked = current.attack(oppositeDir);
+            if ((competitive & current.getPlayerID() != playerID)
+                    | hostileSpecies.contains(current.getSpeciesID())) {
+                attacked = current.attack(oppositeDir, current);
             }
             if (attacked) {
                 hostileCount++;
@@ -131,13 +131,11 @@ public class Unit implements UnitInterface, Serializable, Cloneable {
     }
 
     protected void endStep() {
-        if (!healthChanged) // rule #4: inactivity
-        {
+        if (!healthChanged) { // rule #4: inactivity
             independentAction();
         }
 
-        if (health < 1) // rule #5: hp
-        {
+        if (health < 1) { // rule #5: hp
             nextTurnState = State.DEAD;
         } else {
             nextTurnState = currentState;
@@ -200,8 +198,12 @@ public class Unit implements UnitInterface, Serializable, Cloneable {
      * @return
      */
     @Override
-    public boolean attack(int adjacencyPosition) {
-        return currentState.attackModifier(isAlive(), adjacencyPosition);
+    public boolean attack(int adjacencyPosition, UnitInterface unit) {
+        boolean ret = currentState.attackModifier(isAlive(), adjacencyPosition);
+        if (ret) {
+            unit.incrementHealth(-1);
+        }
+        return ret;
     }
 
     /**

@@ -33,7 +33,7 @@ public abstract interface UnitInterface {
 
     public boolean reproduce(int adjacencyPosition);
 
-    public boolean attack(int adjacencyPosition);
+    public boolean attack(int adjacencyPosition, UnitInterface target);
 
     public void independentAction();
 
