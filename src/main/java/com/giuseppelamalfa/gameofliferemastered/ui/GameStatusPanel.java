@@ -161,7 +161,7 @@ public class GameStatusPanel extends javax.swing.JPanel implements MouseListener
 
     public void setPlayerPanels(ArrayList<PlayerData> list) {
         resetPlayerPanels();
-        if (list != null) {
+        if ( list != null ) {
             for (int i = 0; i < list.size() & i < playerPanels.size(); i++) {
                 playerPanels.get(i).setToPlayer(list.get(i));
             }
@@ -190,20 +190,23 @@ public class GameStatusPanel extends javax.swing.JPanel implements MouseListener
     public void setStatus(String status) {
         gameStatusLabel.setText(status);
     }
-    
-    public void setShowWinner(boolean val){
-        if(val){
-            if(playerDisplayPanel1.getScore() == playerDisplayPanel2.getScore()){
+
+    public void setShowWinner(boolean val) {
+        if ( val ) {
+            if ( playerDisplayPanel1.getScore() == playerDisplayPanel2.getScore() ) {
                 playerWinLabel.setText("Tie!");
-                playerWinLabel.setBackground(new Color(0,0,0,0));
+                playerWinLabel.setBackground(new Color(0, 0, 0, 0));
                 playerWinLabel.setForeground(Color.WHITE);
-            }else{
-            playerWinLabel.setText(playerDisplayPanel1.getPlayerName() + " wins!");
-            playerWinLabel.setBackground(playerDisplayPanel1.getPlayerBackgroundColor());
-            playerWinLabel.setForeground(playerDisplayPanel1.getPlayerForegroundColor());}
-        }else {
+            }
+            else {
+                playerWinLabel.setText(playerDisplayPanel1.getPlayerName() + " wins!");
+                playerWinLabel.setBackground(playerDisplayPanel1.getPlayerBackgroundColor());
+                playerWinLabel.setForeground(playerDisplayPanel1.getPlayerForegroundColor());
+            }
+        }
+        else {
             playerWinLabel.setText("");
-            playerWinLabel.setBackground(new Color(0,0,0,0));
+            playerWinLabel.setBackground(new Color(0, 0, 0, 0));
         }
     }
 

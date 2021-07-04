@@ -11,23 +11,20 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
  *
  * @author glitchedcode
  */
-public class UpdatePlayerDataRequest extends Request
-{
+public class UpdatePlayerDataRequest extends Request {
 
     public final PlayerData playerData;
     public final boolean connected;
     public final boolean updateLocal;
 
-    public UpdatePlayerDataRequest(PlayerData data, boolean connected)
-    {
+    public UpdatePlayerDataRequest(PlayerData data, boolean connected) {
         super(RequestType.UPDATE_PLAYER_DATA);
         playerData = data;
         this.connected = connected;
         updateLocal = false;
     }
 
-    public UpdatePlayerDataRequest(PlayerData data, boolean connected, boolean updateLocal)
-    {
+    public UpdatePlayerDataRequest(PlayerData data, boolean connected, boolean updateLocal) {
         super(RequestType.UPDATE_PLAYER_DATA);
         playerData = data;
         this.connected = connected;

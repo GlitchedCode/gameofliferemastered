@@ -11,28 +11,24 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.Grid;
  *
  * @author glitchedcode
  */
-public class SyncGridRequest extends Request
-{
+public class SyncGridRequest extends Request {
 
     public final Grid grid;
     public final boolean skipTurn;
 
-    public SyncGridRequest()
-    {
+    public SyncGridRequest() {
         super(RequestType.SYNC_GRID);
         grid = null;
         skipTurn = false;
     }
 
-    public SyncGridRequest(Grid grid)
-    {
+    public SyncGridRequest(Grid grid) {
         super(RequestType.SYNC_GRID);
         this.grid = grid;
         skipTurn = false;
     }
 
-    public SyncGridRequest(Grid grid, boolean skip)
-    {
+    public SyncGridRequest(Grid grid, boolean skip) {
         super(RequestType.SYNC_GRID);
         this.grid = grid;
         skipTurn = skip;

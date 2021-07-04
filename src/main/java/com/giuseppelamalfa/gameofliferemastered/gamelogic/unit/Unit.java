@@ -94,13 +94,13 @@ public class Unit implements UnitInterface, Serializable, Cloneable {
         for (int i = 0; i < 8; i++) // conto le unità ostili ed amichevoli
         {
             UnitInterface current = adjacentUnits[i];
-            if (!current.isAlive()) {
+            if ( !current.isAlive() ) {
                 continue;
             }
 
             Integer oppositeDir = UnitInterface.getOppositeDirection(i);
 
-            if (friendlySpecies.contains(current.getSpeciesID())) {
+            if ( friendlySpecies.contains(current.getSpeciesID()) ) {
                 friendlyCount++;
             }
 
@@ -111,7 +111,7 @@ public class Unit implements UnitInterface, Serializable, Cloneable {
                     | hostileSpecies.contains(current.getSpeciesID())) {
                 attacked = current.attack(oppositeDir, current);
             }
-            if (attacked) {
+            if ( attacked ) {
                 hostileCount++;
             }
         }
@@ -121,11 +121,11 @@ public class Unit implements UnitInterface, Serializable, Cloneable {
         boolean friendlyPenalty = !friendlyCountSelector.test(friendlyCount);
         boolean hostilePenalty = !hostileCountSelector.test(hostileCount);
 
-        if (friendlyPenalty | hostilePenalty) {
+        if ( friendlyPenalty | hostilePenalty ) {
             healthIncrement--;
         }
 
-        if (healthIncrement != 0) {
+        if ( healthIncrement != 0 ) {
             incrementHealth(healthIncrement);
         }
     }
@@ -137,7 +137,8 @@ public class Unit implements UnitInterface, Serializable, Cloneable {
 
         if (health < 1) { // rule #5: hp
             nextTurnState = State.DEAD;
-        } else {
+        }
+        else {
             nextTurnState = currentState;
         }
     }
@@ -158,7 +159,7 @@ public class Unit implements UnitInterface, Serializable, Cloneable {
      */
     @Override
     public void update() {
-        if (currentState != nextTurnState) {
+        if ( currentState != nextTurnState ) {
             currentState.exit(this);
             currentState = nextTurnState;
             currentState.enter(this);
@@ -224,7 +225,7 @@ public class Unit implements UnitInterface, Serializable, Cloneable {
      */
     @Override
     public State getNextTurnState() throws GameLogicException {
-        if (nextTurnState == State.INVALID) {
+        if ( nextTurnState == State.INVALID ) {
             throw new GameLogicException(this, "Invalid state.");
         }
         return nextTurnState;
@@ -306,7 +307,8 @@ public class Unit implements UnitInterface, Serializable, Cloneable {
     public Object clone() {
         try {
             return (Unit) super.clone();
-        } catch (CloneNotSupportedException e) {
+        }
+        catch (CloneNotSupportedException e) {
             System.out.println("com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit.clone()");
             return this;
         }

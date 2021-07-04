@@ -24,9 +24,10 @@ class ReproductionCounter {
     }
 
     void increment(int playerID) {
-        if (playerIDCounts.containsKey(playerID)) {
+        if ( playerIDCounts.containsKey(playerID) ) {
             playerIDCounts.put(playerID, playerIDCounts.get(playerID) + 1);
-        } else {
+        }
+        else {
             playerIDCounts.put(playerID, 1);
         }
         count++;
@@ -40,7 +41,7 @@ class ReproductionCounter {
         int ret = -1;
         int max = 0;
         for (int id : playerIDCounts.keySet()) {
-            if (max < playerIDCounts.get(id)) {
+            if ( max < playerIDCounts.get(id) ) {
                 max = playerIDCounts.get(id);
                 ret = id;
             }
@@ -73,13 +74,13 @@ public class DeadUnit implements UnitInterface, Serializable, Cloneable {
         for (int i = 0; i < 8; i++) {
             UnitInterface current = adjacentUnits[i];
 
-            if (current == null) // there is no adjacent unit in this direction
+            if ( current == null ) // there is no adjacent unit in this direction
             {
                 continue;
             }
 
             Integer oppositeDir = UnitInterface.getOppositeDirection(i);
-            if (!current.reproduce(oppositeDir)) // this unity doesn't reproduce from this direction
+            if ( !current.reproduce(oppositeDir) ) // this unity doesn't reproduce from this direction
             {
                 continue;
             }
@@ -87,9 +88,10 @@ public class DeadUnit implements UnitInterface, Serializable, Cloneable {
             int species = current.getSpeciesID();
             // Add new species to the map as we find them in
             // nearby cells
-            if (reproductionCounters.keySet().contains(species)) {
+            if ( reproductionCounters.keySet().contains(species) ) {
                 reproductionCounters.get(species).increment(current.getPlayerID());
-            } else {
+            }
+            else {
                 reproductionCounters.put(species, new ReproductionCounter(current.getPlayerID()));
                 reproductionSelectors.put(species, current.getReproductionSelector());
             }
@@ -98,27 +100,28 @@ public class DeadUnit implements UnitInterface, Serializable, Cloneable {
         // Choose the candidate species to generate based on the reproduction
         // counters taken above and thei order in the Species enum
         for (int current : reproductionCounters.keySet()) {
-            if (current == -1) {
+            if ( current == -1 ) {
                 continue;
             }
 
             ReproductionCounter currentCounter = reproductionCounters.get(current);
             RuleInterface<Integer> selector = reproductionSelectors.get(current);
 
-            if (currentCounter.getCount() == candidateCounter.getCount()) {
-                if (current < candidate
-                        & selector.test(currentCounter.getCount())) {
+            if ( currentCounter.getCount() == candidateCounter.getCount() ) {
+                if ( current < candidate
+                        & selector.test(currentCounter.getCount()) ) {
                     candidate = current;
                     candidateCounter = currentCounter;
                 }
-            } else if (currentCounter.getCount() > candidateCounter.getCount()
-                    & selector.test(currentCounter.getCount())) {
+            }
+            else if ( currentCounter.getCount() > candidateCounter.getCount()
+                    & selector.test(currentCounter.getCount()) ) {
                 candidate = current;
                 candidateCounter = currentCounter;
             }
         }
 
-        if (candidate == -1) // neighboring units do not satisfy reproduction requirements
+        if ( candidate == -1 ) // neighboring units do not satisfy reproduction requirements
         {
             return;
         }
@@ -222,7 +225,8 @@ public class DeadUnit implements UnitInterface, Serializable, Cloneable {
     public Object clone() {
         try {
             return (DeadUnit) super.clone();
-        } catch (CloneNotSupportedException e) {
+        }
+        catch (CloneNotSupportedException e) {
             System.out.println("com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.DeadUnit.clone() failed idk");
             return this;
         }

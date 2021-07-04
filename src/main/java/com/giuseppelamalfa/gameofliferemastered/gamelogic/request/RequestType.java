@@ -12,7 +12,7 @@ import java.lang.reflect.Type;
  * @author glitchedcode
  */
 public enum RequestType {
-    
+
     // procedure prototype:
     // void procedureName(Request req, Integer clientID)
     INVALID(null, ""),
