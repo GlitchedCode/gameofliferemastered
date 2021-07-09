@@ -16,15 +16,13 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.LogMessageRequ
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.Request;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.SetUnitRequest;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.SyncGridRequest;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.SyncSpeciesDataRequest;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.UpdatePlayerDataRequest;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
-import com.giuseppelamalfa.gameofliferemastered.utils.DeferredImageManager;
 import com.giuseppelamalfa.gameofliferemastered.utils.TimerWrapper;
 import java.io.BufferedReader;
 import java.io.EOFException;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -40,7 +38,26 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.ImageIcon;
+
+class ClientData {
+
+    public final Socket socket;
+    public final ObjectOutputStream stream;
+    public final PlayerData playerData = new PlayerData();
+
+    public ClientData(Socket socket, ObjectOutputStream stream, int ID) {
+        this.socket = socket;
+        this.stream = stream;
+        this.playerData.ID = ID;
+    }
+
+    public ClientData(Socket socket, ObjectOutputStream stream, int ID, String playerName) {
+        this.socket = socket;
+        this.stream = stream;
+        this.playerData.ID = ID;
+        this.playerData.name = playerName;
+    }
+}
 
 /**
  *
@@ -48,6 +65,29 @@ import javax.swing.ImageIcon;
  */
 public class SimulationCLIServer implements SimulationInterface {
 
+    public static final Integer DEFAULT_PLAYER_COUNT = 4;
+    public static final Integer MAX_PLAYER_COUNT = 8;
+
+    public final static Integer GRYD_SYNC_TURN_COUNT = 40;
+
+    protected final GameMode mode;
+    protected int nextClientID = 0;
+    protected int playerCount;
+    protected int rowCount;
+    protected int columnCount;
+    protected Grid currentGrid;
+
+    protected Thread acceptConnectionThread;
+
+    protected boolean remoteInstance = false;
+    static protected final ArrayList<PlayerData> offlineRanking = new ArrayList<>();
+    protected HashMap<Integer, ClientData> connectedClients = new HashMap<>();
+    protected ServerSocket serverSocket;
+    protected String serverIP;
+    protected int portNumber;
+
+    protected ArrayList<PlayerData.TeamColor> availableColors = new ArrayList<>();
+    
     public static void writeToStatusLog(String msg) {
         System.out.println(msg + "\n");
     }
@@ -137,30 +177,7 @@ public class SimulationCLIServer implements SimulationInterface {
         }, 0, ApplicationFrame.BOARD_UPDATE_MS);
 
     }
-
-    public static final Integer DEFAULT_PLAYER_COUNT = 4;
-    public static final Integer MAX_PLAYER_COUNT = 8;
-
-    public final static Integer GRYD_SYNC_TURN_COUNT = 40;
-
-    final GameMode mode;
-    int nextClientID = 0;
-    int playerCount;
-    int rowCount;
-    int columnCount;
-    Grid currentGrid;
-
-    Thread acceptConnectionThread;
-
-    boolean remoteInstance = false;
-    static final ArrayList<PlayerData> offlineRanking = new ArrayList<>();
-    HashMap<Integer, ClientData> connectedClients = new HashMap<>();
-    ServerSocket serverSocket;
-    String serverIP;
-    int portNumber;
-
-    ArrayList<PlayerData.TeamColor> availableColors = new ArrayList<>();
-
+    
     public SimulationCLIServer(int portNumber, int playerCount,
             int rowCount, int columnCount, GameMode mode) throws Exception {
         this.mode = mode;
@@ -168,7 +185,12 @@ public class SimulationCLIServer implements SimulationInterface {
         remoteInstance = true;
     }
 
-    private void initializeRemoteServer(int portNumber, int playerCount,
+    public SimulationCLIServer(int rowCount, int columnCount) throws Exception {
+        mode = GameMode.SANDBOX;
+        currentGrid = new Grid(rowCount, columnCount);
+    }
+
+    protected void initializeRemoteServer(int portNumber, int playerCount,
             int rowCount, int columnCount) throws IOException, Exception {
         if (playerCount < 2 | playerCount > MAX_PLAYER_COUNT) {
             this.playerCount = DEFAULT_PLAYER_COUNT;
@@ -215,7 +237,8 @@ public class SimulationCLIServer implements SimulationInterface {
 
                         writeToStatusLog("Accepting connection from" + conn.getRemoteSocketAddress());
                         // Make a thread for each client connection to handle their requests separately.
-                        new Thread(() -> {
+                        new Thread(()
+                                -> {
                             ClientData clientData = client;
                             try {
                                 InputStream input = conn.getInputStream();
@@ -226,6 +249,7 @@ public class SimulationCLIServer implements SimulationInterface {
                                 outputStream.writeObject(new UpdatePlayerDataRequest(tmp, true, true));
                                 outputStream.writeObject(new SyncGridRequest(currentGrid));
                                 outputStream.writeObject(new GameStatusRequest(isRunning(), getStatusString()));
+                                outputStream.writeObject(new SyncSpeciesDataRequest(SpeciesLoader.getLocalSpeciesJSONString()));
 
                                 for (ClientData data : connectedClients.values()) {
                                     if (data.playerData.ID != clientID) {
@@ -262,6 +286,7 @@ public class SimulationCLIServer implements SimulationInterface {
                         outputStream.writeObject(req);
                         conn.close();
                     }
+
                 }
             } catch (IOException e) {
                 System.out.println(e);
@@ -365,7 +390,7 @@ public class SimulationCLIServer implements SimulationInterface {
     @Override
     public void synchronize() {
         try {
-            sendToAll(new SyncGridRequest((Grid)currentGrid.clone()));
+            sendToAll(new SyncGridRequest((Grid) currentGrid.clone()));
         } catch (CloneNotSupportedException ex) {
             Logger.getLogger(SimulationCLIServer.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -373,7 +398,7 @@ public class SimulationCLIServer implements SimulationInterface {
 
     public void synchronize(ObjectOutputStream output) {
         try {
-            output.writeObject(new SyncGridRequest((Grid)currentGrid.clone()));
+            output.writeObject(new SyncGridRequest((Grid) currentGrid.clone()));
         } catch (IOException e) {
             e.printStackTrace();
         } catch (CloneNotSupportedException ex) {
@@ -408,14 +433,14 @@ public class SimulationCLIServer implements SimulationInterface {
         }
     }
 
-    private void handleSyncGridRequest(Request r, Integer clientID) {
+    protected void handleSyncGridRequest(Request r, Integer clientID) {
         ClientData data = connectedClients.get(clientID);
         if (data != null) {
             synchronize(data.stream);
         }
     }
 
-    private void handleUpdatePlayerDataRequest(Request r, Integer clientID) {
+    protected void handleUpdatePlayerDataRequest(Request r, Integer clientID) {
         ClientData data = connectedClients.get(clientID);
         if (data == null) {
             return;
@@ -450,23 +475,23 @@ public class SimulationCLIServer implements SimulationInterface {
         }
     }
 
-    private void handleDisconnectRequest(Request r, Integer clientID) {
+    protected void handleDisconnectRequest(Request r, Integer clientID) {
         ClientData data = connectedClients.get(clientID);
         if (data == null) {
             return;
         }
         DisconnectRequest disconnect = (DisconnectRequest) r;
 
-        ApplicationFrame.writeToStatusLog(data.playerData.name + " disconnected: " + disconnect.message);
+        writeToStatusLog(data.playerData.name + " disconnected: " + disconnect.message);
         connectedClients.remove(clientID);
         try {
             data.socket.close();
         } catch (IOException ex) {
-            ex.printStackTrace();
+            Logger.getLogger(SimulationCLIServer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    private void handleSetUnitRequest(Request r, Integer clientID) {
+    protected void handleSetUnitRequest(Request r, Integer clientID) {
         ClientData data = connectedClients.get(clientID);
         PlayerData playerData;
         if (data == null) {
@@ -495,9 +520,9 @@ public class SimulationCLIServer implements SimulationInterface {
         }
     }
 
-    HashSet<Integer> clientsRequestingPauseFlip = new HashSet<>();
+    protected HashSet<Integer> clientsRequestingPauseFlip = new HashSet<>();
 
-    private void handleGameStatusRequest(Request r, Integer clientID) {
+    protected void handleGameStatusRequest(Request r, Integer clientID) {
         if (!connectedClients.containsKey(clientID) || ((GameStatusRequest) r).running == isRunning()) {
             return;
         }
