@@ -31,8 +31,8 @@ public class Unit implements UnitInterface, Serializable, Cloneable {
     protected RuleInterface<Integer> hostileCountSelector;
     protected RuleInterface<Integer> reproductionSelector;
 
-    private final int playerID;
-    private boolean competitive = false;
+    protected final int playerID;
+    protected boolean competitive = false;
 
     private void initSpeciesData(SpeciesData data) {
         health = data.health;
@@ -109,7 +109,7 @@ public class Unit implements UnitInterface, Serializable, Cloneable {
             boolean attacked = false;
             if ((competitive & current.getPlayerID() != playerID)
                     | hostileSpecies.contains(current.getSpeciesID())) {
-                attacked = current.attack(oppositeDir, current);
+                attacked |= attack(i, current);
             }
             if (attacked) {
                 hostileCount++;
