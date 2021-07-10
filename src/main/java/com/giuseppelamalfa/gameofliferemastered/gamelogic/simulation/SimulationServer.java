@@ -196,7 +196,7 @@ public class SimulationServer extends SimulationCLIServer {
     public void setUnit(int row, int col, UnitInterface unit) {
         SetUnitRequest req = new SetUnitRequest(row, col, unit);
         try {
-            handleRequest(req, -1);
+            handleRequest(req, 0);
         } catch (IOException ex) {
             Logger.getLogger(SimulationServer.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InvalidRequestException ex) {
@@ -313,18 +313,6 @@ public class SimulationServer extends SimulationCLIServer {
     }
 
     @Override
-    public void handleRequest(Request request, int clientID) throws IOException, InvalidRequestException {
-        try {
-            Method method = SimulationServer.class.getDeclaredMethod(request.type.procedureName,
-                    Request.class, Integer.class);
-            method.invoke(this, request, clientID);
-        } catch (NoSuchMethodException e) {
-        } catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    @Override
     public void sendLogMessage(String msg) {
         ApplicationFrame.writeToStatusLog(msg);
         LogMessageRequest req = new LogMessageRequest(msg);
@@ -335,5 +323,10 @@ public class SimulationServer extends SimulationCLIServer {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public int getLocalPlayerID() {
+        return 0;
     }
 }
