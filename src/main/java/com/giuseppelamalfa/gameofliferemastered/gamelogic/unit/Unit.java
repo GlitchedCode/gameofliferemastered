@@ -246,7 +246,7 @@ public class Unit implements UnitInterface, Serializable, Cloneable {
      * @return
      */
     @Override
-    public final int getSpeciesID() {
+    public int getSpeciesID() {
         return speciesID;
     }
 
@@ -265,13 +265,23 @@ public class Unit implements UnitInterface, Serializable, Cloneable {
     public final Set<Integer> getHostileSpecies() {
         return hostileSpecies;
     }
+    
+    @Override
+    public RuleInterface<Integer> getFriendlyCountSelector(){
+        return friendlyCountSelector;
+    }
+
+    @Override
+    public RuleInterface<Integer> getHostileCountSelector() {
+        return hostileCountSelector;
+    }
 
     /**
      *
      * @return lower bound of friendly units adjacent to this unit
      */
     @Override
-    public final RuleInterface<Integer> getReproductionSelector() {
+    public RuleInterface<Integer> getReproductionSelector() {
         return reproductionSelector;
     }
 

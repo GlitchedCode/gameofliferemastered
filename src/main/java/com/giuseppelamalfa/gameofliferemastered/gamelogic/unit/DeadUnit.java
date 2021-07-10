@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.StubRule;
 import java.io.Serializable;
 
 class ReproductionCounter {
@@ -206,10 +207,22 @@ public class DeadUnit implements UnitInterface, Serializable, Cloneable {
     public Set<Integer> getHostileSpecies() {
         return new HashSet<>();
     }
+    
+    static StubRule<Integer> stub = new StubRule<>();
+    
+    @Override
+    public RuleInterface<Integer> getFriendlyCountSelector(){
+        return stub;
+    }
 
     @Override
+    public RuleInterface<Integer> getHostileCountSelector() {
+        return stub;
+    }
+    
+    @Override
     public RuleInterface<Integer> getReproductionSelector() {
-        return null;
+        return stub;
     }
 
     @Override

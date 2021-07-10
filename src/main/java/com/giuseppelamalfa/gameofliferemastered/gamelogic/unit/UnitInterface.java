@@ -43,6 +43,10 @@ public abstract interface UnitInterface {
 
     public Set<Integer> getHostileSpecies();
 
+    public RuleInterface<Integer> getFriendlyCountSelector();
+
+    public RuleInterface<Integer> getHostileCountSelector();
+
     public RuleInterface<Integer> getReproductionSelector();
 
     public boolean isAlive();
