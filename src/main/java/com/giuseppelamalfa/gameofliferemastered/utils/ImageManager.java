@@ -5,6 +5,7 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.utils;
 
+import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
@@ -32,7 +33,7 @@ public class ImageManager {
 
     protected class ImageData {
 
-        public Image image;
+        public BufferedImage image;
         public String path;
     }
 
@@ -103,7 +104,7 @@ public class ImageManager {
                 ImageProducer ip = new FilteredImageSource(img.getSource(), filter);
                 ImageData data = new ImageData();
                 data.path = path;
-                data.image = Toolkit.getDefaultToolkit().createImage(ip);
+                data.image = toBufferedImage(Toolkit.getDefaultToolkit().createImage(ip));
                 imageMap.put(nameString, data);
             }
             catch (IOException e) {
@@ -126,7 +127,24 @@ public class ImageManager {
         return initialized;
     }
 
-    public Image getImage(String name) {
+    public BufferedImage getImage(String name) {
         return imageMap.get(name).image;
+    }
+
+    public static BufferedImage toBufferedImage(Image img) {
+        if ( img instanceof BufferedImage ) {
+            return (BufferedImage) img;
+        }
+
+        // Create a buffered image with transparency
+        BufferedImage bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+
+        // Draw the image on to the buffered image
+        Graphics2D bGr = bimage.createGraphics();
+        bGr.drawImage(img, 0, 0, null);
+        bGr.dispose();
+
+        // Return the buffered image
+        return bimage;
     }
 }
