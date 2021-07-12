@@ -6,7 +6,7 @@
 package com.giuseppelamalfa.gameofliferemastered;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationRemoteClient;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationServer;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationGUIServer;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationInterface;
 import com.giuseppelamalfa.gameofliferemastered.utils.ImageManager;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.*;
@@ -43,7 +43,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
     private final ImageManager tileManager;
 
     SimulationRemoteClient client;
-    SimulationServer server;
+    SimulationGUIServer server;
 
     static ImageIcon icon;
     static JTextArea mainStatusLog;
@@ -68,7 +68,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
     public ApplicationFrame() throws Exception {
         SpeciesLoader.loadSpeciesFromJSON();
         tileManager = new DeferredImageManager("tiles.json");
-        SimulationServer tmp = new SimulationServer(localRowCount, localColumnCount);
+        SimulationGUIServer tmp = new SimulationGUIServer(localRowCount, localColumnCount);
         localGrid = tmp;
 
         initComponents();
@@ -550,7 +550,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
     private void toggleServer(GameMode mode) {
         if ( server == null ) {
             try {
-                server = new SimulationServer(playerNameField.getText(), Integer.parseInt(hostPortNumber.getText()),
+                server = new SimulationGUIServer(playerNameField.getText(), Integer.parseInt(hostPortNumber.getText()),
                         Integer.parseInt(maxPlayerCount.getText()), localRowCount, localColumnCount,
                         mode);
             }

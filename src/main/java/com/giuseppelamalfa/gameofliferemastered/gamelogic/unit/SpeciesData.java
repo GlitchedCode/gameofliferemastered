@@ -7,6 +7,8 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.StubRule;
+import java.awt.image.BufferedImage;
+import java.awt.image.BufferedImageOp;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
@@ -35,6 +37,8 @@ public class SpeciesData {
     public final RuleInterface<Integer> friendlyCountSelector;
     public final RuleInterface<Integer> hostileCountSelector;
     public final RuleInterface<Integer> reproductionSelector;
+    
+    public final BufferedImageOp filter;
 
     @SuppressWarnings(value = {"unchecked", "unchecked", "unchecked"})
     protected SpeciesData(int ID, JSONObject obj, HashMap<String, Integer> speciesIDs) throws ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
@@ -96,6 +100,12 @@ public class SpeciesData {
         this.friendlyCountSelector = _friendlyCountSelector;
         this.hostileCountSelector = _hostileCountSelector;
         this.reproductionSelector = _reproductionSelector;
+        BufferedImageOp _filter = null;
+        try{
+            int filterColor = Integer.decode(obj.getString("filterColor"));
+        }catch (Exception e){
+        }
+        filter = _filter;
     } // Calculate friendly and hostile species sets
     // Create rule objects
 

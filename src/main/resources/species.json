@@ -4,6 +4,7 @@
         "name": "the species' name",
         "id" : "the species' numeric ID, must be unique",
         "textureCode": "the species' texture code",
+        "filterColor": "texture filter color",
         "friendlySpecies": "a set of species the unit considers friendly",
         "hostileSpecies": "a set of species the unit considers friendly",
         "health": "the unit's initial health",

@@ -16,7 +16,6 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.GameStatusRequ
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.DisconnectRequest;
 import com.giuseppelamalfa.gameofliferemastered.ApplicationFrame;
 import com.giuseppelamalfa.gameofliferemastered.ui.GridPanel;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.Grid;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.GameMode;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
@@ -28,13 +27,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -42,12 +38,12 @@ import java.util.logging.Logger;
  *
  * @author glitchedcode
  */
-public class SimulationServer extends SimulationCLIServer {
+public class SimulationGUIServer extends SimulationCLIServer {
 
     PlayerData localPlayerData;
     GridPanel panel;
 
-    public SimulationServer(String playerName, int portNumber, int playerCount,
+    public SimulationGUIServer(String playerName, int portNumber, int playerCount,
             int rowCount, int columnCount, GameMode mode) throws Exception {
         super(portNumber, playerCount, rowCount, columnCount, mode);
         nextClientID = 1;
@@ -56,7 +52,7 @@ public class SimulationServer extends SimulationCLIServer {
         currentGrid.addPlayer(localPlayerData);
     }
 
-    public SimulationServer(int rowCount, int columnCount) throws Exception {
+    public SimulationGUIServer(int rowCount, int columnCount) throws Exception {
         super(rowCount, columnCount);
         currentGrid.setSimulation(this);
         localPlayerData = new PlayerData();
@@ -186,9 +182,9 @@ public class SimulationServer extends SimulationCLIServer {
         try {
             handleRequest(req, -1);
         } catch (IOException ex) {
-            Logger.getLogger(SimulationServer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SimulationGUIServer.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InvalidRequestException ex) {
-            Logger.getLogger(SimulationServer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SimulationGUIServer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -198,9 +194,9 @@ public class SimulationServer extends SimulationCLIServer {
         try {
             handleRequest(req, 0);
         } catch (IOException ex) {
-            Logger.getLogger(SimulationServer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SimulationGUIServer.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InvalidRequestException ex) {
-            Logger.getLogger(SimulationServer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SimulationGUIServer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -274,7 +270,7 @@ public class SimulationServer extends SimulationCLIServer {
         try {
             data.socket.close();
         } catch (IOException ex) {
-            Logger.getLogger(SimulationServer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SimulationGUIServer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
