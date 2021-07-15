@@ -12,7 +12,6 @@ import java.awt.BasicStroke;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -26,8 +25,10 @@ import java.awt.image.ImageObserver;
 import javax.swing.JPanel;
 import javax.swing.ToolTipManager;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationInterface;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesData;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
 import com.giuseppelamalfa.gameofliferemastered.utils.TimerWrapper;
+import java.awt.image.BufferedImage;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -317,11 +318,19 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
     }
 
     public void drawUnit(Graphics2D g, AffineTransform xform, ImageObserver obs, UnitInterface unit) {
-        Image img = tileManager.getImage(SpeciesLoader.getSpeciesData(unit.getSpeciesID()).textureCode);
+        SpeciesData data = SpeciesLoader.getSpeciesData(unit.getSpeciesID());
+        BufferedImage img = tileManager.getImage(data.textureCode);
+        
         g.setColor(simulation.getPlayerColor(unit.getPlayerID()).getMainAWTColor());
         g.fillRect((int) xform.getTranslateX(), (int) xform.getTranslateY(),
                 (int) (xform.getScaleX() * 8), (int) (xform.getScaleY() * 8));
-        g.drawImage(img, xform, obs);
+        
+        AffineTransform oldXForm = g.getTransform();
+        
+        g.setTransform(xform);
+        g.drawImage(img, data.filter, 0,0);
+        
+        g.setTransform(oldXForm);
     }
 
     /**

@@ -7,8 +7,15 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.StubRule;
+import com.giuseppelamalfa.gameofliferemastered.ui.ColorTintFilter;
+import java.awt.Color;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
+import java.awt.image.ColorModel;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
@@ -37,7 +44,7 @@ public class SpeciesData {
     public final RuleInterface<Integer> friendlyCountSelector;
     public final RuleInterface<Integer> hostileCountSelector;
     public final RuleInterface<Integer> reproductionSelector;
-    
+
     public final BufferedImageOp filter;
 
     @SuppressWarnings(value = {"unchecked", "unchecked", "unchecked"})
@@ -45,8 +52,7 @@ public class SpeciesData {
         String implementingTypeName;
         try {
             implementingTypeName = obj.getString("implementingType");
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             implementingTypeName = "Unit";
         }
         Class<?> implementingClass = Class.forName(SpeciesLoader.UNIT_CLASS_PATH + implementingTypeName);
@@ -77,33 +83,32 @@ public class SpeciesData {
             JSONObject friendlyCountJSON = obj.getJSONObject("friendlyCountSelector");
             Class<?> friendlyRuleClass = Class.forName(SpeciesLoader.RULE_CLASS_PATH + friendlyCountJSON.getString("ruleClassName"));
             _friendlyCountSelector = (RuleInterface<Integer>) friendlyRuleClass.getConstructor(Collection.class).newInstance(friendlyCountJSON.getJSONArray("args").toList());
-        }
-        catch (ClassNotFoundException | IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException | JSONException e) {
+        } catch (ClassNotFoundException | IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException | JSONException e) {
             _friendlyCountSelector = new StubRule<>();
         }
         try {
             JSONObject hostileCountJSON = obj.getJSONObject("hostileCountSelector");
             Class<?> hostileRuleClass = Class.forName(SpeciesLoader.RULE_CLASS_PATH + hostileCountJSON.getString("ruleClassName"));
             _hostileCountSelector = (RuleInterface<Integer>) hostileRuleClass.getConstructor(Collection.class).newInstance(hostileCountJSON.getJSONArray("args").toList());
-        }
-        catch (ClassNotFoundException | IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException | JSONException e) {
+        } catch (ClassNotFoundException | IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException | JSONException e) {
             _hostileCountSelector = new StubRule<>();
         }
         try {
             JSONObject reproductionCountJSON = obj.getJSONObject("reproductionSelector");
             Class<?> reproductionRuleClass = Class.forName(SpeciesLoader.RULE_CLASS_PATH + reproductionCountJSON.getString("ruleClassName"));
             _reproductionSelector = (RuleInterface<Integer>) reproductionRuleClass.getConstructor(Collection.class).newInstance(reproductionCountJSON.getJSONArray("args").toList());
-        }
-        catch (ClassNotFoundException | IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException | JSONException e) {
+        } catch (ClassNotFoundException | IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException | JSONException e) {
             _reproductionSelector = new StubRule<>();
         }
         this.friendlyCountSelector = _friendlyCountSelector;
         this.hostileCountSelector = _hostileCountSelector;
         this.reproductionSelector = _reproductionSelector;
         BufferedImageOp _filter = null;
-        try{
+        try {
             int filterColor = Integer.decode(obj.getString("filterColor"));
-        }catch (Exception e){
+            _filter = new ColorTintFilter(new Color(filterColor), 0.5f);
+        } catch (Exception e) {
+            _filter = new ColorTintFilter(Color.BLUE, 0.5f);
         }
         filter = _filter;
     } // Calculate friendly and hostile species sets
