@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.StubRule;
+import java.awt.image.BufferedImageOp;
 import java.io.Serializable;
 
 class ReproductionCounter {
@@ -244,4 +245,11 @@ public class DeadUnit implements UnitInterface, Serializable, Cloneable {
             return this;
         }
     }
+    
+    @Override
+    public String getTextureCode() { return ""; }
+    
+    @Override
+    public BufferedImageOp getFilter() { return null; }
+
 }

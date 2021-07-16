@@ -106,9 +106,9 @@ public class SpeciesData {
         BufferedImageOp _filter = null;
         try {
             int filterColor = Integer.decode(obj.getString("filterColor"));
-            _filter = new ColorTintFilter(new Color(filterColor), 0.5f);
+            _filter = new ColorTintFilter(new Color(filterColor), 0.75f);
         } catch (Exception e) {
-            _filter = new ColorTintFilter(Color.BLUE, 0.5f);
+            _filter = null;
         }
         filter = _filter;
     } // Calculate friendly and hostile species sets

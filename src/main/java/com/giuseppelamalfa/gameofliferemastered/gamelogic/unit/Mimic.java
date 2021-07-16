@@ -77,4 +77,11 @@ public class Mimic extends Unit {
             health = 1;
         }
     }
+    
+    @Override
+    public String getTextureCode(){
+        if(replicatedSpeciesID == -1)
+            return SpeciesLoader.getSpeciesData(speciesID).textureCode;
+        return SpeciesLoader.getSpeciesData(replicatedSpeciesID).textureCode;
+    }
 }

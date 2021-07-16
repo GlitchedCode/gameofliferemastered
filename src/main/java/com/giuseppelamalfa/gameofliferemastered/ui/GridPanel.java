@@ -318,9 +318,6 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
     }
 
     public void drawUnit(Graphics2D g, AffineTransform xform, ImageObserver obs, UnitInterface unit) {
-        SpeciesData data = SpeciesLoader.getSpeciesData(unit.getSpeciesID());
-        BufferedImage img = tileManager.getImage(data.textureCode);
-        
         g.setColor(simulation.getPlayerColor(unit.getPlayerID()).getMainAWTColor());
         g.fillRect((int) xform.getTranslateX(), (int) xform.getTranslateY(),
                 (int) (xform.getScaleX() * 8), (int) (xform.getScaleY() * 8));
@@ -328,7 +325,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
         AffineTransform oldXForm = g.getTransform();
         
         g.setTransform(xform);
-        g.drawImage(img, data.filter, 0,0);
+        g.drawImage(tileManager.getImage(unit.getTextureCode()), unit.getFilter(), 0,0);
         
         g.setTransform(oldXForm);
     }

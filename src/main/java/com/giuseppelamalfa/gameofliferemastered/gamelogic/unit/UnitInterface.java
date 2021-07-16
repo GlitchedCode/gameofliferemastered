@@ -7,6 +7,8 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.GameLogicException;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
+import java.awt.image.BufferedImage;
+import java.awt.image.BufferedImageOp;
 import java.util.Set;
 
 /**
@@ -38,6 +40,10 @@ public abstract interface UnitInterface {
     public void independentAction();
 
     public int getSpeciesID();
+    
+    public String getTextureCode();
+    
+    public BufferedImageOp getFilter();
 
     public Set<Integer> getFriendlySpecies();
 

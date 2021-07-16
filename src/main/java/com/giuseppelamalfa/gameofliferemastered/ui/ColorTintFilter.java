@@ -59,9 +59,9 @@ public class ColorTintFilter implements BufferedImageOp {
             int argb = inPixels[i];
 
             int a = argb & 0xFF000000;
-            int r = (argb >> 16) & 0xFF;
-            int g = (argb >> 8) & 0xFF;
-            int b = (argb) & 0xFF;
+            int r = argb & 0xFF0000;
+            int g = argb & 0xFF00;
+            int b = argb & 0xFF;
             r = (int) (r * (1.0f - mixValue) + mix_r * mixValue);
             g = (int) (g * (1.0f - mixValue) + mix_g * mixValue);
             b = (int) (b * (1.0f - mixValue) + mix_b * mixValue);
