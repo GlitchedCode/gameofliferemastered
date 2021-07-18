@@ -13,7 +13,7 @@ public class Mimic extends Unit {
 
     static public final int REPLICATION_COOLDOWN = 8;
 
-    int turnsTillReplication = REPLICATION_COOLDOWN;
+    int turnsTillReplication = 0;
     int replicatedSpeciesID = -1;
     State replicatedState = State.INVALID;
 
@@ -27,6 +27,54 @@ public class Mimic extends Unit {
 
     public Mimic(SpeciesData data, Integer playerID, Boolean competitive) {
         super(data, playerID, competitive);
+    }
+    
+    @Override
+    protected void boardStep(UnitInterface[] adjacentUnits) {
+        int hostileCount = 0;
+        int friendlyCount = 0;
+        int healthIncrement = 0;
+
+        for (int i = 0; i < 8; i++) // conto le unità ostili ed amichevoli
+        {
+            UnitInterface current = adjacentUnits[i];
+            if (!current.isAlive()) {
+                continue;
+            }
+
+            if (friendlySpecies.contains(current.getSpeciesID())) {
+                friendlyCount++;
+            }
+
+            // additionally check if the adjacent cell can attack from 
+            // their position relative to this cell
+            boolean attacked = false;
+            if (
+                    (competitive & current.getPlayerID() != playerID) |  
+                    (
+                        hostileSpecies.contains(current.getSpeciesID()) ^
+                        (replicatedSpeciesID == -1 & current.getSpeciesID() != speciesID)
+                    )
+                    ) {
+                attacked |= attack(i, current);
+            }
+            if (attacked) {
+                hostileCount++;
+            }
+        }
+
+        // rule #1: population
+        // rule #2: hostility
+        boolean friendlyPenalty = !friendlyCountSelector.test(friendlyCount);
+        boolean hostilePenalty = !hostileCountSelector.test(hostileCount);
+
+        if (friendlyPenalty | hostilePenalty) {
+            healthIncrement--;
+        }
+
+        if (healthIncrement != 0) {
+            incrementHealth(healthIncrement);
+        }
     }
 
     @Override
@@ -73,8 +121,8 @@ public class Mimic extends Unit {
         reproductionSelector = unit.getReproductionSelector();
 
         health = data.health - (health - myData.health);
-        if ( health < 1 ) {
-            health = 1;
+        if ( health < 2 ) {
+            health = 2;
         }
     }
     

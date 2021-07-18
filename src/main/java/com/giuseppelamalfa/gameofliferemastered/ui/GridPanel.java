@@ -25,10 +25,7 @@ import java.awt.image.ImageObserver;
 import javax.swing.JPanel;
 import javax.swing.ToolTipManager;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationInterface;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesData;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
 import com.giuseppelamalfa.gameofliferemastered.utils.TimerWrapper;
-import java.awt.image.BufferedImage;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

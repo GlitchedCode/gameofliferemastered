@@ -325,4 +325,9 @@ public class SimulationGUIServer extends SimulationCLIServer {
     public int getLocalPlayerID() {
         return 0;
     }
+    
+    @Override
+    public boolean isLocallyControlled() {
+        return true;
+    }
 }

@@ -53,15 +53,40 @@
             "initialState" : "ALIVE_AGING",
             "friendlyCountSelector" : {
                 "ruleClassName" : "IntegerRangeRule",
-                "args" : [3,5]
+                "args" : [3]
             },
             "hostileCountSelector" : {
                 "ruleClassName" : "IntegerRangeRule",
-                "args" : [0,9]
+                "args" : [0,8]
             },
             "reproductionSelector" : {
                 "ruleClassName" : "IntegerSetRule",
                 "args" : [3]
+            }
+        },
+        {
+            "name" : "Mimic",
+            "id" : 2,
+            "implementingType" : "Mimic",
+            "textureCode" : "mimic",
+            "filterColor" : 935655,
+            "friendlySpecies" : [
+                "Mimic"
+            ],
+            "hostileSpecies" : [],
+            "health" : 2,
+            "initialState" : "ALIVE",
+            "friendlyCountSelector" : {
+                "ruleClassName" : "IntegerRangeRule",
+                "args" : [0,0]
+            },
+            "hostileCountSelector" : {
+                "ruleClassName" : "IntegerRangeRule",
+                "args" : [0,5]
+            },
+            "reproductionSelector" : {
+                "ruleClassName" : "IntegerSetRule",
+                "args" : [0]
             }
         }
     ]

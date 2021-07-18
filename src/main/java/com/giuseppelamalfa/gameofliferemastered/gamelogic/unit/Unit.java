@@ -100,8 +100,6 @@ public class Unit implements UnitInterface, Serializable, Cloneable {
                 continue;
             }
 
-            Integer oppositeDir = UnitInterface.getOppositeDirection(i);
-
             if (friendlySpecies.contains(current.getSpeciesID())) {
                 friendlyCount++;
             }
