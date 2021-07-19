@@ -69,7 +69,7 @@
             "id" : 2,
             "implementingType" : "Mimic",
             "textureCode" : "mimic",
-            "filterColor" : 935655,
+            "filterColor" : "0x4d8fc1",
             "friendlySpecies" : [
                 "Mimic"
             ],
@@ -86,7 +86,7 @@
             },
             "reproductionSelector" : {
                 "ruleClassName" : "IntegerSetRule",
-                "args" : [0]
+                "args" : [3]
             }
         }
     ]

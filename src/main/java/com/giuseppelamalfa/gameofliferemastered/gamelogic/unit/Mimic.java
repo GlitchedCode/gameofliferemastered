@@ -14,6 +14,8 @@ public class Mimic extends Unit {
     static public final int REPLICATION_COOLDOWN = 8;
 
     int turnsTillReplication = 0;
+    
+    UnitInterface replicationTarget;
     int replicatedSpeciesID = -1;
     State replicatedState = State.INVALID;
 
@@ -50,16 +52,19 @@ public class Mimic extends Unit {
             // their position relative to this cell
             boolean attacked = false;
             if (
-                    (competitive & current.getPlayerID() != playerID) |  
+                    (competitive & current.getPlayerID() != playerID) |
                     (
                         hostileSpecies.contains(current.getSpeciesID()) ^
                         (replicatedSpeciesID == -1 & current.getSpeciesID() != speciesID)
-                    )
-                    ) {
+                    )) {
                 attacked |= attack(i, current);
             }
             if (attacked) {
                 hostileCount++;
+            }
+            
+            if(replicatedSpeciesID == -1 & current.getSpeciesID() != speciesID){
+                replicationTarget = current;
             }
         }
 
@@ -76,11 +81,27 @@ public class Mimic extends Unit {
             incrementHealth(healthIncrement);
         }
     }
+    
+    @Override
+    public boolean attack(int adjacencyPosition, UnitInterface unit) {
+        boolean ret = currentState.attackModifier(isAlive(), adjacencyPosition);
+        if (ret) {
+            unit.incrementHealth(-1);
+        }
+        return ret;
+    }
 
     @Override
     protected void endStep() {
         if ( !healthChanged ) { // rule #4: inactivity
             independentAction();
+        }
+        
+        if ( turnsTillReplication > 0 ) {
+            turnsTillReplication--;
+        } else if (replicationTarget != null) {
+            replicate(replicationTarget);
+            turnsTillReplication = REPLICATION_COOLDOWN;
         }
 
         if ( health < 1 ) { // rule #5: hp
@@ -89,23 +110,8 @@ public class Mimic extends Unit {
         else {
             nextTurnState = currentState;
         }
-
-        if ( turnsTillReplication > 0 ) {
-            turnsTillReplication--;
-        }
-    }
-
-    @Override
-    public boolean attack(int adjacencyPosition, UnitInterface unit) {
-        boolean ret = currentState.attackModifier(isAlive(), adjacencyPosition);
-        if ( ret ) {
-            unit.incrementHealth(-1);
-            if ( turnsTillReplication == 0 ) {
-                turnsTillReplication = REPLICATION_COOLDOWN;
-                replicate(unit);
-            }
-        }
-        return ret;
+        
+        replicationTarget = null;        
     }
 
     protected void replicate(UnitInterface unit) {
@@ -121,8 +127,8 @@ public class Mimic extends Unit {
         reproductionSelector = unit.getReproductionSelector();
 
         health = data.health - (health - myData.health);
-        if ( health < 2 ) {
-            health = 2;
+        if ( health < 1 ) {
+            health = 1;
         }
     }
     
@@ -131,5 +137,12 @@ public class Mimic extends Unit {
         if(replicatedSpeciesID == -1)
             return SpeciesLoader.getSpeciesData(speciesID).textureCode;
         return SpeciesLoader.getSpeciesData(replicatedSpeciesID).textureCode;
+    }
+    
+    @Override
+    public int getSpeciesID(){
+        if(replicatedSpeciesID != -1)
+            return replicatedSpeciesID;
+        return speciesID;
     }
 }

@@ -568,7 +568,6 @@ public class Grid implements Serializable, Cloneable {
                 deadUnit.update();
 
                 if ( bornUnit != null ) {
-                    //System.out.println("" + col + " " + row + " " + Arrays.toString(adjacentUnits));
                     aliveNextTurn = true;
                     setToPosition(row, col, bornUnit);
                     moveProcessBoundaryToInclude(row, col);

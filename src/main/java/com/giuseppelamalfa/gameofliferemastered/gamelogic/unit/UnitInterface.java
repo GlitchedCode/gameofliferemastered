@@ -41,6 +41,8 @@ public abstract interface UnitInterface {
 
     public int getSpeciesID();
     
+    public int getBornSpeciesID();
+    
     public String getTextureCode();
     
     public BufferedImageOp getFilter();

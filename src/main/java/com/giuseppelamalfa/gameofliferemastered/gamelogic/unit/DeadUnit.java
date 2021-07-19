@@ -15,6 +15,7 @@ import java.io.Serializable;
 
 class ReproductionCounter {
 
+    int mimic_count = 0;
     int count = 0;
     HashMap<Integer, Integer> playerIDCounts = new HashMap<>();
 
@@ -87,7 +88,7 @@ public class DeadUnit implements UnitInterface, Serializable, Cloneable {
                 continue;
             }
 
-            int species = current.getSpeciesID();
+            int species = current.getBornSpeciesID();
             // Add new species to the map as we find them in
             // nearby cells
             if ( reproductionCounters.keySet().contains(species) ) {
@@ -138,12 +139,13 @@ public class DeadUnit implements UnitInterface, Serializable, Cloneable {
      * @return
      */
     public final UnitInterface getBornUnit() {
-        return bornUnit;
+        UnitInterface tmp = bornUnit;
+        bornUnit = null;
+        return tmp;
     }
 
     @Override
     public void update() {
-        bornUnit = null;
     }
 
     @Override
@@ -199,6 +201,11 @@ public class DeadUnit implements UnitInterface, Serializable, Cloneable {
         return -1;
     }
 
+    @Override
+    public int getBornSpeciesID(){
+        return -1;
+    }
+    
     @Override
     public Set<Integer> getFriendlySpecies() {
         return new HashSet<>();
