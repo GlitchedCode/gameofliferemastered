@@ -96,7 +96,7 @@ public class DeadUnit implements UnitInterface, Serializable, Cloneable {
             }
             else {
                 reproductionCounters.put(species, new ReproductionCounter(current.getPlayerID()));
-                reproductionSelectors.put(species, current.getReproductionSelector());
+                reproductionSelectors.put(species, SpeciesLoader.getSpeciesData(species).reproductionSelector);
             }
         }
 

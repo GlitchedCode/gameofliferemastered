@@ -9,7 +9,7 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
  *
  * @author glitchedcode
  */
-public class Mimic extends Unit {
+public class Mimic extends LifeUnit {
 
     static public final int REPLICATION_COOLDOWN = 8;
 

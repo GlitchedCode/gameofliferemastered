@@ -15,7 +15,7 @@ import java.io.Serializable;
  *
  * @author glitchedcode
  */
-public class Unit implements UnitInterface, Serializable, Cloneable {
+public class LifeUnit implements UnitInterface, Serializable, Cloneable {
 
     public final int speciesID;
 
@@ -47,20 +47,20 @@ public class Unit implements UnitInterface, Serializable, Cloneable {
         reproductionSelector = data.reproductionSelector;
     }
 
-    public Unit(SpeciesData data) {
+    public LifeUnit(SpeciesData data) {
         speciesID = data.speciesID;
         playerID = 0;
         initSpeciesData(data);
     }
 
-    public Unit(SpeciesData data, Integer playerID) {
+    public LifeUnit(SpeciesData data, Integer playerID) {
         this.playerID = playerID;
         speciesID = data.speciesID;
 
         initSpeciesData(data);
     }
 
-    public Unit(SpeciesData data, Integer playerID, Boolean competitive) {
+    public LifeUnit(SpeciesData data, Integer playerID, Boolean competitive) {
         this.playerID = playerID;
         speciesID = data.speciesID;
         this.competitive = competitive;
@@ -319,7 +319,7 @@ public class Unit implements UnitInterface, Serializable, Cloneable {
     @Override
     public Object clone() {
         try {
-            return (Unit) super.clone();
+            return (LifeUnit) super.clone();
         } catch (CloneNotSupportedException e) {
             System.out.println("com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit.clone()");
             return this;

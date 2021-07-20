@@ -19,7 +19,7 @@
         {
             "name" : "Cell",
             "id" : 0,
-            "implementingType" : "Unit",
+            "implementingType" : "LifeUnit",
             "textureCode" : "cell",
             "friendlySpecies" : [
                 "Cell"
@@ -43,25 +43,25 @@
         {
             "name" : "Snake",
             "id" : 1,
-            "implementingType" : "Unit",
+            "implementingType" : "LifeUnit",
             "textureCode" : "snake",
             "friendlySpecies" : [
                 "Snake"
             ],
             "hostileSpecies" : [],
-            "health" : 4,
+            "health" : 2,
             "initialState" : "ALIVE_AGING",
             "friendlyCountSelector" : {
                 "ruleClassName" : "IntegerRangeRule",
-                "args" : [3]
+                "args" : [2, 3]
             },
             "hostileCountSelector" : {
                 "ruleClassName" : "IntegerRangeRule",
-                "args" : [0,8]
+                "args" : [0]
             },
             "reproductionSelector" : {
                 "ruleClassName" : "IntegerSetRule",
-                "args" : [3]
+                "args" : [3, 7]
             }
         },
         {

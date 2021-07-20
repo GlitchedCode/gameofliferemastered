@@ -15,7 +15,6 @@ import java.awt.image.BufferedImageOp;
 import java.awt.image.ColorModel;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
-import sun.jvm.hotspot.ui.GraphicsUtilities;
 
 /**
  *

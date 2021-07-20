@@ -5,7 +5,7 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic;
 
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.LifeUnit;
 
 /**
  *
@@ -13,10 +13,10 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
  */
 public class GameLogicException extends Exception {
 
-    private final Unit invalidUnit;
+    private final LifeUnit invalidUnit;
     private final String reason;
 
-    public GameLogicException(Unit invalidUnit, String reason) {
+    public GameLogicException(LifeUnit invalidUnit, String reason) {
         this.invalidUnit = invalidUnit;
         this.reason = reason;
     }
