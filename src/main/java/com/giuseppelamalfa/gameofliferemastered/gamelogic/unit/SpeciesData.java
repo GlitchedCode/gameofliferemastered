@@ -105,7 +105,7 @@ public class SpeciesData {
         this.reproductionSelector = _reproductionSelector;
         BufferedImageOp _filter = null;
         try {
-            int filterColor = Integer.decode(obj.getString("filterColor"));
+            int filterColor = obj.getInt("filterColor");
             _filter = new ColorTintFilter(new Color(filterColor), 0.75f);
         } catch (Exception e) {
             _filter = null;

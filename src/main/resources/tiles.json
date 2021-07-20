@@ -18,6 +18,10 @@
         {
             "name" : "snake",
             "code" : "0014"
+        },
+        {
+            "name" : "mimic",
+            "code" : "0081"
         }
     ]
 }
