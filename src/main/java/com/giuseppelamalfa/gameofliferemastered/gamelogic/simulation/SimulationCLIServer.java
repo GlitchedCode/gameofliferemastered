@@ -19,7 +19,6 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.SyncGridReques
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.SyncSpeciesDataRequest;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.UpdatePlayerDataRequest;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
 import com.giuseppelamalfa.gameofliferemastered.utils.TimerWrapper;
 import java.io.BufferedReader;
 import java.io.EOFException;
@@ -38,6 +37,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
 
 class ClientData {
 
@@ -366,7 +366,7 @@ public class SimulationCLIServer implements SimulationInterface {
     }
 
     @Override
-    public UnitInterface getUnit(int row, int col) {
+    public Unit getUnit(int row, int col) {
         return currentGrid.getUnit(row, col);
     }
 
@@ -375,7 +375,7 @@ public class SimulationCLIServer implements SimulationInterface {
     }
 
     @Override
-    public void setUnit(int row, int col, UnitInterface unit) {
+    public void setUnit(int row, int col, Unit unit) {
     }
 
     @Override
@@ -509,7 +509,7 @@ public class SimulationCLIServer implements SimulationInterface {
             currentGrid.setUnit(setUnit.row, setUnit.col, setUnit.unit);
 
         } else { // remove unit
-            UnitInterface unit = currentGrid.getUnit(setUnit.row, setUnit.col);
+            Unit unit = currentGrid.getUnit(setUnit.row, setUnit.col);
             if (unit == null) {
                 return;
             }

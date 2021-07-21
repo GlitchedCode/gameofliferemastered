@@ -26,7 +26,7 @@ public class Grid implements Serializable, Cloneable {
     public final Integer SECTOR_SIDE_LENGTH = 32;
     protected String gameModeName = "Sandbox";
 
-    private TwoDimensionalContainer<UnitInterface> board;
+    private TwoDimensionalContainer<Unit> board;
     private TwoDimensionalContainer<Boolean> sectorFlags;
 
     protected String gameStatus = "Paused";
@@ -84,7 +84,7 @@ public class Grid implements Serializable, Cloneable {
     public Object clone() throws CloneNotSupportedException {
         try {
             Grid ret = (Grid) super.clone();
-            ret.board = (TwoDimensionalContainer<UnitInterface>) board.clone();
+            ret.board = (TwoDimensionalContainer<Unit>) board.clone();
             ret.sectorFlags = (TwoDimensionalContainer<Boolean>) sectorFlags.clone();
 
             ret.topLeftActive = new Point(0, 0);
@@ -178,7 +178,7 @@ public class Grid implements Serializable, Cloneable {
      * @return Returns unit at provided location, or null if none is present or
      * if location is out of bounds.
      */
-    public final UnitInterface getUnit(int row, int col) {
+    public final Unit getUnit(int row, int col) {
         return board.get(row, col);
     }
 
@@ -189,7 +189,7 @@ public class Grid implements Serializable, Cloneable {
      * @param col
      */
     public final void removeUnit(int row, int col) {
-        UnitInterface found = board.get(row, col);
+        Unit found = board.get(row, col);
         if ( found != null ) {
             players.get(found.getPlayerID()).score -= getUnitScoreIncrement(found);
             orderPlayersByScore();
@@ -204,7 +204,7 @@ public class Grid implements Serializable, Cloneable {
      * @param col Column location.
      * @param unit Unit to be set.
      */
-    public final void setUnit(int row, int col, UnitInterface unit) {
+    public final void setUnit(int row, int col, Unit unit) {
         if ( unit == null ) {
             return;
         }
@@ -305,7 +305,7 @@ public class Grid implements Serializable, Cloneable {
 
         for (int row = topLeftActive.y; row <= bottomRightActive.y; row++) {
             for (int col = topLeftActive.x; col <= bottomRightActive.x; col++) {
-                UnitInterface current = board.get(row, col);
+                Unit current = board.get(row, col);
                 if ( current != null ) {
                     players.get(current.getPlayerID()).score += getUnitScoreIncrement(current);
                 }
@@ -341,7 +341,7 @@ public class Grid implements Serializable, Cloneable {
     public void removePlayer(int id) {
         for (int r = 0; r < rowCount; r++) {
             for (int c = 0; c < columnCount; c++) {
-                UnitInterface unit = getUnit(r, c);
+                Unit unit = getUnit(r, c);
                 if ( unit != null ) {
                     if ( unit.getPlayerID() == id ) {
                         setToPosition(r, c, null);
@@ -389,8 +389,8 @@ public class Grid implements Serializable, Cloneable {
      * @param col row
      * @param unit unit to be set
      */
-    protected final void setToPosition(Integer row, Integer col, UnitInterface unit) {
-        UnitInterface previous = board.get(row, col);
+    protected final void setToPosition(Integer row, Integer col, Unit unit) {
+        Unit previous = board.get(row, col);
         if ( previous != null ) {
             players.get(previous.getPlayerID()).score -= getUnitScoreIncrement(previous);
             board.remove(row, col);
@@ -411,7 +411,7 @@ public class Grid implements Serializable, Cloneable {
      * @param unit
      * @return Unit's score increment.
      */
-    protected int getUnitScoreIncrement(UnitInterface unit) {
+    protected int getUnitScoreIncrement(Unit unit) {
         if ( unit.isAlive() ) {
             return 1;
         }
@@ -478,12 +478,12 @@ public class Grid implements Serializable, Cloneable {
         return new Point(col, row);
     }
 
-    private UnitInterface[] getUnitsAdjacentToPosition(Integer row, Integer col) {
-        UnitInterface[] ret = new UnitInterface[8];
+    private Unit[] getUnitsAdjacentToPosition(Integer row, Integer col) {
+        Unit[] ret = new Unit[8];
 
         //top row
         for (int i = 0; i < 3; i++) {
-            UnitInterface unit = board.get(row - 1, col + i - 1);
+            Unit unit = board.get(row - 1, col + i - 1);
             ret[i] = unit;
         }
 
@@ -493,7 +493,7 @@ public class Grid implements Serializable, Cloneable {
 
         //bottom row
         for (int i = 0; i < 3; i++) {
-            UnitInterface unit = board.get(row + 1, col - i + 1);
+            Unit unit = board.get(row + 1, col - i + 1);
             ret[i + 4] = unit;
         }
 
@@ -523,7 +523,7 @@ public class Grid implements Serializable, Cloneable {
 
         for (int row = topLeftBoundary.y; row <= bottomRightBoundary.y; row++) {
             for (int col = topLeftBoundary.x; col <= bottomRightBoundary.x; col++) {
-                UnitInterface current = board.get(row, col);
+                Unit current = board.get(row, col);
                 if ( current == null ) {
                     continue;
                 }
@@ -534,7 +534,7 @@ public class Grid implements Serializable, Cloneable {
                     }
                 }
 
-                UnitInterface[] adjacentUnits = getUnitsAdjacentToPosition(row, col);
+                Unit[] adjacentUnits = getUnitsAdjacentToPosition(row, col);
                 //System.out.println("" + col + " " + row + " " + Arrays.toString(adjacentUnits));
                 current.computeNextTurn(adjacentUnits);
 
@@ -554,17 +554,17 @@ public class Grid implements Serializable, Cloneable {
         boolean aliveNextTurn = false;
         for (int row = topLeftBoundary.y; row <= bottomRightBoundary.y; row++) {
             for (int col = topLeftBoundary.x; col <= bottomRightBoundary.x; col++) {
-                UnitInterface unit = board.get(row, col);
+                Unit unit = board.get(row, col);
                 if ( unit != null ) {
                     if ( unit.isAlive() ) {
                         continue;
                     }
                 }
 
-                UnitInterface[] adjacentUnits = getUnitsAdjacentToPosition(row, col);
+                Unit[] adjacentUnits = getUnitsAdjacentToPosition(row, col);
 
                 deadUnit.computeNextTurn(adjacentUnits);
-                UnitInterface bornUnit = deadUnit.getBornUnit();
+                Unit bornUnit = deadUnit.getBornUnit();
                 deadUnit.update();
 
                 if ( bornUnit != null ) {
@@ -584,7 +584,7 @@ public class Grid implements Serializable, Cloneable {
 
         for (int row = topLeftActive.y; row <= bottomRightActive.y; row++) {
             for (int col = topLeftActive.x; col <= bottomRightActive.x; col++) {
-                UnitInterface current = board.get(row, col);
+                Unit current = board.get(row, col);
                 if ( current != null ) {
                     current.update();
                     players.get(current.getPlayerID()).score += getUnitScoreIncrement(current);

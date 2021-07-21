@@ -56,14 +56,14 @@ class ReproductionCounter {
 /**
  * @author glitchedcode
  */
-public class DeadUnit implements UnitInterface, Serializable, Cloneable {
+public class DeadUnit implements Unit, Serializable, Cloneable {
 
-    private UnitInterface bornUnit = null;
+    private Unit bornUnit = null;
 
     // This function implements rule #3: reproduction
     @Override
     @SuppressWarnings("unchecked")
-    public void computeNextTurn(UnitInterface[] adjacentUnits) {
+    public void computeNextTurn(Unit[] adjacentUnits) {
         // Contains how many units of a given species are adjacent.
         HashMap<Integer, ReproductionCounter> reproductionCounters = new HashMap<>();
         int candidate = -1;
@@ -75,14 +75,14 @@ public class DeadUnit implements UnitInterface, Serializable, Cloneable {
         HashMap<Integer, RuleInterface<Integer>> reproductionSelectors = new HashMap<>();
         bornUnit = null;
         for (int i = 0; i < 8; i++) {
-            UnitInterface current = adjacentUnits[i];
+            Unit current = adjacentUnits[i];
 
             if ( current == null ) // there is no adjacent unit in this direction
             {
                 continue;
             }
 
-            Integer oppositeDir = UnitInterface.getOppositeDirection(i);
+            Integer oppositeDir = Unit.getOppositeDirection(i);
             if ( !current.reproduce(oppositeDir) ) // this unity doesn't reproduce from this direction
             {
                 continue;
@@ -138,8 +138,8 @@ public class DeadUnit implements UnitInterface, Serializable, Cloneable {
      *
      * @return
      */
-    public final UnitInterface getBornUnit() {
-        UnitInterface tmp = bornUnit;
+    public final Unit getBornUnit() {
+        Unit tmp = bornUnit;
         bornUnit = null;
         return tmp;
     }
@@ -178,7 +178,7 @@ public class DeadUnit implements UnitInterface, Serializable, Cloneable {
     }
 
     @Override
-    public boolean attack(int a, UnitInterface unit) {
+    public boolean attack(int a, Unit unit) {
         return false;
     }
 

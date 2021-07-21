@@ -19,7 +19,6 @@ import com.giuseppelamalfa.gameofliferemastered.ui.GridPanel;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.Grid;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -31,6 +30,7 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
 
 /**
  *
@@ -144,13 +144,13 @@ public class SimulationRemoteClient implements SimulationInterface {
     }
 
     @Override
-    public UnitInterface getUnit(int row, int col) {
+    public Unit getUnit(int row, int col) {
         return currentGrid.getUnit(row, col);
     }
 
     @Override
     public void removeUnit(int row, int col) {
-        UnitInterface unit = currentGrid.getUnit(row, col);
+        Unit unit = currentGrid.getUnit(row, col);
         if ( unit == null ) {
             return;
         }
@@ -169,7 +169,7 @@ public class SimulationRemoteClient implements SimulationInterface {
     }
 
     @Override
-    public void setUnit(int row, int col, UnitInterface unit) {
+    public void setUnit(int row, int col, Unit unit) {
 
         if ( currentGrid.getUnit(row, col) != null ) {
             return;

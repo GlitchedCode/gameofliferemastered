@@ -8,9 +8,9 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.InvalidRequestException;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.Request;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
 import java.io.IOException;
 import java.util.ArrayList;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
 
 /**
  *
@@ -44,11 +44,11 @@ public interface SimulationInterface {
 
     int getCurrentTurn();
 
-    UnitInterface getUnit(int row, int col);
+    Unit getUnit(int row, int col);
 
     void removeUnit(int row, int col);
 
-    void setUnit(int row, int col, UnitInterface unit);
+    void setUnit(int row, int col, Unit unit);
 
     void computeNextTurn() throws Exception;
 

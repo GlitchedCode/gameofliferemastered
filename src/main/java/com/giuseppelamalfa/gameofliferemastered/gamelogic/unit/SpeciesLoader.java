@@ -77,10 +77,10 @@ public class SpeciesLoader {
         return speciesData.size();
     }
 
-    public static synchronized UnitInterface getNewUnit(int speciesID, int playerID) throws IllegalArgumentException {
+    public static synchronized Unit getNewUnit(int speciesID, int playerID) throws IllegalArgumentException {
         try {
             SpeciesData data = speciesData.get(speciesID);
-            return (UnitInterface) data.constructor.newInstance(data, playerID);
+            return (Unit) data.constructor.newInstance(data, playerID);
         }
         catch (IllegalAccessException | IllegalArgumentException | InstantiationException
                 | SecurityException | InvocationTargetException e) {
@@ -88,7 +88,7 @@ public class SpeciesLoader {
         }
     }
 
-    public static synchronized UnitInterface getNewUnit(int speciesID) throws IllegalArgumentException {
+    public static synchronized Unit getNewUnit(int speciesID) throws IllegalArgumentException {
         return getNewUnit(speciesID, 0);
     }
 

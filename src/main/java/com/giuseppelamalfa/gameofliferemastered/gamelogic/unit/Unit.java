@@ -7,7 +7,6 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.GameLogicException;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
-import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
 import java.util.Set;
 
@@ -15,7 +14,7 @@ import java.util.Set;
  *
  * @author glitchedcode
  */
-public abstract interface UnitInterface {
+public abstract interface Unit {
 
     public static Integer getOppositeDirection(Integer adjacencyPosition) {
         return (adjacencyPosition + 4) % 8;
@@ -27,7 +26,7 @@ public abstract interface UnitInterface {
 
     public void setCompetitive(boolean val);
 
-    public void computeNextTurn(UnitInterface[] adjacentUnits);
+    public void computeNextTurn(Unit[] adjacentUnits);
 
     public void update();
 
@@ -35,7 +34,7 @@ public abstract interface UnitInterface {
 
     public boolean reproduce(int adjacencyPosition);
 
-    public boolean attack(int adjacencyPosition, UnitInterface target);
+    public boolean attack(int adjacencyPosition, Unit target);
 
     public void independentAction();
 

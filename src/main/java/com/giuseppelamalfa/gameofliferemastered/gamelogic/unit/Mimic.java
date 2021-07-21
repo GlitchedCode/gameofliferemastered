@@ -15,7 +15,7 @@ public class Mimic extends LifeUnit {
 
     int turnsTillReplication = 0;
     
-    UnitInterface replicationTarget;
+    Unit replicationTarget;
     int replicatedSpeciesID = -1;
     State replicatedState = State.INVALID;
 
@@ -32,14 +32,14 @@ public class Mimic extends LifeUnit {
     }
     
     @Override
-    protected void boardStep(UnitInterface[] adjacentUnits) {
+    protected void boardStep(Unit[] adjacentUnits) {
         int hostileCount = 0;
         int friendlyCount = 0;
         int healthIncrement = 0;
 
         for (int i = 0; i < 8; i++) // conto le unità ostili ed amichevoli
         {
-            UnitInterface current = adjacentUnits[i];
+            Unit current = adjacentUnits[i];
             if (!current.isAlive()) {
                 continue;
             }
@@ -83,7 +83,7 @@ public class Mimic extends LifeUnit {
     }
     
     @Override
-    public boolean attack(int adjacencyPosition, UnitInterface unit) {
+    public boolean attack(int adjacencyPosition, Unit unit) {
         boolean ret = currentState.attackModifier(isAlive(), adjacencyPosition);
         if (ret) {
             unit.incrementHealth(-1);
@@ -114,7 +114,7 @@ public class Mimic extends LifeUnit {
         replicationTarget = null;        
     }
 
-    protected void replicate(UnitInterface unit) {
+    protected void replicate(Unit unit) {
         replicatedSpeciesID = unit.getSpeciesID();
         SpeciesData data = SpeciesLoader.getSpeciesData(replicatedSpeciesID);
         SpeciesData myData = SpeciesLoader.getSpeciesData(speciesID);

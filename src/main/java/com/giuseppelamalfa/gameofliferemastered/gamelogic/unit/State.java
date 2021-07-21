@@ -5,8 +5,8 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
 import java.io.Serializable;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
 
 /**
  *
@@ -18,15 +18,15 @@ public enum State implements Serializable {
     ALIVE,
     ALIVE_AGING {
         @Override
-        public void independentAction(UnitInterface unit) {
+        public void independentAction(Unit unit) {
             unit.incrementHealth(-1);
         }
     };
 
-    public void enter(UnitInterface unit) {
+    public void enter(Unit unit) {
     }
 
-    public void exit(UnitInterface unit) {
+    public void exit(Unit unit) {
     }
 
     public boolean attackModifier(boolean speciesResult, Integer adjacencyPosition) {
@@ -37,7 +37,7 @@ public enum State implements Serializable {
         return speciesResult;
     }
 
-    public void independentAction(UnitInterface unit) {
+    public void independentAction(Unit unit) {
     }
 
 }

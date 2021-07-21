@@ -5,7 +5,7 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.request;
 
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
 
 /**
  *
@@ -13,11 +13,11 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
  */
 public class SetUnitRequest extends Request {
 
-    public final UnitInterface unit;
+    public final Unit unit;
     public final int row;
     public final int col;
 
-    public SetUnitRequest(int row, int col, UnitInterface unit) {
+    public SetUnitRequest(int row, int col, Unit unit) {
         super(RequestType.SET_UNIT);
         this.row = row;
         this.col = col;

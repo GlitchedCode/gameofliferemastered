@@ -15,7 +15,7 @@ import java.io.Serializable;
  *
  * @author glitchedcode
  */
-public class LifeUnit implements UnitInterface, Serializable, Cloneable {
+public class LifeUnit implements Unit, Serializable, Cloneable {
 
     public final int speciesID;
 
@@ -87,14 +87,14 @@ public class LifeUnit implements UnitInterface, Serializable, Cloneable {
      *
      * @param adjacentUnits array of units adjacent to this unit
      */
-    protected void boardStep(UnitInterface[] adjacentUnits) {
+    protected void boardStep(Unit[] adjacentUnits) {
         int hostileCount = 0;
         int friendlyCount = 0;
         int healthIncrement = 0;
 
         for (int i = 0; i < 8; i++) // conto le unità ostili ed amichevoli
         {
-            UnitInterface current = adjacentUnits[i];
+            Unit current = adjacentUnits[i];
             if (!current.isAlive()) {
                 continue;
             }
@@ -147,7 +147,7 @@ public class LifeUnit implements UnitInterface, Serializable, Cloneable {
      * @param adjacentUnits
      */
     @Override
-    public final void computeNextTurn(UnitInterface[] adjacentUnits) {
+    public final void computeNextTurn(Unit[] adjacentUnits) {
         boardStep(adjacentUnits);
         endStep();
     }
@@ -197,7 +197,7 @@ public class LifeUnit implements UnitInterface, Serializable, Cloneable {
      * @return
      */
     @Override
-    public boolean attack(int adjacencyPosition, UnitInterface unit) {
+    public boolean attack(int adjacencyPosition, Unit unit) {
         boolean ret = currentState.attackModifier(isAlive(), adjacencyPosition);
         if (ret) {
             unit.incrementHealth(-1);

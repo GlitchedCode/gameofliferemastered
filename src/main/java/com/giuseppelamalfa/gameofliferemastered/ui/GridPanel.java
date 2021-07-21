@@ -6,7 +6,6 @@
 package com.giuseppelamalfa.gameofliferemastered.ui;
 
 import com.giuseppelamalfa.gameofliferemastered.ApplicationFrame;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
 import com.giuseppelamalfa.gameofliferemastered.utils.ImageManager;
 import java.awt.BasicStroke;
 import java.awt.Dimension;
@@ -28,6 +27,7 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationI
 import com.giuseppelamalfa.gameofliferemastered.utils.TimerWrapper;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
 
 /**
  *
@@ -107,7 +107,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
             String text = "<html>Position: (" + col + ", " + row
                     + ")<br>Sector: (" + sectorCol + ", " + sectorRow + ")";
 
-            UnitInterface unit = simulation.getUnit(row, col);
+            Unit unit = simulation.getUnit(row, col);
 
             if ( unit != null ) {
                 text += "<br>" + unit.toString();
@@ -300,7 +300,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
                 int xpos = c * (lineSpacing) - xoffset + 1;
                 int ypos = r * (lineSpacing) - yoffset + 1;
 
-                UnitInterface unit = simulation.getUnit(row, col);
+                Unit unit = simulation.getUnit(row, col);
                 if ( unit == null ) {
                     continue;
                 }
@@ -314,7 +314,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
         }
     }
 
-    public void drawUnit(Graphics2D g, AffineTransform xform, ImageObserver obs, UnitInterface unit) {
+    public void drawUnit(Graphics2D g, AffineTransform xform, ImageObserver obs, Unit unit) {
         g.setColor(simulation.getPlayerColor(unit.getPlayerID()).getMainAWTColor());
         g.fillRect((int) xform.getTranslateX(), (int) xform.getTranslateY(),
                 (int) (xform.getScaleX() * 8), (int) (xform.getScaleY() * 8));

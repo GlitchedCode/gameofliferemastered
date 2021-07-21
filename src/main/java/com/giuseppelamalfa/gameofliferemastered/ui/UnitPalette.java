@@ -6,7 +6,6 @@
 package com.giuseppelamalfa.gameofliferemastered.ui;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.UnitInterface;
 import com.giuseppelamalfa.gameofliferemastered.utils.ImageManager;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -22,6 +21,7 @@ import java.awt.geom.AffineTransform;
 import java.io.Serializable;
 import java.util.ArrayList;
 import javax.swing.JPanel;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
 
 class PaletteItem implements Serializable {
 
@@ -154,12 +154,12 @@ public class UnitPalette extends JPanel implements MouseListener {
     }
 
     @SuppressWarnings("unchecked")
-    public UnitInterface getNewUnit(int playerID) throws Exception {
+    public Unit getNewUnit(int playerID) throws Exception {
         PaletteItem item = items.get(selectedIndex);
         if ( !item.active | item.count == 0 ) {
             return null;
         }
-        UnitInterface ret = (UnitInterface) SpeciesLoader.getNewUnit(item.getSpeciesID(), playerID);
+        Unit ret = (Unit) SpeciesLoader.getNewUnit(item.getSpeciesID(), playerID);
         if ( item.count < 0 ) {
             item.count--;
         }
