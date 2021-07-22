@@ -7,15 +7,9 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.StubRule;
-import com.giuseppelamalfa.gameofliferemastered.ui.ColorTintFilter;
+import com.giuseppelamalfa.gameofliferemastered.utils.ColorTintFilter;
 import java.awt.Color;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
-import java.awt.image.ColorModel;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
