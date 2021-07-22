@@ -89,7 +89,7 @@ public class SimulationCLIServer implements SimulationInterface {
     protected ArrayList<PlayerData.TeamColor> availableColors = new ArrayList<>();
     
     public static void writeToStatusLog(String msg) {
-        System.out.println(msg + "\n");
+        System.out.println(msg);
     }
 
     public static void printUsage() {
@@ -100,6 +100,7 @@ public class SimulationCLIServer implements SimulationInterface {
                 + "-c <columnCount>: grid column count (default: 70)\n"
                 + "-p <portNumber>: set port number for server socket (default: 7777)\n"
                 + "-P <maxPlayers>: set max player count (default: 4, max: 8)\n"
+                + "-h: print this message and quit."
         );
         System.exit(-1);
     }
@@ -121,11 +122,12 @@ public class SimulationCLIServer implements SimulationInterface {
         SimulationCLIServer server = null;
 
         // defaults
-        GameMode mode = GameMode.SANDBOX;
+        GameMode mode = GameMode.COMPETITIVE;
         int rows = 50;
         int cols = 70;
         int port = 7777;
         int playerCount = 4;
+        boolean usage = false;
 
         // Read command line arguments
         try {
@@ -149,6 +151,9 @@ public class SimulationCLIServer implements SimulationInterface {
                     case "-P":
                         playerCount = Integer.decode(args[++i]);
                         break;
+                    case "-h":
+                        usage = true;
+                        break;
                 }
             }
 
@@ -158,10 +163,12 @@ public class SimulationCLIServer implements SimulationInterface {
             printUsage();
             server = null;
         }
-        if (server == null) {
+        if (server == null | usage) {
             printUsage();
         }
-
+        
+        System.out.println("To show help, pass -h as argument.");
+        
         TimerWrapper timer = new TimerWrapper();
         SimulationCLIServer finalServer = server;
 
@@ -213,6 +220,7 @@ public class SimulationCLIServer implements SimulationInterface {
         serverIP = in.readLine(); //you get the IP as a String
         this.portNumber = portNumber;
         writeToStatusLog("Server open at " + serverIP + ":" + portNumber);
+        writeToStatusLog("Game mode: " + mode.toString());
         writeToStatusLog("Max players: " + this.playerCount);
 
         this.rowCount = rowCount;
@@ -229,7 +237,7 @@ public class SimulationCLIServer implements SimulationInterface {
                     ObjectOutputStream outputStream = new ObjectOutputStream(conn.getOutputStream());
                     nextClientID++;
 
-                    if (connectedClients.size() + 1 < playerCount) {
+                    if (connectedClients.size() < playerCount) {
                         ClientData client = new ClientData(conn, outputStream, clientID);
                         client.playerData.color = extractRandomColor();
                         client.playerData.ID = clientID;
