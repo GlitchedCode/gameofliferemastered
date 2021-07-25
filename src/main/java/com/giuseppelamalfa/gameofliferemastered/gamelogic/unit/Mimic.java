@@ -93,10 +93,6 @@ public class Mimic extends LifeUnit {
 
     @Override
     protected void endStep() {
-        if ( !healthChanged ) { // rule #4: inactivity
-            independentAction();
-        }
-        
         if ( turnsTillReplication > 0 ) {
             turnsTillReplication--;
         } else if (replicationTarget != null) {

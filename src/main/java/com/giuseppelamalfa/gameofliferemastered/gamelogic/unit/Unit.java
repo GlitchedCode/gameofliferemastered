@@ -36,8 +36,6 @@ public abstract interface Unit {
 
     public boolean attack(int adjacencyPosition, Unit target);
 
-    public void independentAction();
-
     public int getSpeciesID();
     
     public int getBornSpeciesID();
