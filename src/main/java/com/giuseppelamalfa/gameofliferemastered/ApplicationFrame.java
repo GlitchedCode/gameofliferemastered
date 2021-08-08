@@ -66,7 +66,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
      * @throws java.lang.Exception
      */
     public ApplicationFrame() throws Exception {
-        SpeciesLoader.loadSpeciesFromJSON();
+        SpeciesLoader.loadSpeciesFromLocalJSON();
         tileManager = new DeferredImageManager("tiles.json");
         SimulationGUIServer tmp = new SimulationGUIServer(localRowCount, localColumnCount);
         localGrid = tmp;

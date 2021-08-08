@@ -6,7 +6,6 @@
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
 import java.io.Serializable;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
 
 /**
  *

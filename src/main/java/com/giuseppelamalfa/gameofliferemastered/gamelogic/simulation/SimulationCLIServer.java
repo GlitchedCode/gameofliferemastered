@@ -131,7 +131,7 @@ public class SimulationCLIServer implements SimulationInterface {
 
         // Read command line arguments
         try {
-            SpeciesLoader.loadSpeciesFromJSON();
+            SpeciesLoader.loadSpeciesFromLocalJSON();
 
             for (int i = 0; i < args.length; i++) {
                 String currentArg = args[i];

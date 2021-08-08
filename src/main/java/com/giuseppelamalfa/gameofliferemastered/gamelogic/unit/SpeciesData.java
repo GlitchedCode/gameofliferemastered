@@ -56,19 +56,31 @@ public class SpeciesData {
         textureCode = obj.getString("textureCode");
         initialState = State.valueOf(obj.getString("initialState"));
         health = obj.getInt("health");
+
         // Calculate friendly and hostile species sets
-        JSONArray friendlies = obj.getJSONArray("friendlySpecies");
-        JSONArray hostiles = obj.getJSONArray("hostileSpecies");
         HashSet<Integer> _friendlySpecies = new HashSet<>();
         HashSet<Integer> _hostileSpecies = new HashSet<>();
-        for (int i = 0; i < friendlies.length(); i++) {
-            _friendlySpecies.add(speciesIDs.get(friendlies.getString(i)));
+        try {
+            JSONArray friendlies = obj.getJSONArray("friendlySpecies");
+            for (int i = 0; i < friendlies.length(); i++) {
+                _friendlySpecies.add(speciesIDs.get(friendlies.getString(i)));
+            }
+        } catch (JSONException e) {
+            // ignore if missing or malformed
+            _friendlySpecies.clear();
         }
-        for (int i = 0; i < hostiles.length(); i++) {
-            _hostileSpecies.add(speciesIDs.get(friendlies.getString(i)));
+        try {
+            JSONArray hostiles = obj.getJSONArray("hostileSpecies");
+            for (int i = 0; i < hostiles.length(); i++) {
+                _hostileSpecies.add(speciesIDs.get(hostiles.getString(i)));
+            }
+        } catch (JSONException e) {
+            // ignore if missing or malformed
+            _hostileSpecies.clear();
         }
         this.friendlySpecies = (HashSet<Integer>) _friendlySpecies.clone();
         this.hostileSpecies = (HashSet<Integer>) _hostileSpecies.clone();
+
         // Create rule objects
         RuleInterface<Integer> _friendlyCountSelector;
         RuleInterface<Integer> _hostileCountSelector;
