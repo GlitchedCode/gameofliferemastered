@@ -130,9 +130,7 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
     }
 
     protected void endStep() {
-        if (!healthChanged) { // rule #4: inactivity
-            independentAction();
-        }
+        independentAction();
 
         if (health < 1) { // rule #5: hp
             nextTurnState = State.DEAD;
@@ -161,8 +159,8 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
             currentState.exit(this);
             currentState = nextTurnState;
             currentState.enter(this);
-            nextTurnState = State.INVALID;
         }
+        nextTurnState = State.INVALID;
         healthChanged = false;
     }
 
@@ -250,10 +248,10 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
     }
 
     @Override
-    public int getBornSpeciesID(){
+    public int getBornSpeciesID() {
         return speciesID;
     }
-    
+
     /**
      * @return set with friendly species
      */
@@ -269,9 +267,9 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
     public final Set<Integer> getHostileSpecies() {
         return hostileSpecies;
     }
-    
+
     @Override
-    public RuleInterface<Integer> getFriendlyCountSelector(){
+    public RuleInterface<Integer> getFriendlyCountSelector() {
         return friendlyCountSelector;
     }
 
@@ -325,14 +323,14 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
             return this;
         }
     }
-    
+
     @Override
-    public String getTextureCode(){
+    public String getTextureCode() {
         return SpeciesLoader.getSpeciesData(speciesID).textureCode;
     }
-    
+
     @Override
-    public BufferedImageOp getFilter(){
+    public BufferedImageOp getFilter() {
         return SpeciesLoader.getSpeciesData(speciesID).filter;
     }
 
