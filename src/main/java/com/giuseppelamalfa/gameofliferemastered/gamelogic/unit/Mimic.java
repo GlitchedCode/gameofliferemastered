@@ -90,9 +90,9 @@ public class Mimic extends LifeUnit {
 
     @Override
     protected void endStep() {
-        independentAction();
+        currentState.independentAction(this);
 
-        if (turnsTillReplication > 0) {
+        if ( turnsTillReplication > 0 ) {
             turnsTillReplication--;
         } else if (replicationTarget != null) {
             replicate(replicationTarget);

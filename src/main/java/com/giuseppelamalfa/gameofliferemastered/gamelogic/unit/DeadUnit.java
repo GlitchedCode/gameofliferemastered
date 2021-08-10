@@ -183,10 +183,6 @@ public class DeadUnit implements Unit, Serializable, Cloneable {
     }
 
     @Override
-    public void independentAction() {
-    }
-
-    @Override
     public State getNextTurnState() {
         return State.INVALID;
     }

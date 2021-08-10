@@ -162,11 +162,6 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
 
         menuPanel.setInheritsPopupMenu(true);
         menuPanel.setOpaque(false);
-        menuPanel.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyTyped(java.awt.event.KeyEvent evt) {
-                menuPanelKeyTyped(evt);
-            }
-        });
 
         titleLabel.setFont(new java.awt.Font("sansserif", 0, 48)); // NOI18N
         titleLabel.setForeground(new java.awt.Color(255, 255, 255));
@@ -404,7 +399,6 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
         addKeyListener(gridPanel);
         menuPanel.getAccessibleContext().setAccessibleParent(menuPanel);
         menuPanel.setBackground(new Color(0,0,0,127));
-        addKeyListener(menuPanel);
         try {
             unitPalette.init(tileManager);
         } catch (Exception e) {e.printStackTrace();}
@@ -432,10 +426,6 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
 
     private void gameStatusPanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_gameStatusPanelMouseClicked
     }//GEN-LAST:event_gameStatusPanelMouseClicked
-
-    private void menuPanelKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_menuPanelKeyTyped
-        // TODO add your handling code here:
-    }//GEN-LAST:event_menuPanelKeyTyped
 
     private void unpauseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_unpauseButtonActionPerformed
         // TODO add your handling code here:

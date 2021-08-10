@@ -130,8 +130,8 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
     }
 
     protected void endStep() {
-        independentAction();
-
+        currentState.independentAction(this);
+        
         if (health < 1) { // rule #5: hp
             nextTurnState = State.DEAD;
         } else {
@@ -201,15 +201,6 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
             unit.incrementHealth(-1);
         }
         return ret;
-    }
-
-    /**
-     * In base alla regola #4, questa funzione viene eseguita durante lo
-     * computeNextTurn se i punti vita dell'unità non sono cambiati
-     */
-    @Override
-    public void independentAction() {
-        currentState.independentAction(this);
     }
 
     /**

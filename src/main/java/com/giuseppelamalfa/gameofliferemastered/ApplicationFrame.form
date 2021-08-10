@@ -150,12 +150,9 @@
               <ComponentRef name="menuPanel"/>
             </Property>
           </AccessibilityProperties>
-          <Events>
-            <EventHandler event="keyTyped" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="menuPanelKeyTyped"/>
-          </Events>
           <AuxValues>
             <AuxValue name="JLayeredPane.layer" type="java.lang.Integer" value="400"/>
-            <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="menuPanel.setBackground(new Color(0,0,0,127));&#xa;addKeyListener(menuPanel);"/>
+            <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="menuPanel.setBackground(new Color(0,0,0,127));"/>
           </AuxValues>
 
           <Layout>
