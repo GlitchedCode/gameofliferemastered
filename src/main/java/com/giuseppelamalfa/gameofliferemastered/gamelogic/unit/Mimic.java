@@ -113,7 +113,7 @@ public class Mimic extends LifeUnit {
         SpeciesData data = SpeciesLoader.getSpeciesData(replicatedSpeciesID);
         SpeciesData myData = SpeciesLoader.getSpeciesData(speciesID);
 
-        replicatedState = unit.getCurrentState();
+        currentState = unit.getCurrentState();
         friendlySpecies = unit.getFriendlySpecies();
         hostileSpecies = unit.getHostileSpecies();
         friendlyCountSelector = unit.getFriendlyCountSelector();

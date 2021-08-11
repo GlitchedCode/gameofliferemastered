@@ -68,9 +68,9 @@ public class Grid implements Serializable, Cloneable {
         sectorRowCount = (rows / SECTOR_SIDE_LENGTH) + 1;
         sectorColumnCount = (cols / SECTOR_SIDE_LENGTH) + 1;
 
-        board = new TwoDimensionalContainer<>(rows, cols);
-        sectorFlags = new TwoDimensionalContainer<>(sectorRowCount, sectorColumnCount, false);
         deadUnit = new DeadUnit();
+        board = new TwoDimensionalContainer<>(rows, cols, deadUnit);
+        sectorFlags = new TwoDimensionalContainer<>(sectorRowCount, sectorColumnCount, false);
 
         topLeftActive = new Point(0, 0);
         bottomRightActive = new Point(cols, rows);
@@ -93,8 +93,7 @@ public class Grid implements Serializable, Cloneable {
             ret.topLeftProcessed = new Point(ret.topLeftActive);
             ret.bottomRightProcessed = new Point(ret.bottomRightActive);
             return ret;
-        }
-        catch (CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             System.out.println("com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid.clone() failed idk");
             return this;
         }
@@ -190,7 +189,7 @@ public class Grid implements Serializable, Cloneable {
      */
     public final void removeUnit(int row, int col) {
         Unit found = board.get(row, col);
-        if ( found != null ) {
+        if (found.isAlive()) {
             players.get(found.getPlayerID()).score -= getUnitScoreIncrement(found);
             orderPlayersByScore();
             board.remove(row, col);
@@ -205,10 +204,10 @@ public class Grid implements Serializable, Cloneable {
      * @param unit Unit to be set.
      */
     public final void setUnit(int row, int col, Unit unit) {
-        if ( unit == null ) {
+        if (unit == null) {
             return;
         }
-        if ( !players.containsKey(unit.getPlayerID()) ) {
+        if (!players.containsKey(unit.getPlayerID())) {
             return;
         }
         unit.update();
@@ -224,7 +223,7 @@ public class Grid implements Serializable, Cloneable {
     }
 
     public final void clearBoard(boolean orderPlayers) {
-        if ( orderPlayers ) {
+        if (orderPlayers) {
             players.values().forEach(data -> {
                 data.score = 0;
             });
@@ -236,10 +235,9 @@ public class Grid implements Serializable, Cloneable {
 
     public void setRunning(boolean val) {
         isRunning = val;
-        if ( val ) {
+        if (val) {
             gameStatus = "Running";
-        }
-        else {
+        } else {
             gameStatus = "Paused";
         }
     }
@@ -260,7 +258,7 @@ public class Grid implements Serializable, Cloneable {
         // Loop through every active sector, and any adjacent inactive sectors
         for (int sectorRow = 0; sectorRow < sectorRowCount; sectorRow++) {
             for (int sectorColumn = 0; sectorColumn < sectorColumnCount; sectorColumn++) {
-                if ( !surroundingSectorsActive(sectorRow, sectorColumn) ) {
+                if (!surroundingSectorsActive(sectorRow, sectorColumn)) {
                     continue;
                 }
 
@@ -284,8 +282,8 @@ public class Grid implements Serializable, Cloneable {
         runPlayerIDCheck = false;
         turn += 1;
 
-        if ( syncTurnCount != 0 & simulation != null ) {
-            if ( turn % syncTurnCount == 0 ) {
+        if (syncTurnCount != 0 & simulation != null) {
+            if (turn % syncTurnCount == 0) {
                 simulation.synchronize();
             }
         }
@@ -306,7 +304,7 @@ public class Grid implements Serializable, Cloneable {
         for (int row = topLeftActive.y; row <= bottomRightActive.y; row++) {
             for (int col = topLeftActive.x; col <= bottomRightActive.x; col++) {
                 Unit current = board.get(row, col);
-                if ( current != null ) {
+                if (current.isAlive()) {
                     players.get(current.getPlayerID()).score += getUnitScoreIncrement(current);
                 }
             }
@@ -320,12 +318,11 @@ public class Grid implements Serializable, Cloneable {
      * @param player
      */
     public void addPlayer(PlayerData player) {
-        if ( !players.containsKey(player.ID) ) {
+        if (!players.containsKey(player.ID)) {
             players.put(player.ID, player);
-        }
-        else {
+        } else {
             PlayerData data = players.get(player.ID);
-            if ( player.name != null ) {
+            if (player.name != null) {
                 data.name = player.name;
             }
         }
@@ -342,8 +339,8 @@ public class Grid implements Serializable, Cloneable {
         for (int r = 0; r < rowCount; r++) {
             for (int c = 0; c < columnCount; c++) {
                 Unit unit = getUnit(r, c);
-                if ( unit != null ) {
-                    if ( unit.getPlayerID() == id ) {
+                if (unit != null) {
+                    if (unit.getPlayerID() == id) {
                         setToPosition(r, c, null);
                     }
                 }
@@ -368,8 +365,7 @@ public class Grid implements Serializable, Cloneable {
     public final PlayerData.TeamColor getPlayerColor(int ID) {
         try {
             return players.get(ID).color;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return PlayerData.TeamColor.NONE;
         }
     }
@@ -391,7 +387,7 @@ public class Grid implements Serializable, Cloneable {
      */
     protected final void setToPosition(Integer row, Integer col, Unit unit) {
         Unit previous = board.get(row, col);
-        if ( previous != null ) {
+        if (previous.isAlive()) {
             players.get(previous.getPlayerID()).score -= getUnitScoreIncrement(previous);
             board.remove(row, col);
         }
@@ -412,7 +408,7 @@ public class Grid implements Serializable, Cloneable {
      * @return Unit's score increment.
      */
     protected int getUnitScoreIncrement(Unit unit) {
-        if ( unit.isAlive() ) {
+        if (unit.isAlive()) {
             return 1;
         }
         return 0;
@@ -422,11 +418,11 @@ public class Grid implements Serializable, Cloneable {
     private boolean surroundingSectorsActive(int sectorRow, int sectorColumn) {
         boolean ret = false;
         for (int r = sectorRow - 1; r <= sectorRow + 1; r++) {
-            if ( r < 0 | r >= sectorRowCount ) {
+            if (r < 0 | r >= sectorRowCount) {
                 continue;
             }
             for (int c = sectorColumn - 1; c <= sectorColumn + 1; c++) {
-                if ( c < 0 | c >= sectorColumnCount ) {
+                if (c < 0 | c >= sectorColumnCount) {
                     continue;
                 }
 
@@ -437,24 +433,22 @@ public class Grid implements Serializable, Cloneable {
     }
 
     private void moveProcessBoundaryToInclude(Integer row, Integer col) {
-        if ( !unitFoundThisTurn ) {
+        if (!unitFoundThisTurn) {
             topLeftProcessed.move(col, row);
             bottomRightProcessed.move(col, row);
             unitFoundThisTurn = true;
             return;
         }
 
-        if ( row < topLeftProcessed.y ) {
+        if (row < topLeftProcessed.y) {
             topLeftProcessed.y = row;
-        }
-        else if ( row > bottomRightProcessed.y ) {
+        } else if (row > bottomRightProcessed.y) {
             bottomRightProcessed.y = row;
         }
 
-        if ( col < topLeftProcessed.x ) {
+        if (col < topLeftProcessed.x) {
             topLeftProcessed.x = col;
-        }
-        else if ( col > bottomRightProcessed.x ) {
+        } else if (col > bottomRightProcessed.x) {
             bottomRightProcessed.x = col;
         }
     }
@@ -497,12 +491,6 @@ public class Grid implements Serializable, Cloneable {
             ret[i + 4] = unit;
         }
 
-        for (int i = 0; i < 8; i++) {
-            if ( ret[i] == null ) {
-                ret[i] = deadUnit;
-            }
-        }
-
         return ret;
     }
 
@@ -510,7 +498,7 @@ public class Grid implements Serializable, Cloneable {
         orderedPlayers = new ArrayList<>(players.values());
         orderedPlayers.sort((PlayerData one, PlayerData two) -> {
             int val = two.score - one.score;
-            if ( val == 0 ) {
+            if (val == 0) {
                 val = one.ID - two.ID;
             }
             return val;
@@ -524,11 +512,11 @@ public class Grid implements Serializable, Cloneable {
         for (int row = topLeftBoundary.y; row <= bottomRightBoundary.y; row++) {
             for (int col = topLeftBoundary.x; col <= bottomRightBoundary.x; col++) {
                 Unit current = board.get(row, col);
-                if ( current == null ) {
+                if (!current.isAlive()) {
                     continue;
                 }
-                if ( runPlayerIDCheck ) {
-                    if ( current.getPlayerID() != -1 & !players.containsKey(current.getPlayerID()) ) {
+                if (runPlayerIDCheck) {
+                    if (current.getPlayerID() != -1 & !players.containsKey(current.getPlayerID())) {
                         setToPosition(row, col, null);
                         continue;
                     }
@@ -540,7 +528,7 @@ public class Grid implements Serializable, Cloneable {
 
                 // Expand the board's processing area accordingly as we
                 // process more units
-                if ( current.getNextTurnState() != State.DEAD ) {
+                if (current.getNextTurnState() != State.DEAD) {
                     moveProcessBoundaryToInclude(row, col);
                     aliveNextTurn = true;
                 }
@@ -555,19 +543,16 @@ public class Grid implements Serializable, Cloneable {
         for (int row = topLeftBoundary.y; row <= bottomRightBoundary.y; row++) {
             for (int col = topLeftBoundary.x; col <= bottomRightBoundary.x; col++) {
                 Unit unit = board.get(row, col);
-                if ( unit != null ) {
-                    if ( unit.isAlive() ) {
-                        continue;
-                    }
+                if (unit.isAlive()) {
+                    continue;
                 }
 
                 Unit[] adjacentUnits = getUnitsAdjacentToPosition(row, col);
 
                 deadUnit.computeNextTurn(adjacentUnits);
                 Unit bornUnit = deadUnit.getBornUnit();
-                deadUnit.update();
 
-                if ( bornUnit != null ) {
+                if (bornUnit != null) {
                     aliveNextTurn = true;
                     setToPosition(row, col, bornUnit);
                     moveProcessBoundaryToInclude(row, col);
@@ -585,10 +570,10 @@ public class Grid implements Serializable, Cloneable {
         for (int row = topLeftActive.y; row <= bottomRightActive.y; row++) {
             for (int col = topLeftActive.x; col <= bottomRightActive.x; col++) {
                 Unit current = board.get(row, col);
-                if ( current != null ) {
+                if (current != deadUnit) {
                     current.update();
                     players.get(current.getPlayerID()).score += getUnitScoreIncrement(current);
-                    if ( !current.isAlive() ) {
+                    if (!current.isAlive()) {
                         board.remove(row, col);
                     }
                 }

@@ -511,14 +511,14 @@ public class SimulationCLIServer implements SimulationInterface {
         sendToAll(r, clientID);
 
         if (setUnit.unit != null) { // set unit
-            if (currentGrid.getUnit(setUnit.row, setUnit.col) != null) {
+            if (currentGrid.getUnit(setUnit.row, setUnit.col).isAlive()) {
                 return;
             }
             currentGrid.setUnit(setUnit.row, setUnit.col, setUnit.unit);
 
         } else { // remove unit
             Unit unit = currentGrid.getUnit(setUnit.row, setUnit.col);
-            if (unit == null) {
+            if (!unit.isAlive()) {
                 return;
             }
             if (unit.getPlayerID() != playerData.ID) {
