@@ -77,13 +77,13 @@ public class DeadUnit implements Unit, Serializable, Cloneable {
         for (int i = 0; i < 8; i++) {
             Unit current = adjacentUnits[i];
 
-            if ( current == null ) // there is no adjacent unit in this direction
+            if ( !current.isAlive() ) // there is no adjacent unit in this direction
             {
                 continue;
             }
 
             Integer oppositeDir = Unit.getOppositeDirection(i);
-            if ( !current.reproduce(oppositeDir) ) // this unity doesn't reproduce from this direction
+            if ( !current.reproduce(oppositeDir) ) // this unit doesn't reproduce from this direction
             {
                 continue;
             }
@@ -255,4 +255,9 @@ public class DeadUnit implements Unit, Serializable, Cloneable {
     @Override
     public BufferedImageOp getFilter() { return null; }
 
+    @Override
+    public String toString() {
+        return "";
+    }
+    
 }

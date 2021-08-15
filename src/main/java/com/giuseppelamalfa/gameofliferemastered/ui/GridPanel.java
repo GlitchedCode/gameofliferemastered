@@ -186,7 +186,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
         int col = point.x / lineSpacing + startColumn;
 
         try {
-            if ( simulation.getUnit(row, col) != null ) {
+            if ( simulation.getUnit(row, col).isAlive() ) {
                 simulation.removeUnit(row, col);
             }
             else {
@@ -309,7 +309,8 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
                 xform.translate(xpos, ypos);
                 xform.scale(tileScale, tileScale);
 
-                drawUnit(g2, xform, this, unit);
+                if(unit.isAlive()) 
+                    drawUnit(g2, xform, this, unit);
             }
         }
     }

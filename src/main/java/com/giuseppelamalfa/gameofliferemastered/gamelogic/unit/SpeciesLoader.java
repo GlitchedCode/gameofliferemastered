@@ -27,9 +27,9 @@ public class SpeciesLoader {
 
     static HashMap<Integer, SpeciesData> speciesData;
 
-    public static synchronized void loadSpeciesFromJSON()
+    public static synchronized void loadSpeciesFromLocalJSON()
             throws IOException, ClassNotFoundException, InstantiationException,
-            IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
+            IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, Exception {
 
         // Load species.json into localSpeciesDataJSON
         InputStream istream = new SpeciesLoader().getClass().
@@ -47,7 +47,7 @@ public class SpeciesLoader {
 
     public static synchronized void loadJSONString(String jsonString)
             throws ClassNotFoundException, InstantiationException, IllegalAccessException,
-            IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
+            IllegalArgumentException, InvocationTargetException, NoSuchMethodException, Exception {
 
         speciesData = new HashMap<>();
         HashMap<String, Integer> speciesIDs = new HashMap<>();
@@ -56,12 +56,16 @@ public class SpeciesLoader {
         // Correlate names to IDs
         for (int c = 0; c < unitDataArray.length(); c++) {
             JSONObject current = unitDataArray.getJSONObject(c);
-            speciesIDs.put(current.getString("name"), current.getInt("id"));
+            if(speciesIDs.put(current.getString("name"), current.getInt("id")) != null)
+                throw new Exception("Species names must be unique!");
         }
 
+        // Create SpeciesData objects from JSON objects
         for (int c = 0; c < unitDataArray.length(); c++) {
             JSONObject current = unitDataArray.getJSONObject(c);
-            speciesData.put(c, new SpeciesData(speciesIDs.get(current.getString("name")), current, speciesIDs));
+            SpeciesData tmp = speciesData.put(current.getInt("id"), new SpeciesData(speciesIDs.get(current.getString("name")), current, speciesIDs));
+            if(tmp != null)
+                throw new Exception("Species IDs must be unique!");
         }
     }
 

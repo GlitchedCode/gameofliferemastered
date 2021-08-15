@@ -109,8 +109,11 @@ public class TwoDimensionalContainer<T> extends HashMap<Integer, HashMap<Integer
         if ( row >= rows | col >= cols | row < 0 | col < 0 ) {
             return;
         }
-
-        super.get(col).put(row, element);
+        
+        if(element == null || element == defaultValue)
+            remove(row, col);
+        else
+            super.get(col).put(row, element);
     }
 
     public void remove(Integer row, Integer col) {

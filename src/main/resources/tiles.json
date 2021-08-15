@@ -4,7 +4,7 @@
         "directory, the # character is replaced with the appropriate code during",
         "load time.",
         "colorKey: color that gets keyed out from images",
-        "name: the tile's name",
+        "name: the tile's name used in game",
         "code: the tile's numeric code, linked to their filename"        
     ],
     "pathTemplate" : "Tiles/tile_#.png" ,

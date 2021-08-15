@@ -14,7 +14,7 @@ public class Mimic extends LifeUnit {
     static public final int REPLICATION_COOLDOWN = 8;
 
     int turnsTillReplication = 0;
-    
+
     Unit replicationTarget;
     int replicatedSpeciesID = -1;
     State replicatedState = State.INVALID;
@@ -30,7 +30,7 @@ public class Mimic extends LifeUnit {
     public Mimic(SpeciesData data, Integer playerID, Boolean competitive) {
         super(data, playerID, competitive);
     }
-    
+
     @Override
     protected void boardStep(Unit[] adjacentUnits) {
         int hostileCount = 0;
@@ -51,19 +51,16 @@ public class Mimic extends LifeUnit {
             // additionally check if the adjacent cell can attack from 
             // their position relative to this cell
             boolean attacked = false;
-            if (
-                    (competitive & current.getPlayerID() != playerID) |
-                    (
-                        hostileSpecies.contains(current.getSpeciesID()) ^
-                        (replicatedSpeciesID == -1 & current.getSpeciesID() != speciesID)
-                    )) {
+            if ((competitive & current.getPlayerID() != playerID)
+                    | (hostileSpecies.contains(current.getSpeciesID())
+                    ^ (replicatedSpeciesID == -1 & current.getSpeciesID() != speciesID))) {
                 attacked |= attack(i, current);
             }
             if (attacked) {
                 hostileCount++;
             }
-            
-            if(replicatedSpeciesID == -1 & current.getSpeciesID() != speciesID){
+
+            if (replicatedSpeciesID == -1 & current.getSpeciesID() != speciesID) {
                 replicationTarget = current;
             }
         }
@@ -81,7 +78,7 @@ public class Mimic extends LifeUnit {
             incrementHealth(healthIncrement);
         }
     }
-    
+
     @Override
     public boolean attack(int adjacencyPosition, Unit unit) {
         boolean ret = currentState.attackModifier(isAlive(), adjacencyPosition);
@@ -93,6 +90,8 @@ public class Mimic extends LifeUnit {
 
     @Override
     protected void endStep() {
+        currentState.independentAction(this);
+
         if ( turnsTillReplication > 0 ) {
             turnsTillReplication--;
         } else if (replicationTarget != null) {
@@ -100,14 +99,13 @@ public class Mimic extends LifeUnit {
             turnsTillReplication = REPLICATION_COOLDOWN;
         }
 
-        if ( health < 1 ) { // rule #5: hp
+        if (health < 1) { // rule #5: hp
             nextTurnState = State.DEAD;
-        }
-        else {
+        } else {
             nextTurnState = currentState;
         }
-        
-        replicationTarget = null;        
+
+        replicationTarget = null;
     }
 
     protected void replicate(Unit unit) {
@@ -115,7 +113,7 @@ public class Mimic extends LifeUnit {
         SpeciesData data = SpeciesLoader.getSpeciesData(replicatedSpeciesID);
         SpeciesData myData = SpeciesLoader.getSpeciesData(speciesID);
 
-        replicatedState = unit.getCurrentState();
+        currentState = unit.getCurrentState();
         friendlySpecies = unit.getFriendlySpecies();
         hostileSpecies = unit.getHostileSpecies();
         friendlyCountSelector = unit.getFriendlyCountSelector();
@@ -123,22 +121,24 @@ public class Mimic extends LifeUnit {
         reproductionSelector = unit.getReproductionSelector();
 
         health = data.health - (health - myData.health);
-        if ( health < 1 ) {
+        if (health < 1) {
             health = 1;
         }
     }
-    
+
     @Override
-    public String getTextureCode(){
-        if(replicatedSpeciesID == -1)
+    public String getTextureCode() {
+        if (replicatedSpeciesID == -1) {
             return SpeciesLoader.getSpeciesData(speciesID).textureCode;
+        }
         return SpeciesLoader.getSpeciesData(replicatedSpeciesID).textureCode;
     }
-    
+
     @Override
-    public int getSpeciesID(){
-        if(replicatedSpeciesID != -1)
+    public int getSpeciesID() {
+        if (replicatedSpeciesID != -1) {
             return replicatedSpeciesID;
+        }
         return speciesID;
     }
 }
