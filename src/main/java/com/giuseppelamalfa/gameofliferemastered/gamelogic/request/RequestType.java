@@ -21,7 +21,7 @@ public enum RequestType {
     SYNC_GRID(SyncGridRequest.class, "handleSyncGridRequest"),
     UPDATE_PLAYER_DATA(UpdatePlayerDataRequest.class, "handleUpdatePlayerDataRequest"),
     DISCONNECT(DisconnectRequest.class, "handleDisconnectRequest"),
-    PAUSE(GameStatusRequest.class, "handleGameStatusRequest"),
+    GAME_STATUS(GameStatusRequest.class, "handleGameStatusRequest"),
     SET_UNIT(SetUnitRequest.class, "handleSetUnitRequest");
 
     public final Type requestObjectType;

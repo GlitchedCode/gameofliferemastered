@@ -5,7 +5,6 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.grid;
 
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationInterface;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Level;
@@ -26,8 +25,7 @@ public enum GameMode {
         Constructor<?> tmp;
         try {
             tmp = clazz.getConstructor(Integer.class, Integer.class);
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             tmp = null;
             Logger.getLogger(GameMode.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -38,17 +36,13 @@ public enum GameMode {
     public Grid getNewGrid(int rows, int cols) {
         try {
             return (Grid) constructor.newInstance(rows, cols);
-        }
-        catch (InstantiationException ex) {
+        } catch (InstantiationException ex) {
             Logger.getLogger(GameMode.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        catch (IllegalAccessException ex) {
+        } catch (IllegalAccessException ex) {
             Logger.getLogger(GameMode.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException ex) {
             Logger.getLogger(GameMode.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        catch (InvocationTargetException ex) {
+        } catch (InvocationTargetException ex) {
             Logger.getLogger(GameMode.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;

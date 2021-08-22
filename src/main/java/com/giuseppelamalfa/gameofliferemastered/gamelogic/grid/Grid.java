@@ -304,8 +304,10 @@ public class Grid implements Serializable, Cloneable {
         for (int row = topLeftActive.y; row <= bottomRightActive.y; row++) {
             for (int col = topLeftActive.x; col <= bottomRightActive.x; col++) {
                 Unit current = board.get(row, col);
-                if (current.isAlive()) {
-                    players.get(current.getPlayerID()).score += getUnitScoreIncrement(current);
+                if (current != null) {
+                    if (current.isAlive()) {
+                        players.get(current.getPlayerID()).score += getUnitScoreIncrement(current);
+                    }
                 }
             }
         }
@@ -392,13 +394,15 @@ public class Grid implements Serializable, Cloneable {
             board.remove(row, col);
         }
 
-        unit.setCompetitive(competitive);
+        if (unit != null) {
+            unit.setCompetitive(competitive);
 
-        players.get(unit.getPlayerID()).score += getUnitScoreIncrement(unit);
-        board.put(row, col, unit);
-        moveProcessBoundaryToInclude(row, col);
-        sectorFlags.put(row / SECTOR_SIDE_LENGTH, col / SECTOR_SIDE_LENGTH, true);
-        orderPlayersByScore();
+            players.get(unit.getPlayerID()).score += getUnitScoreIncrement(unit);
+            board.put(row, col, unit);
+            moveProcessBoundaryToInclude(row, col);
+            sectorFlags.put(row / SECTOR_SIDE_LENGTH, col / SECTOR_SIDE_LENGTH, true);
+            orderPlayersByScore();
+        }
     }
 
     /**
@@ -491,6 +495,12 @@ public class Grid implements Serializable, Cloneable {
             ret[i + 4] = unit;
         }
 
+        for(int i = 0; i < 8; i++){
+            if(ret[i] == null){
+                ret[i] = deadUnit;
+            }
+        }
+        
         return ret;
     }
 
@@ -549,7 +559,14 @@ public class Grid implements Serializable, Cloneable {
 
                 Unit[] adjacentUnits = getUnitsAdjacentToPosition(row, col);
 
-                deadUnit.computeNextTurn(adjacentUnits);
+                // Run reproduction checks only if there are adjacent alive units
+                for (int i = 0; i < 8; i++) {
+                    if (adjacentUnits[i].isAlive()) {
+                        deadUnit.computeNextTurn(adjacentUnits);
+                        break;
+                    }
+                }
+
                 Unit bornUnit = deadUnit.getBornUnit();
 
                 if (bornUnit != null) {

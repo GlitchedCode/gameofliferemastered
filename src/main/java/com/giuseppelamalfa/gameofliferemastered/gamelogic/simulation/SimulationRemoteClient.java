@@ -64,7 +64,8 @@ public class SimulationRemoteClient implements SimulationInterface {
             try {
                 ObjectInputStream input = new ObjectInputStream(clientSocket.getInputStream());
                 while ( true ) {
-                    handleRequest((Request) input.readObject(), 0);
+                    Request r = (Request) input.readObject();
+                    handleRequest(r, 0);
                 }
             }
             catch (EOFException | SocketException e) {
@@ -171,7 +172,7 @@ public class SimulationRemoteClient implements SimulationInterface {
     @Override
     public void setUnit(int row, int col, Unit unit) {
 
-        if ( currentGrid.getUnit(row, col) != null ) {
+        if ( currentGrid.getUnit(row, col).isAlive()) {
             return;
         }
 

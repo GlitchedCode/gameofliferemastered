@@ -5,13 +5,10 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.grid;
 
-import com.giuseppelamalfa.gameofliferemastered.ApplicationFrame;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationInterface;
 import com.giuseppelamalfa.gameofliferemastered.utils.TimerWrapper;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.function.Predicate;
 
 /**
  *
@@ -89,6 +86,7 @@ public class CompetitiveGrid extends Grid {
         }
     }
 
+    @Override
     public boolean showWinner() {
         return showWinner;
     }
@@ -114,7 +112,7 @@ public class CompetitiveGrid extends Grid {
     @Override
     public void removePlayer(int id) {
         super.removePlayer(id);
-        if ( getPlayerCount() == 1 ) {
+        if ( getPlayerCount() <= 2 ) {
             setState(State.WAITING);
         }
     }

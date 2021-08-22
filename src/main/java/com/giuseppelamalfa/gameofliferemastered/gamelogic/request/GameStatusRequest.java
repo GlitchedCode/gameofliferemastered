@@ -15,12 +15,12 @@ public class GameStatusRequest extends Request {
     public String status;
 
     public GameStatusRequest(boolean val) {
-        super(RequestType.PAUSE);
+        super(RequestType.GAME_STATUS);
         running = val;
     }
 
     public GameStatusRequest(boolean val, String status) {
-        super(RequestType.PAUSE);
+        super(RequestType.GAME_STATUS);
         running = val;
         this.status = status;
     }

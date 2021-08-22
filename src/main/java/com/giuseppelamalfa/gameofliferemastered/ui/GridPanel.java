@@ -74,17 +74,15 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
     public void mouseClicked(MouseEvent me) {
         synchronized (simulation) {
             int button = me.getButton();
-            if ( button == MouseEvent.BUTTON1 & !simulation.isLocked() ) {
+            if (button == MouseEvent.BUTTON1 & !simulation.isLocked()) {
                 setUnit(me.getPoint());
-            }
-            else if ( button == MouseEvent.BUTTON3 ) {
+            } else if (button == MouseEvent.BUTTON3) {
                 try {
-                    if ( simulation.isLocallyControlled() & !simulation.isLocked() ) {
+                    if (simulation.isLocallyControlled() & !simulation.isLocked()) {
                         simulation.computeNextTurn();
                         gameStatusPanel.setPlayerPanels(simulation.getPlayerRankings());
                     }
-                }
-                catch (Exception ex) {
+                } catch (Exception ex) {
                     ex.printStackTrace();
                 }
             }
@@ -109,7 +107,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
 
             Unit unit = simulation.getUnit(row, col);
 
-            if ( unit != null ) {
+            if (unit != null) {
                 text += "<br>" + unit.toString();
             }
 
@@ -122,7 +120,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
     @Override
     public void mousePressed(MouseEvent me) {
         int button = me.getButton();
-        if ( button == MouseEvent.BUTTON1 ) {
+        if (button == MouseEvent.BUTTON1) {
             lastDragLocation = new Point(me.getPoint());
         }
     }
@@ -130,7 +128,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
     @Override
     public void mouseDragged(MouseEvent me) {
         int mask = MouseEvent.BUTTON1_DOWN_MASK;
-        if ( me.getModifiersEx() != mask ) {
+        if (me.getModifiersEx() != mask) {
             return;
         }
         Point dragLocation = me.getPoint();
@@ -173,7 +171,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
 
     @Override
     public void keyReleased(KeyEvent e) {
-        if ( e.getKeyCode() == KeyEvent.VK_SPACE ) {
+        if (e.getKeyCode() == KeyEvent.VK_SPACE) {
             simulation.setRunning(!simulation.isRunning());
         }
     }
@@ -186,15 +184,13 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
         int col = point.x / lineSpacing + startColumn;
 
         try {
-            if ( simulation.getUnit(row, col).isAlive() ) {
+            if (simulation.getUnit(row, col).isAlive()) {
                 simulation.removeUnit(row, col);
-            }
-            else {
+            } else {
                 simulation.setUnit(row, col, palette.getNewUnit(simulation.getLocalPlayerID()));
             }
             gameStatusPanel.setPlayerPanels(simulation.getPlayerRankings());
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             Logger.getLogger(GridPanel.class.getName()).log(Level.SEVERE, null, ex);
         }
 
@@ -210,7 +206,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
 
         Dimension size = getSize();
         Dimension gridSize = getGridSize();
-        if ( resetOrigin ) {
+        if (resetOrigin) {
             setScreenOrigin(new Point((gridSize.width - size.width) / 2,
                     (gridSize.height - size.height) / 2));
         }
@@ -246,7 +242,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
 
     @Override
     public void paintComponent(Graphics g) {
-        if ( simulation == null ) {
+        if (simulation == null) {
             return;
         }
 
@@ -301,7 +297,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
                 int ypos = r * (lineSpacing) - yoffset + 1;
 
                 Unit unit = simulation.getUnit(row, col);
-                if ( unit == null ) {
+                if (unit == null) {
                     continue;
                 }
 
@@ -309,8 +305,9 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
                 xform.translate(xpos, ypos);
                 xform.scale(tileScale, tileScale);
 
-                if(unit.isAlive()) 
+                if (unit.isAlive()) {
                     drawUnit(g2, xform, this, unit);
+                }
             }
         }
     }
@@ -319,12 +316,12 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
         g.setColor(simulation.getPlayerColor(unit.getPlayerID()).getMainAWTColor());
         g.fillRect((int) xform.getTranslateX(), (int) xform.getTranslateY(),
                 (int) (xform.getScaleX() * 8), (int) (xform.getScaleY() * 8));
-        
+
         AffineTransform oldXForm = g.getTransform();
-        
+
         g.setTransform(xform);
-        g.drawImage(tileManager.getImage(unit.getTextureCode()), unit.getFilter(), 0,0);
-        
+        g.drawImage(tileManager.getImage(unit.getTextureCode()), unit.getFilter(), 0, 0);
+
         g.setTransform(oldXForm);
     }
 
@@ -343,7 +340,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
     public void setSideLength(Integer value) {
         sideLength = Integer.min(64, Integer.max(8, value));
         lineSpacing = sideLength + 1;
-        if ( simulation != null ) {
+        if (simulation != null) {
             setScreenOrigin(screenOrigin);
         }
         tileScale = sideLength / 8.0f;
@@ -365,7 +362,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
     }
 
     public void init(UnitPalette palette) {
-        if ( initialized ) {
+        if (initialized) {
             return;
         }
 
@@ -383,17 +380,16 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
         }, 0, 18);
         // board update task
         timer.scheduleAtFixedRate(() -> {
-            if ( simulation == null ) {
+            if (simulation == null) {
                 return;
             }
-            if ( !simulation.isRunning() ) {
+            if (!simulation.isRunning()) {
                 return;
             }
             try {
                 simulation.computeNextTurn();
                 gameStatusPanel.setPlayerPanels(simulation.getPlayerRankings());
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }, 0, ApplicationFrame.BOARD_UPDATE_MS);

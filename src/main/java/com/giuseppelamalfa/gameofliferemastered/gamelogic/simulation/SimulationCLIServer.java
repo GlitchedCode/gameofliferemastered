@@ -87,7 +87,9 @@ public class SimulationCLIServer implements SimulationInterface {
     protected int portNumber;
 
     protected ArrayList<PlayerData.TeamColor> availableColors = new ArrayList<>();
-    
+
+    private int lastSyncTurn = 0;
+
     public static void writeToStatusLog(String msg) {
         System.out.println(msg);
     }
@@ -166,9 +168,9 @@ public class SimulationCLIServer implements SimulationInterface {
         if (server == null | usage) {
             printUsage();
         }
-        
+
         System.out.println("To show help, pass -h as argument.");
-        
+
         TimerWrapper timer = new TimerWrapper();
         SimulationCLIServer finalServer = server;
 
@@ -184,7 +186,7 @@ public class SimulationCLIServer implements SimulationInterface {
         }, 0, ApplicationFrame.BOARD_UPDATE_MS);
 
     }
-    
+
     public SimulationCLIServer(int portNumber, int playerCount,
             int rowCount, int columnCount, GameMode mode) throws Exception {
         this.mode = mode;
@@ -397,6 +399,10 @@ public class SimulationCLIServer implements SimulationInterface {
 
     @Override
     public void synchronize() {
+        if (getCurrentTurn() == lastSyncTurn) {
+            return;
+        }
+        lastSyncTurn = getCurrentTurn();
         try {
             sendToAll(new SyncGridRequest((Grid) currentGrid.clone()));
         } catch (CloneNotSupportedException ex) {
@@ -405,6 +411,10 @@ public class SimulationCLIServer implements SimulationInterface {
     }
 
     public void synchronize(ObjectOutputStream output) {
+        if (getCurrentTurn() == lastSyncTurn) {
+            return;
+        }
+        lastSyncTurn = getCurrentTurn();
         try {
             output.writeObject(new SyncGridRequest((Grid) currentGrid.clone()));
         } catch (IOException e) {
@@ -433,7 +443,7 @@ public class SimulationCLIServer implements SimulationInterface {
 
     @Override
     public void setRunning(boolean val) {
-        //sendToAll(new GameStatusRequest(isRunning()));
+        sendToAll(new GameStatusRequest(isRunning()));
         if (val != isRunning()) {
             currentGrid.setRunning(val);
             clientsRequestingPauseFlip.clear();
@@ -460,7 +470,10 @@ public class SimulationCLIServer implements SimulationInterface {
             currentGrid.removePlayer(newPlayerData.ID);
             UpdatePlayerDataRequest disconnectRequest = new UpdatePlayerDataRequest(newPlayerData, false);
             sendToAll(disconnectRequest, newPlayerData.ID);
-        } else if (updateRequest.updateLocal) {
+            return;
+        }
+
+        if (updateRequest.updateLocal) {
             if (newPlayerData.name != null) {
                 if (data.playerData.name == null) {
                     sendLogMessage(newPlayerData.name + " joined the game.");
@@ -508,7 +521,6 @@ public class SimulationCLIServer implements SimulationInterface {
         playerData = data.playerData;
 
         SetUnitRequest setUnit = (SetUnitRequest) r;
-        sendToAll(r, clientID);
 
         if (setUnit.unit != null) { // set unit
             if (currentGrid.getUnit(setUnit.row, setUnit.col).isAlive()) {
@@ -526,6 +538,8 @@ public class SimulationCLIServer implements SimulationInterface {
             }
             currentGrid.removeUnit(setUnit.row, setUnit.col);
         }
+
+        sendToAll(r, clientID);
     }
 
     protected HashSet<Integer> clientsRequestingPauseFlip = new HashSet<>();
@@ -546,7 +560,7 @@ public class SimulationCLIServer implements SimulationInterface {
     @Override
     public void handleRequest(Request request, int clientID) throws IOException, InvalidRequestException {
         try {
-            Method method = SimulationCLIServer.class.getDeclaredMethod(request.type.procedureName,
+            Method method = getClass().getDeclaredMethod(request.type.procedureName,
                     Request.class, Integer.class);
             method.invoke(this, request, clientID);
         } catch (NoSuchMethodException e) {

@@ -131,7 +131,8 @@ public class SimulationGUIServer extends SimulationCLIServer {
                                 }
 
                                 while (true) {
-                                    handleRequest((Request) inputStream.readObject(), clientData.playerData.ID);
+                                    Request r = (Request) inputStream.readObject();
+                                    handleRequest(r, clientData.playerData.ID);
                                 }
                             } // These exceptions are caught when the client disconnects
                             catch (EOFException e) {

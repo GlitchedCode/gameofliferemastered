@@ -72,6 +72,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
         localGrid = tmp;
 
         initComponents();
+        requestFocus();
         tmp.initializeGridPanel(gridPanel);
         mainStatusLog = statusLog;
 
@@ -90,8 +91,6 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
     private void initComponents() {
 
         outerLayeredPane = new javax.swing.JLayeredPane();
-        gridPanel = gridPanel = new com.giuseppelamalfa.gameofliferemastered.ui.GridPanel(tileManager);
-        gameStatusPanel = new com.giuseppelamalfa.gameofliferemastered.ui.GameStatusPanel();
         menuPanel = new com.giuseppelamalfa.gameofliferemastered.ui.MenuPanel();
         titleLabel = new javax.swing.JLabel();
         hostPortNumber = new javax.swing.JTextField();
@@ -114,6 +113,8 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
         colField = new javax.swing.JTextField();
         unpauseButton = new javax.swing.JButton();
         hostCompetitiveGameButton = new javax.swing.JButton();
+        gridPanel = gridPanel = new com.giuseppelamalfa.gameofliferemastered.ui.GridPanel(tileManager);
+        gameStatusPanel = new com.giuseppelamalfa.gameofliferemastered.ui.GameStatusPanel();
         unitPalette = new com.giuseppelamalfa.gameofliferemastered.ui.UnitPalette();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -133,35 +134,13 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
             }
         });
 
-        gridPanel.setBackground(new java.awt.Color(61, 63, 65));
-        gridPanel.setForeground(new java.awt.Color(186, 186, 186));
-        gridPanel.setPreferredSize(new java.awt.Dimension(800, 600));
-
-        gameStatusPanel.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                gameStatusPanelMouseClicked(evt);
-            }
-        });
-
-        javax.swing.GroupLayout gridPanelLayout = new javax.swing.GroupLayout(gridPanel);
-        gridPanel.setLayout(gridPanelLayout);
-        gridPanelLayout.setHorizontalGroup(
-            gridPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(gridPanelLayout.createSequentialGroup()
-                .addComponent(gameStatusPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 558, Short.MAX_VALUE))
-        );
-        gridPanelLayout.setVerticalGroup(
-            gridPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(gridPanelLayout.createSequentialGroup()
-                .addComponent(gameStatusPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(354, Short.MAX_VALUE))
-        );
-
-        gameStatusPanel.setGridPanel(gridPanel);
-
         menuPanel.setInheritsPopupMenu(true);
         menuPanel.setOpaque(false);
+        menuPanel.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                menuPanelMouseClicked(evt);
+            }
+        });
 
         titleLabel.setFont(new java.awt.Font("sansserif", 0, 48)); // NOI18N
         titleLabel.setForeground(new java.awt.Color(255, 255, 255));
@@ -356,6 +335,33 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
         PlainDocument colFieldDocument = (PlainDocument) colField.getDocument();
         colFieldDocument.addDocumentListener(sizeListener);
 
+        gridPanel.setBackground(new java.awt.Color(61, 63, 65));
+        gridPanel.setForeground(new java.awt.Color(186, 186, 186));
+        gridPanel.setPreferredSize(new java.awt.Dimension(800, 600));
+
+        gameStatusPanel.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                gameStatusPanelMouseClicked(evt);
+            }
+        });
+
+        javax.swing.GroupLayout gridPanelLayout = new javax.swing.GroupLayout(gridPanel);
+        gridPanel.setLayout(gridPanelLayout);
+        gridPanelLayout.setHorizontalGroup(
+            gridPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(gridPanelLayout.createSequentialGroup()
+                .addComponent(gameStatusPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 558, Short.MAX_VALUE))
+        );
+        gridPanelLayout.setVerticalGroup(
+            gridPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(gridPanelLayout.createSequentialGroup()
+                .addComponent(gameStatusPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(354, Short.MAX_VALUE))
+        );
+
+        gameStatusPanel.setGridPanel(gridPanel);
+
         javax.swing.GroupLayout unitPaletteLayout = new javax.swing.GroupLayout(unitPalette);
         unitPalette.setLayout(unitPaletteLayout);
         unitPaletteLayout.setHorizontalGroup(
@@ -367,8 +373,8 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
             .addGap(0, 34, Short.MAX_VALUE)
         );
 
-        outerLayeredPane.setLayer(gridPanel, javax.swing.JLayeredPane.PALETTE_LAYER);
         outerLayeredPane.setLayer(menuPanel, javax.swing.JLayeredPane.DRAG_LAYER);
+        outerLayeredPane.setLayer(gridPanel, javax.swing.JLayeredPane.PALETTE_LAYER);
         outerLayeredPane.setLayer(unitPalette, javax.swing.JLayeredPane.MODAL_LAYER);
 
         javax.swing.GroupLayout outerLayeredPaneLayout = new javax.swing.GroupLayout(outerLayeredPane);
@@ -394,11 +400,11 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
                     .addComponent(unitPalette, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
         );
 
+        menuPanel.getAccessibleContext().setAccessibleParent(menuPanel);
+        menuPanel.setBackground(new Color(0,0,0,127));
         gridPanel.init(unitPalette);
         gridPanel.setSimulation(localGrid);
         addKeyListener(gridPanel);
-        menuPanel.getAccessibleContext().setAccessibleParent(menuPanel);
-        menuPanel.setBackground(new Color(0,0,0,127));
         try {
             unitPalette.init(tileManager);
         } catch (Exception e) {e.printStackTrace();}
@@ -537,6 +543,10 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
         // TODO add your handling code here:
     }//GEN-LAST:event_hostSandboxGameButtonActionPerformed
 
+    private void menuPanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_menuPanelMouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_menuPanelMouseClicked
+
     private void toggleServer(GameMode mode) {
         if ( server == null ) {
             try {
@@ -671,11 +681,11 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
             if ( server != null ) {
                 server.resize(localRowCount, localColumnCount);
             }
-            //gridPanel.requestFocus();
+            gridPanel.requestFocus();
         }
         else {
             outerLayeredPane.setLayer(menuPanel, JLayeredPane.DRAG_LAYER);
-            //menuPanel.requestFocus();
+            menuPanel.requestFocus();
         }
         requestFocus();
         isInMenu = !isInMenu;
