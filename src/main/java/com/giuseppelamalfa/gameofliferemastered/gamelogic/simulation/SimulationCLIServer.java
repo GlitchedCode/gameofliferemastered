@@ -257,9 +257,9 @@ public class SimulationCLIServer implements SimulationInterface {
                                 PlayerData tmp = new PlayerData(clientData.playerData);
                                 currentGrid.addPlayer(client.playerData);
                                 outputStream.writeObject(new UpdatePlayerDataRequest(tmp, true, true));
+                                outputStream.writeObject(new SyncSpeciesDataRequest(SpeciesLoader.getLocalSpeciesJSONString()));
                                 outputStream.writeObject(new SyncGridRequest(currentGrid));
                                 outputStream.writeObject(new GameStatusRequest(isRunning(), getStatusString()));
-                                outputStream.writeObject(new SyncSpeciesDataRequest(SpeciesLoader.getLocalSpeciesJSONString()));
 
                                 for (ClientData data : connectedClients.values()) {
                                     if (data.playerData.ID != clientID) {
