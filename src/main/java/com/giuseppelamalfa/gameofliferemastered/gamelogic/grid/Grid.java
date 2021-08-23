@@ -26,8 +26,8 @@ public class Grid implements Serializable, Cloneable {
     public final Integer SECTOR_SIDE_LENGTH = 32;
     protected String gameModeName = "Sandbox";
 
-    private TwoDimensionalContainer<Unit> board;
-    private TwoDimensionalContainer<Boolean> sectorFlags;
+    private ConcurrentGrid2DContainer<Unit> board;
+    private ConcurrentGrid2DContainer<Boolean> sectorFlags;
 
     protected String gameStatus = "Paused";
     protected boolean isRunning = false;
@@ -47,7 +47,7 @@ public class Grid implements Serializable, Cloneable {
     private Point topLeftProcessed;
     private Point bottomRightProcessed;
 
-    private final DeadUnit deadUnit;
+    private static final DeadUnit deadUnit = new DeadUnit();
 
     private final HashMap<Integer, PlayerData> players = new HashMap<>();
     private ArrayList<PlayerData> orderedPlayers = new ArrayList<>(); // players ordered by their ranking
@@ -68,9 +68,8 @@ public class Grid implements Serializable, Cloneable {
         sectorRowCount = (rows / SECTOR_SIDE_LENGTH) + 1;
         sectorColumnCount = (cols / SECTOR_SIDE_LENGTH) + 1;
 
-        deadUnit = new DeadUnit();
-        board = new TwoDimensionalContainer<>(rows, cols, deadUnit);
-        sectorFlags = new TwoDimensionalContainer<>(sectorRowCount, sectorColumnCount, false);
+        board = new ConcurrentGrid2DContainer<>(rows, cols, deadUnit);
+        sectorFlags = new ConcurrentGrid2DContainer<>(sectorRowCount, sectorColumnCount, false);
 
         topLeftActive = new Point(0, 0);
         bottomRightActive = new Point(cols, rows);
@@ -84,8 +83,8 @@ public class Grid implements Serializable, Cloneable {
     public Object clone() throws CloneNotSupportedException {
         try {
             Grid ret = (Grid) super.clone();
-            ret.board = (TwoDimensionalContainer<Unit>) board.clone();
-            ret.sectorFlags = (TwoDimensionalContainer<Boolean>) sectorFlags.clone();
+            ret.board = (ConcurrentGrid2DContainer<Unit>) board.clone();
+            ret.sectorFlags = (ConcurrentGrid2DContainer<Boolean>) sectorFlags.clone();
 
             ret.topLeftActive = new Point(0, 0);
             ret.bottomRightActive = new Point(ret.columnCount, ret.rowCount);
@@ -243,6 +242,8 @@ public class Grid implements Serializable, Cloneable {
     }
 
     public void afterSync() {
+        board.setDefaultValue(deadUnit);
+        sectorFlags.setDefaultValue(false);
     }
 
     /*
@@ -389,7 +390,7 @@ public class Grid implements Serializable, Cloneable {
      */
     protected final void setToPosition(Integer row, Integer col, Unit unit) {
         Unit previous = board.get(row, col);
-        if (previous.isAlive()) {
+        if (previous.getPlayerID() != -1) {
             players.get(previous.getPlayerID()).score -= getUnitScoreIncrement(previous);
             board.remove(row, col);
         }
@@ -587,7 +588,7 @@ public class Grid implements Serializable, Cloneable {
         for (int row = topLeftActive.y; row <= bottomRightActive.y; row++) {
             for (int col = topLeftActive.x; col <= bottomRightActive.x; col++) {
                 Unit current = board.get(row, col);
-                if (current != deadUnit) {
+                if (current.getPlayerID() != -1) {
                     current.update();
                     players.get(current.getPlayerID()).score += getUnitScoreIncrement(current);
                     if (!current.isAlive()) {

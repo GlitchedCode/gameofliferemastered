@@ -5,11 +5,13 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.rule;
 
+import java.io.Serializable;
+
 /**
  *
  * @author glitchedcode
  */
-public class StubRule<T> implements RuleInterface<T> {
+public class StubRule<T> implements RuleInterface<T>, Serializable {
 
     @Override
     public boolean test(T value) {

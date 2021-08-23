@@ -119,6 +119,7 @@ public class CompetitiveGrid extends Grid {
 
     @Override
     public void afterSync() {
+        super.afterSync();
         timer = new TimerWrapper();
         setState(currentState);
     }

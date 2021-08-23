@@ -124,7 +124,7 @@ public class SimulationCLIServer implements SimulationInterface {
         SimulationCLIServer server = null;
 
         // defaults
-        GameMode mode = GameMode.COMPETITIVE;
+        GameMode mode = GameMode.SANDBOX;
         int rows = 50;
         int cols = 70;
         int port = 7777;
@@ -443,12 +443,12 @@ public class SimulationCLIServer implements SimulationInterface {
 
     @Override
     public void setRunning(boolean val) {
-        sendToAll(new GameStatusRequest(isRunning()));
         if (val != isRunning()) {
             currentGrid.setRunning(val);
             clientsRequestingPauseFlip.clear();
             synchronize();
         }
+        sendToAll(new GameStatusRequest(isRunning()));
     }
 
     protected void handleSyncGridRequest(Request r, Integer clientID) {
@@ -522,10 +522,13 @@ public class SimulationCLIServer implements SimulationInterface {
 
         SetUnitRequest setUnit = (SetUnitRequest) r;
 
+        // sendToAll() is called once in each method because setUnit()
+        // also modifies the unit
         if (setUnit.unit != null) { // set unit
             if (currentGrid.getUnit(setUnit.row, setUnit.col).isAlive()) {
                 return;
             }
+            sendToAll(r, clientID);
             currentGrid.setUnit(setUnit.row, setUnit.col, setUnit.unit);
 
         } else { // remove unit
@@ -536,10 +539,10 @@ public class SimulationCLIServer implements SimulationInterface {
             if (unit.getPlayerID() != playerData.ID) {
                 return;
             }
+            sendToAll(r, clientID);
             currentGrid.removeUnit(setUnit.row, setUnit.col);
         }
 
-        sendToAll(r, clientID);
     }
 
     protected HashSet<Integer> clientsRequestingPauseFlip = new HashSet<>();

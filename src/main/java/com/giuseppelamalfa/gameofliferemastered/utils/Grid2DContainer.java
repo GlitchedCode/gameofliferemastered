@@ -12,7 +12,7 @@ import java.util.HashMap;
  * @author glitchedcode
  * @param <T> Stored type
  */
-public class TwoDimensionalContainer<T> extends HashMap<Integer, HashMap<Integer, T>> implements Cloneable, Serializable {
+public class Grid2DContainer<T> extends HashMap<Integer, HashMap<Integer, T>> implements Cloneable, Serializable {
 
     private int rows;
     private int cols;
@@ -21,43 +21,42 @@ public class TwoDimensionalContainer<T> extends HashMap<Integer, HashMap<Integer
     private T defaultValue = null;
 
     // Initializes the ArrayList objects 
-    public TwoDimensionalContainer(int rows, int cols, T sparseDefault) throws IllegalArgumentException {
+    public Grid2DContainer(int rows, int cols, T sparseDefault) throws IllegalArgumentException {
         super();
-        if ( rows < 0 | cols < 0 ) // sanity check
+        if (rows < 0 | cols < 0) // sanity check
         {
             throw new IllegalArgumentException("Invalid size values for TwoDimensionalArrayList");
         }
         this.rows = rows;
         this.cols = cols;
-        this.defaultValue = sparseDefault;
-        hasDefault = true;
         resize(rows, cols);
+        this.defaultValue = sparseDefault;
+        hasDefault = sparseDefault != null;
     }
 
     // Initializes the ArrayList objects 
-    public TwoDimensionalContainer(int rows, int cols) throws IllegalArgumentException {
-        super();
-        if ( rows < 0 | cols < 0 ) // sanity check
-        {
-            throw new IllegalArgumentException("Invalid size values for TwoDimensionalArrayList");
-        }
-        this.rows = rows;
-        this.cols = cols;
-        resize(rows, cols);
+    public Grid2DContainer(int rows, int cols) throws IllegalArgumentException {
+        this(rows, cols, null);
+
     }
 
     public boolean hasDefaultValue() {
         return hasDefault;
     }
 
+    public void setDefaultValue(T val) {
+        defaultValue = val;
+        hasDefault = val != null;
+    }
+
     // Resets the minimum capacity for all the ArrayList objects
     public final void resize(int rows, int cols) throws IllegalArgumentException {
-        if ( rows < 0 | cols < 0 ) // sanity check
+        if (rows < 0 | cols < 0) // sanity check
         {
             throw new IllegalArgumentException("Invalid size values for TwoDimensionalArrayList");
         }
 
-        if ( cols < this.cols ) // remove extra columns
+        if (cols < this.cols) // remove extra columns
         {
             for (int i = cols; i < this.cols; i++) {
                 super.remove(i);
@@ -68,19 +67,18 @@ public class TwoDimensionalContainer<T> extends HashMap<Integer, HashMap<Integer
         {
             HashMap<Integer, T> column = null;
 
-            if ( super.containsKey(i) ) {
+            if (super.containsKey(i)) {
                 column = super.get(i);
             }
 
-            if ( column != null ) {
-                if ( rows < this.rows ) // remove extra rows
+            if (column != null) {
+                if (rows < this.rows) // remove extra rows
                 {
                     for (int j = rows; j < this.rows; j++) {
                         column.remove(j);
                     }
                 }
-            }
-            else {
+            } else {
                 super.put(i, new HashMap<>());
             }
         }
@@ -91,13 +89,13 @@ public class TwoDimensionalContainer<T> extends HashMap<Integer, HashMap<Integer
 
     // Gets element at (row, col) coordinates
     public final T get(int row, int col) {
-        if ( super.containsKey(col) ) {
-            if ( super.get(col).containsKey(row) ) {
+        if (super.containsKey(col)) {
+            if (super.get(col).containsKey(row)) {
                 return super.get(col).get(row);
             }
         }
 
-        if ( hasDefault ) {
+        if (hasDefault) {
             return defaultValue;
         }
 
@@ -106,20 +104,21 @@ public class TwoDimensionalContainer<T> extends HashMap<Integer, HashMap<Integer
 
     // Puts element at (row, col) coordinates
     public void put(Integer row, Integer col, T element) {
-        if ( row >= rows | col >= cols | row < 0 | col < 0 ) {
+        if (row >= rows | col >= cols | row < 0 | col < 0) {
             return;
         }
-        
-        if(element == null || element == defaultValue)
+
+        if (element == null || element == defaultValue) {
             remove(row, col);
-        else
+        } else {
             super.get(col).put(row, element);
+        }
     }
 
     public void remove(Integer row, Integer col) {
 
-        if ( super.containsKey(col) ) {
-            if ( super.get(col).containsKey(row) ) {
+        if (super.containsKey(col)) {
+            if (super.get(col).containsKey(row)) {
                 super.get(col).remove(row);
             }
         }
@@ -130,8 +129,7 @@ public class TwoDimensionalContainer<T> extends HashMap<Integer, HashMap<Integer
         super.clear();
         try {
             resize(rows, cols);
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
             System.exit(1);
         }
@@ -140,9 +138,9 @@ public class TwoDimensionalContainer<T> extends HashMap<Integer, HashMap<Integer
     @Override
     @SuppressWarnings("unchecked")
     public Object clone() {
-        TwoDimensionalContainer<T> ret;
+        Grid2DContainer<T> ret;
         try {
-            ret = new TwoDimensionalContainer<>(rows, cols);
+            ret = new Grid2DContainer<>(rows, cols, defaultValue);
             for (int r = 0; r < rows; r++) {
                 for (int c = 0; c < cols; c++) {
                     ret.put(r, c, get(r, c));
@@ -150,8 +148,7 @@ public class TwoDimensionalContainer<T> extends HashMap<Integer, HashMap<Integer
             }
 
             return ret;
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
         return null;
