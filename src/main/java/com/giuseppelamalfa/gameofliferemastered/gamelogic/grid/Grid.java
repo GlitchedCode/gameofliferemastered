@@ -15,6 +15,9 @@ import java.awt.Point;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Class for handling all of game logic and rendering all units to the grid
@@ -47,14 +50,17 @@ public class Grid implements Serializable, Cloneable {
     private Point topLeftProcessed;
     private Point bottomRightProcessed;
 
-    private static final DeadUnit deadUnit = new DeadUnit();
 
     private final HashMap<Integer, PlayerData> players = new HashMap<>();
     private ArrayList<PlayerData> orderedPlayers = new ArrayList<>(); // players ordered by their ranking
     private boolean runPlayerIDCheck = false;
 
     private transient SimulationInterface simulation;
-
+    private transient Lock lock = new ReentrantLock();
+    private transient Condition gridStateAccessible = lock.newCondition();
+            
+    private static final DeadUnit deadUnit = new DeadUnit();
+    private static final int processorCount = Runtime.getRuntime().availableProcessors();
     /**
      * Constructor
      *
@@ -244,11 +250,15 @@ public class Grid implements Serializable, Cloneable {
     public void afterSync() {
         board.setDefaultValue(deadUnit);
         sectorFlags.setDefaultValue(false);
+        lock = new ReentrantLock();
+        gridStateAccessible = lock.newCondition();
     }
 
     /*
      * GAME LOGIC CODE
      */
+    
+    
     /**
      * Advances the board's state to the next turn.
      *
