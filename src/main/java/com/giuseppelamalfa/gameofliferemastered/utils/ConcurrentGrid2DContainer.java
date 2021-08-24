@@ -6,15 +6,16 @@
 package com.giuseppelamalfa.gameofliferemastered.utils;
 
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author glitchedcode
  * @param <T> Stored type
  */
-public class ConcurrentGrid2DContainer<T> extends ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, T>> implements Cloneable, Serializable {
+public class ConcurrentGrid2DContainer<T> implements Cloneable, Serializable {
 
+    private ConcurrentHashMap<Integer, T> map = new ConcurrentHashMap<>();
     private int rows;
     private int cols;
 
@@ -55,32 +56,17 @@ public class ConcurrentGrid2DContainer<T> extends ConcurrentHashMap<Integer, Con
         {
             throw new IllegalArgumentException("Invalid size values for TwoDimensionalArrayList");
         }
-
-        if (cols < this.cols) // remove extra columns
-        {
-            for (int i = cols; i < this.cols; i++) {
-                super.remove(i);
+        ArrayList<Integer> keys = new ArrayList<>();
+        for (Integer key : map.keySet()) {
+            int row = getRow(key);
+            int col = getColumn(key);
+            if (row >= rows | col >= cols) {
+                keys.add(key);
             }
         }
 
-        for (int i = 0; i < cols; i++) // column cycle
-        {
-            ConcurrentHashMap<Integer, T> column = null;
-
-            if (super.containsKey(i)) {
-                column = super.get(i);
-            }
-
-            if (column != null) {
-                if (rows < this.rows) // remove extra rows
-                {
-                    for (int j = rows; j < this.rows; j++) {
-                        column.remove(j);
-                    }
-                }
-            } else {
-                super.put(i, new ConcurrentHashMap<>());
-            }
+        for (Integer key : keys) {
+            map.remove(key);
         }
 
         this.rows = rows;
@@ -89,10 +75,9 @@ public class ConcurrentGrid2DContainer<T> extends ConcurrentHashMap<Integer, Con
 
     // Gets element at (row, col) coordinates
     public final T get(int row, int col) {
-        if (super.containsKey(col)) {
-            if (super.get(col).containsKey(row)) {
-                return super.get(col).get(row);
-            }
+        int key = getKeyFromCoords(row, col);
+        if (map.containsKey(key)) {
+            return map.get(key);
         }
 
         if (hasDefault) {
@@ -111,22 +96,16 @@ public class ConcurrentGrid2DContainer<T> extends ConcurrentHashMap<Integer, Con
         if (element == null || element == defaultValue) {
             remove(row, col);
         } else {
-            super.get(col).put(row, element);
+            map.put(getKeyFromCoords(row, col), element);
         }
     }
 
     public void remove(Integer row, Integer col) {
-
-        if (super.containsKey(col)) {
-            if (super.get(col).containsKey(row)) {
-                super.get(col).remove(row);
-            }
-        }
+        map.remove(getKeyFromCoords(row, col));
     }
 
-    @Override
     public void clear() {
-        super.clear();
+        map.clear();
         try {
             resize(rows, cols);
         } catch (Exception ex) {
@@ -153,4 +132,17 @@ public class ConcurrentGrid2DContainer<T> extends ConcurrentHashMap<Integer, Con
         }
         return null;
     }
+
+    private static int getRow(int key) {
+        return key >> 16;
+    }
+
+    private static int getColumn(int key) {
+        return key & 0x000000FF;
+    }
+
+    private static int getKeyFromCoords(int row, int col) {
+        return row << 16 | col;
+    }
+
 }

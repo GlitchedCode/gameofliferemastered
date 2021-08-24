@@ -369,8 +369,6 @@ public class Grid implements Serializable, Cloneable {
     protected final void advance() throws Exception {
         turnLock.lock();
         try {
-            System.out.println("start " + turn);
-
             unitFoundThisTurn = false;
             ArrayList<SectorCoords> processedSectors = new ArrayList<>();
 
@@ -392,7 +390,6 @@ public class Grid implements Serializable, Cloneable {
             correctProcessRegion();
             orderPlayersByScore();
             runPlayerIDCheck = false;
-            System.out.println("end " + turn);
             turn += 1;
 
             if (syncTurnCount != 0 & simulation != null) {
