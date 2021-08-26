@@ -221,10 +221,10 @@ public class SimulationRemoteClient implements SimulationInterface {
         SyncGridRequest sync = (SyncGridRequest) r;
         if ( sync.grid != null ) {
             currentGrid = sync.grid;
+            currentGrid.afterSync();
             currentGrid.setSimulation(this);
             currentGrid.setPlayerIDCheckNextTurn();
             currentGrid.addPlayer(localPlayerData);
-            currentGrid.afterSync();
             if ( !currentGrid.showWinner() ) {
                 currentGrid.calculateScore();
             }

@@ -6,14 +6,16 @@
 package com.giuseppelamalfa.gameofliferemastered.utils;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
  * @author glitchedcode
  * @param <T> Stored type
  */
-public class Grid2DContainer<T> extends HashMap<Integer, HashMap<Integer, T>> implements Cloneable, Serializable {
+public class Grid2DContainer<T> implements Cloneable, Serializable {
 
+    private HashMap<Integer, T> map = new HashMap<>();
     private int rows;
     private int cols;
 
@@ -37,50 +39,34 @@ public class Grid2DContainer<T> extends HashMap<Integer, HashMap<Integer, T>> im
     // Initializes the ArrayList objects 
     public Grid2DContainer(int rows, int cols) throws IllegalArgumentException {
         this(rows, cols, null);
-
     }
 
-    public boolean hasDefaultValue() {
+    public synchronized boolean hasDefaultValue() {
         return hasDefault;
     }
 
-    public void setDefaultValue(T val) {
+    public synchronized void setDefaultValue(T val) {
         defaultValue = val;
         hasDefault = val != null;
     }
 
     // Resets the minimum capacity for all the ArrayList objects
-    public final void resize(int rows, int cols) throws IllegalArgumentException {
+    public synchronized final void resize(int rows, int cols) throws IllegalArgumentException {
         if (rows < 0 | cols < 0) // sanity check
         {
             throw new IllegalArgumentException("Invalid size values for TwoDimensionalArrayList");
         }
-
-        if (cols < this.cols) // remove extra columns
-        {
-            for (int i = cols; i < this.cols; i++) {
-                super.remove(i);
+        ArrayList<Integer> keys = new ArrayList<>();
+        for (Integer key : map.keySet()) {
+            int row = getRow(key);
+            int col = getColumn(key);
+            if (row >= rows | col >= cols) {
+                keys.add(key);
             }
         }
 
-        for (int i = 0; i < cols; i++) // column cycle
-        {
-            HashMap<Integer, T> column = null;
-
-            if (super.containsKey(i)) {
-                column = super.get(i);
-            }
-
-            if (column != null) {
-                if (rows < this.rows) // remove extra rows
-                {
-                    for (int j = rows; j < this.rows; j++) {
-                        column.remove(j);
-                    }
-                }
-            } else {
-                super.put(i, new HashMap<>());
-            }
+        for (Integer key : keys) {
+            map.remove(key);
         }
 
         this.rows = rows;
@@ -88,11 +74,10 @@ public class Grid2DContainer<T> extends HashMap<Integer, HashMap<Integer, T>> im
     }
 
     // Gets element at (row, col) coordinates
-    public final T get(int row, int col) {
-        if (super.containsKey(col)) {
-            if (super.get(col).containsKey(row)) {
-                return super.get(col).get(row);
-            }
+    public synchronized final T get(int row, int col) {
+        int key = getKeyFromCoords(row, col);
+        if (map.containsKey(key)) {
+            return map.get(key);
         }
 
         if (hasDefault) {
@@ -103,7 +88,7 @@ public class Grid2DContainer<T> extends HashMap<Integer, HashMap<Integer, T>> im
     }
 
     // Puts element at (row, col) coordinates
-    public void put(Integer row, Integer col, T element) {
+    public synchronized void put(Integer row, Integer col, T element) {
         if (row >= rows | col >= cols | row < 0 | col < 0) {
             return;
         }
@@ -111,22 +96,16 @@ public class Grid2DContainer<T> extends HashMap<Integer, HashMap<Integer, T>> im
         if (element == null || element == defaultValue) {
             remove(row, col);
         } else {
-            super.get(col).put(row, element);
+            map.put(getKeyFromCoords(row, col), element);
         }
     }
 
-    public void remove(Integer row, Integer col) {
-
-        if (super.containsKey(col)) {
-            if (super.get(col).containsKey(row)) {
-                super.get(col).remove(row);
-            }
-        }
+    public synchronized void remove(Integer row, Integer col) {
+        map.remove(getKeyFromCoords(row, col));
     }
 
-    @Override
-    public void clear() {
-        super.clear();
+    public synchronized void clear() {
+        map.clear();
         try {
             resize(rows, cols);
         } catch (Exception ex) {
@@ -137,10 +116,10 @@ public class Grid2DContainer<T> extends HashMap<Integer, HashMap<Integer, T>> im
 
     @Override
     @SuppressWarnings("unchecked")
-    public Object clone() {
-        Grid2DContainer<T> ret;
+    public synchronized Object clone() {
+        ConcurrentGrid2DContainer<T> ret;
         try {
-            ret = new Grid2DContainer<>(rows, cols, defaultValue);
+            ret = new ConcurrentGrid2DContainer<>(rows, cols, defaultValue);
             for (int r = 0; r < rows; r++) {
                 for (int c = 0; c < cols; c++) {
                     ret.put(r, c, get(r, c));
@@ -153,4 +132,17 @@ public class Grid2DContainer<T> extends HashMap<Integer, HashMap<Integer, T>> im
         }
         return null;
     }
+
+    private static int getRow(int key) {
+        return key >> 16;
+    }
+
+    private static int getColumn(int key) {
+        return key & 0x0000FFFF;
+    }
+
+    private static int getKeyFromCoords(int row, int col) {
+        return row << 16 | col;
+    }
+
 }
