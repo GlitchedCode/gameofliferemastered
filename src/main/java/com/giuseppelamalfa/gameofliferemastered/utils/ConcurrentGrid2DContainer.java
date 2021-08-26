@@ -41,17 +41,17 @@ public class ConcurrentGrid2DContainer<T> implements Cloneable, Serializable {
         this(rows, cols, null);
     }
 
-    public boolean hasDefaultValue() {
+    public synchronized boolean hasDefaultValue() {
         return hasDefault;
     }
 
-    public void setDefaultValue(T val) {
+    public synchronized void setDefaultValue(T val) {
         defaultValue = val;
         hasDefault = val != null;
     }
 
     // Resets the minimum capacity for all the ArrayList objects
-    public final void resize(int rows, int cols) throws IllegalArgumentException {
+    public synchronized final void resize(int rows, int cols) throws IllegalArgumentException {
         if (rows < 0 | cols < 0) // sanity check
         {
             throw new IllegalArgumentException("Invalid size values for TwoDimensionalArrayList");
@@ -74,7 +74,7 @@ public class ConcurrentGrid2DContainer<T> implements Cloneable, Serializable {
     }
 
     // Gets element at (row, col) coordinates
-    public final T get(int row, int col) {
+    public synchronized final T get(int row, int col) {
         int key = getKeyFromCoords(row, col);
         if (map.containsKey(key)) {
             return map.get(key);
@@ -88,7 +88,7 @@ public class ConcurrentGrid2DContainer<T> implements Cloneable, Serializable {
     }
 
     // Puts element at (row, col) coordinates
-    public void put(Integer row, Integer col, T element) {
+    public synchronized void put(Integer row, Integer col, T element) {
         if (row >= rows | col >= cols | row < 0 | col < 0) {
             return;
         }
@@ -100,11 +100,11 @@ public class ConcurrentGrid2DContainer<T> implements Cloneable, Serializable {
         }
     }
 
-    public void remove(Integer row, Integer col) {
+    public synchronized void remove(Integer row, Integer col) {
         map.remove(getKeyFromCoords(row, col));
     }
 
-    public void clear() {
+    public synchronized void clear() {
         map.clear();
         try {
             resize(rows, cols);
@@ -116,7 +116,7 @@ public class ConcurrentGrid2DContainer<T> implements Cloneable, Serializable {
 
     @Override
     @SuppressWarnings("unchecked")
-    public Object clone() {
+    public synchronized Object clone() {
         ConcurrentGrid2DContainer<T> ret;
         try {
             ret = new ConcurrentGrid2DContainer<>(rows, cols, defaultValue);

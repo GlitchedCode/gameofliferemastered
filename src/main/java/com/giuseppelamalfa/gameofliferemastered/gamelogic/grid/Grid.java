@@ -14,7 +14,8 @@ import com.giuseppelamalfa.gameofliferemastered.utils.*;
 import java.awt.Point;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -52,7 +53,7 @@ public class Grid implements Serializable, Cloneable {
     private Point topLeftProcessed;
     private Point bottomRightProcessed;
 
-    private final HashMap<Integer, PlayerData> players = new HashMap<>();
+    private final ConcurrentHashMap<Integer, PlayerData> players = new ConcurrentHashMap<>();
     private ArrayList<PlayerData> orderedPlayers = new ArrayList<>(); // players ordered by their ranking
     private boolean runPlayerIDCheck = false;
 
@@ -318,7 +319,7 @@ public class Grid implements Serializable, Cloneable {
         sectorFlags.put(sectorRow, sectorColumn, active);
     }
 
-    private void startBatchSurviveReproduce(ArrayList<SectorCoords> processedSectors) throws GameLogicException, InterruptedException {
+    private void startBatchSurviveReproduce(ConcurrentLinkedQueue<SectorCoords> processedSectors) throws GameLogicException, InterruptedException {
         ArrayList<Thread> threads = new ArrayList<>();
 
         // Divide the sectors we need to process into batches
@@ -326,15 +327,14 @@ public class Grid implements Serializable, Cloneable {
         // Additional threads are not started if additional processors are
         // not available.
         int spawnedThreads = Integer.min(processorCount, processedSectors.size());
-        int sectorsPerThread = processedSectors.size() / spawnedThreads;
         for (int i = 1; i < spawnedThreads; i++) {
-            int start = i * sectorsPerThread;
-            int end = start + sectorsPerThread;
             Thread thread = new Thread(() -> {
-                for (int j = start; j < end; j++) {
-                    SectorCoords coords = processedSectors.get(j);
+                while (!processedSectors.isEmpty()) {
+                    SectorCoords coords = processedSectors.poll();
                     try {
-                        sectorSurviveReproduce(coords.row, coords.col);
+                        if (coords != null) {
+                            sectorSurviveReproduce(coords.row, coords.col);
+                        }
                     } catch (GameLogicException ex) {
                         Logger.getLogger(Grid.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -346,18 +346,18 @@ public class Grid implements Serializable, Cloneable {
         }
 
         // One batch may be executed in the current thread
-        for (int i = 0; i < sectorsPerThread; i++) {
-            SectorCoords coords = processedSectors.get(i);
-            sectorSurviveReproduce(coords.row, coords.col);
+        while (!processedSectors.isEmpty()) {
+            SectorCoords coords = processedSectors.poll();
+            if (coords != null) {
+                sectorSurviveReproduce(coords.row, coords.col);
+            }
         }
 
         // Join them all because survival and reproduction phases
         // need to be completed on the entire board before moving on.
         for (int i = 0; i < threads.size(); i++) {
             Thread thread = threads.get(i);
-            if (thread.isAlive()) {
-                thread.join();
-            }
+            thread.join();
         }
     }
 
@@ -370,7 +370,7 @@ public class Grid implements Serializable, Cloneable {
         turnLock.lock();
         try {
             unitFoundThisTurn = false;
-            ArrayList<SectorCoords> processedSectors = new ArrayList<>();
+            ConcurrentLinkedQueue<SectorCoords> processedSectors = new ConcurrentLinkedQueue<>();
 
             // Loop through every active sector and any adjacent inactive sectors
             // to add them to processedSectors.
@@ -705,16 +705,15 @@ public class Grid implements Serializable, Cloneable {
                 }
 
                 Unit[] adjacentUnits = getUnitsAdjacentToPosition(row, col);
+                Unit bornUnit = null;
 
                 // Run reproduction checks only if there are adjacent alive units
                 for (int i = 0; i < 8; i++) {
                     if (adjacentUnits[i].isAlive()) {
-                        deadUnit.computeNextTurn(adjacentUnits);
+                        bornUnit = DeadUnit.getBornUnit(adjacentUnits);
                         break;
                     }
                 }
-
-                Unit bornUnit = deadUnit.getBornUnit();
 
                 if (bornUnit != null) {
                     aliveNextTurn = true;
@@ -768,9 +767,7 @@ public class Grid implements Serializable, Cloneable {
             cleanupRows(topLeftActive.y, lastRow);
             threads.forEach(thread -> {
                 try {
-                    if (thread.isAlive()) {
-                        thread.join();
-                    }
+                    thread.join();
                 } catch (InterruptedException ex) {
                     Logger.getLogger(Grid.class.getName()).log(Level.SEVERE, null, ex);
                 }

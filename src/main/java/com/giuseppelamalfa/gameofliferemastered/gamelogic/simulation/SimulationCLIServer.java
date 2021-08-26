@@ -38,6 +38,7 @@ import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
+import java.util.concurrent.ConcurrentHashMap;
 
 class ClientData {
 
@@ -81,7 +82,7 @@ public class SimulationCLIServer implements SimulationInterface {
 
     protected boolean remoteInstance = false;
     static protected final ArrayList<PlayerData> offlineRanking = new ArrayList<>();
-    protected HashMap<Integer, ClientData> connectedClients = new HashMap<>();
+    protected ConcurrentHashMap<Integer, ClientData> connectedClients = new ConcurrentHashMap<>();
     protected ServerSocket serverSocket;
     protected String serverIP;
     protected int portNumber;
