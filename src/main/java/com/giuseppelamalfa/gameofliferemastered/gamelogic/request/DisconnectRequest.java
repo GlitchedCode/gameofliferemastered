@@ -11,7 +11,7 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic.request;
  */
 public class DisconnectRequest extends Request {
 
-    public String message;
+    public final String message;
 
     public DisconnectRequest(String message) {
         super(RequestType.DISCONNECT);

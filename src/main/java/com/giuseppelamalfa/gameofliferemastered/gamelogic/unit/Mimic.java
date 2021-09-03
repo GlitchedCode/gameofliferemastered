@@ -13,11 +13,10 @@ public class Mimic extends LifeUnit {
 
     static public final int REPLICATION_COOLDOWN = 8;
 
-    int turnsTillReplication = 0;
+    private int turnsTillReplication = 0;
 
-    Unit replicationTarget;
-    int replicatedSpeciesID = -1;
-    State replicatedState = State.INVALID;
+    private Unit replicationTarget;
+    private int replicatedSpeciesID = -1;
 
     public Mimic(SpeciesData data) {
         super(data);
@@ -33,55 +32,25 @@ public class Mimic extends LifeUnit {
 
     @Override
     protected void boardStep(Unit[] adjacentUnits) {
-        int hostileCount = 0;
-        int friendlyCount = 0;
-        int healthIncrement = 0;
-
+        super.boardStep(adjacentUnits);
         for (int i = 0; i < 8; i++) // conto le unità ostili ed amichevoli
         {
             Unit current = adjacentUnits[i];
-            if (!current.isAlive()) {
-                continue;
+            if(replicatedSpeciesID != -1 | replicationTarget != null) {
+                break;
             }
-
-            if (friendlySpecies.contains(current.getSpeciesID())) {
-                friendlyCount++;
-            }
-
-            // additionally check if the adjacent cell can attack from 
-            // their position relative to this cell
-            boolean attacked = false;
-            if ((competitive & current.getPlayerID() != playerID)
-                    | (hostileSpecies.contains(current.getSpeciesID())
-                    ^ (replicatedSpeciesID == -1 & current.getSpeciesID() != speciesID))) {
-                attacked |= attack(i, current);
-            }
-            if (attacked) {
-                hostileCount++;
-            }
-
-            if (replicatedSpeciesID == -1 & current.getSpeciesID() != speciesID) {
+            if (current.getSpeciesID() != speciesID & current.isAlive()) {
                 replicationTarget = current;
             }
-        }
-
-        // rule #1: population
-        // rule #2: hostility
-        boolean friendlyPenalty = !friendlyCountSelector.test(friendlyCount);
-        boolean hostilePenalty = !hostileCountSelector.test(hostileCount);
-
-        if (friendlyPenalty | hostilePenalty) {
-            healthIncrement--;
-        }
-
-        if (healthIncrement != 0) {
-            incrementHealth(healthIncrement);
         }
     }
 
     @Override
     public boolean attack(int adjacencyPosition, Unit unit) {
         boolean ret = currentState.attackModifier(isAlive(), adjacencyPosition);
+        ret &= (competitive & unit.getPlayerID() != playerID)
+                | (hostileSpecies.contains(unit.getSpeciesID())
+                ^ (replicatedSpeciesID == -1 & unit.getSpeciesID() != speciesID));
         if (ret) {
             unit.incrementHealth(-1);
         }
@@ -90,21 +59,13 @@ public class Mimic extends LifeUnit {
 
     @Override
     protected void endStep() {
-        currentState.independentAction(this);
-
-        if ( turnsTillReplication > 0 ) {
+        if (turnsTillReplication > 0) {
             turnsTillReplication--;
         } else if (replicationTarget != null) {
             replicate(replicationTarget);
             turnsTillReplication = REPLICATION_COOLDOWN;
         }
-
-        if (health < 1) { // rule #5: hp
-            nextTurnState = State.DEAD;
-        } else {
-            nextTurnState = currentState;
-        }
-
+        super.endStep();
         replicationTarget = null;
     }
 
@@ -119,6 +80,7 @@ public class Mimic extends LifeUnit {
         friendlyCountSelector = unit.getFriendlyCountSelector();
         hostileCountSelector = unit.getHostileCountSelector();
         reproductionSelector = unit.getReproductionSelector();
+        currentState = unit.getCurrentState();
 
         health = data.health - (health - myData.health);
         if (health < 1) {

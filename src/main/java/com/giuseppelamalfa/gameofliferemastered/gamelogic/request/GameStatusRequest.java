@@ -11,12 +11,13 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic.request;
  */
 public class GameStatusRequest extends Request {
 
-    public boolean running;
-    public String status;
+    public final boolean running;
+    public final String status;
 
     public GameStatusRequest(boolean val) {
         super(RequestType.GAME_STATUS);
         running = val;
+        status = null;
     }
 
     public GameStatusRequest(boolean val, String status) {

@@ -105,11 +105,8 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
 
             // additionally check if the adjacent cell can attack from 
             // their position relative to this cell
-            boolean attacked = false;
-            if ((competitive & current.getPlayerID() != playerID)
-                    | hostileSpecies.contains(current.getSpeciesID())) {
-                attacked |= attack(i, current);
-            }
+            boolean attacked = attack(i, current);
+
             if (attacked) {
                 hostileCount++;
             }
@@ -131,7 +128,7 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
 
     protected void endStep() {
         currentState.independentAction(this);
-        
+
         if (health < 1) { // rule #5: hp
             nextTurnState = State.DEAD;
         } else {
@@ -197,6 +194,8 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
     @Override
     public boolean attack(int adjacencyPosition, Unit unit) {
         boolean ret = currentState.attackModifier(isAlive(), adjacencyPosition);
+        ret &= (competitive & unit.getPlayerID() != playerID)
+                | hostileSpecies.contains(unit.getSpeciesID());
         if (ret) {
             unit.incrementHealth(-1);
         }

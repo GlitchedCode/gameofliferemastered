@@ -30,16 +30,10 @@ import java.util.logging.Logger;
 public class Grid implements Serializable, Cloneable {
 
     public final Integer SECTOR_SIDE_LENGTH = 32;
-    protected String gameModeName = "Sandbox";
 
     private ConcurrentGrid2DContainer<Unit> board;
     private ConcurrentGrid2DContainer<Boolean> sectorFlags;
 
-    protected String gameStatus = "Paused";
-    protected boolean isRunning = false;
-    protected boolean isLocked = false;
-    protected boolean competitive = false;
-    protected int syncTurnCount = 40;
     private int turn = 0;
 
     private Integer rowCount;
@@ -60,11 +54,16 @@ public class Grid implements Serializable, Cloneable {
     private transient SimulationInterface simulation;
     private transient Lock gridLock = new ReentrantLock();
     private transient Lock turnLock = new ReentrantLock();
-    private transient Condition gridStateAccessible = gridLock.newCondition();
-    private transient Boolean modifyingGridState = false;
 
-    private static final DeadUnit deadUnit = new DeadUnit();
-    private static final int processorCount = Runtime.getRuntime().availableProcessors();
+    protected static final DeadUnit deadUnit = new DeadUnit();
+    protected static final int PROCESSOR_COUNT = Runtime.getRuntime().availableProcessors();
+
+    protected String gameModeName = "Sandbox";
+    protected String gameStatus = "Paused";
+    protected boolean isRunning = false;
+    protected boolean isLocked = false;
+    protected boolean competitive = false;
+    protected int syncTurnCount = 40;
 
     /**
      * Constructor
@@ -284,8 +283,6 @@ public class Grid implements Serializable, Cloneable {
         //sectorFlags.setDefaultValue(false);
         gridLock = new ReentrantLock();
         turnLock = new ReentrantLock();
-        gridStateAccessible = gridLock.newCondition();
-        modifyingGridState = false;
     }
 
     /*
@@ -326,7 +323,7 @@ public class Grid implements Serializable, Cloneable {
         // that can be passed to each thread, then start each of them.
         // Additional threads are not started if additional processors are
         // not available.
-        int spawnedThreads = Integer.min(processorCount, processedSectors.size());
+        int spawnedThreads = Integer.min(PROCESSOR_COUNT, processedSectors.size());
         for (int i = 1; i < spawnedThreads; i++) {
             Thread thread = new Thread(() -> {
                 while (!processedSectors.isEmpty()) {
@@ -366,7 +363,7 @@ public class Grid implements Serializable, Cloneable {
      *
      * @throws Exception
      */
-    protected final void advance() throws Exception {
+    private void advance() throws Exception {
         turnLock.lock();
         try {
             unitFoundThisTurn = false;
@@ -749,7 +746,7 @@ public class Grid implements Serializable, Cloneable {
 
             ArrayList<Thread> threads = new ArrayList<>();
             int rows = bottomRightActive.y - topLeftActive.y;
-            int threadCount = Integer.min(rows, processorCount);
+            int threadCount = Integer.min(rows, PROCESSOR_COUNT);
             int rowsPerBatch = rows / threadCount;
             rowsPerBatch++;
 

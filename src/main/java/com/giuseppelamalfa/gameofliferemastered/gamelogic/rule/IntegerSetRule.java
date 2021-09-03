@@ -16,7 +16,7 @@ import java.util.Set;
  */
 public class IntegerSetRule implements RuleInterface<Integer>, Serializable {
 
-    public final Set<Integer> acceptedValues;
+    private final Set<Integer> acceptedValues;
 
     public IntegerSetRule(Collection<Integer> values) {
         acceptedValues = new HashSet<>(values);

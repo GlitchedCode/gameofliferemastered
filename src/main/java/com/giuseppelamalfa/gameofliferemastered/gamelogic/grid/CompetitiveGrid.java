@@ -80,7 +80,7 @@ public class CompetitiveGrid extends Grid {
 
     @Override
     public synchronized void computeNextTurn() throws Exception {
-        advance();
+        super.computeNextTurn();
         if ( getCurrentTurn() % SIMULATION_PHASE_LENGTH == 0 ) {
             setState(State.PLACEMENT_PHASE);
         }
