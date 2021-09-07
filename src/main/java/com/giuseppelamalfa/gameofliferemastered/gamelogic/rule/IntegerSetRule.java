@@ -21,6 +21,13 @@ public class IntegerSetRule implements RuleInterface<Integer>, Serializable {
     public IntegerSetRule(Collection<Integer> values) {
         acceptedValues = new HashSet<>(values);
     }
+    
+    public IntegerSetRule(Integer... values){
+        acceptedValues = new HashSet<>();
+        for(Integer val : values){
+            acceptedValues.add(val);
+        }
+    }
 
     public IntegerSetRule() {
         acceptedValues = new HashSet<>();

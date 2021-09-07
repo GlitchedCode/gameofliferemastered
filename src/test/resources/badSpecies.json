@@ -1,0 +1,369 @@
+{
+    "speciesData": [
+        { 
+            "testTip": "#0 works fine, but test for missing ColorTintFilter",
+            "name": "Cell",
+            "id": 0,
+            "implementingType": "LifeUnit",
+            "textureCode": "cell",
+            "friendlySpecies": [
+                "Cell"
+            ],
+            "hostileSpecies": [],
+            "health": 1,
+            "initialState": "ALIVE",
+            "friendlyCountSelector": {
+                "ruleClassName": "IntegerRangeRule",
+                "args": [2, 3]
+            },
+            "hostileCountSelector": {
+                "ruleClassName": "IntegerRangeRule",
+                "args": [0, 1]
+            },
+            "reproductionSelector": {
+                "ruleClassName": "IntegerSetRule",
+                "args": [3]
+            }
+        },
+        {
+            "testTip": "#1 works fine, but test for duplicate ID",
+            "name": "Snake",
+            "id": 0,
+            "implementingType": "LifeUnit",
+            "textureCode": "snake",
+            "friendlySpecies": [
+                "Snake"
+            ],
+            "hostileSpecies": [],
+            "health": 2,
+            "initialState": "ALIVE_AGING",
+            "friendlyCountSelector": {
+                "ruleClassName": "IntegerRangeRule",
+                "args": [2, 3]
+            },
+            "hostileCountSelector": {
+                "ruleClassName": "IntegerRangeRule",
+                "args": [0]
+            },
+            "reproductionSelector": {
+                "ruleClassName": "IntegerSetRule",
+                "args": [3, 7]
+            }
+        },
+        {
+            "testTip": "#2 missing textureCode",
+            "name": "Snake",
+            "id": 0,
+            "implementingType": "LifeUnit",
+            "friendlySpecies": [
+                "Snake"
+            ],
+            "hostileSpecies": [],
+            "health": 2,
+            "initialState": "ALIVE_AGING",
+            "friendlyCountSelector": {
+                "ruleClassName": "IntegerRangeRule",
+                "args": [2, 3]
+            },
+            "hostileCountSelector": {
+                "ruleClassName": "IntegerRangeRule",
+                "args": [0]
+            },
+            "reproductionSelector": {
+                "ruleClassName": "IntegerSetRule",
+                "args": [3, 7]
+            }
+        },
+        {
+            "testTip": "#3 missing name",
+            "id": 0,
+            "implementingType": "LifeUnit",
+            "textureCode": "snake",
+            "friendlySpecies": [
+                "Snake"
+            ],
+            "hostileSpecies": [],
+            "health": 2,
+            "initialState": "ALIVE_AGING",
+            "friendlyCountSelector": {
+                "ruleClassName": "IntegerRangeRule",
+                "args": [2, 3]
+            },
+            "hostileCountSelector": {
+                "ruleClassName": "IntegerRangeRule",
+                "args": [0]
+            },
+            "reproductionSelector": {
+                "ruleClassName": "IntegerSetRule",
+                "args": [3, 7]
+            }
+        },
+        {
+            "testTip": "#4 missing id",
+            "name": "Snake",
+            "implementingType": "LifeUnit",
+            "textureCode": "snake",
+            "friendlySpecies": [
+                "Snake"
+            ],
+            "hostileSpecies": [],
+            "health": 2,
+            "initialState": "ALIVE_AGING",
+            "friendlyCountSelector": {
+                "ruleClassName": "IntegerRangeRule",
+                "args": [2, 3]
+            },
+            "hostileCountSelector": {
+                "ruleClassName": "IntegerRangeRule",
+                "args": [0]
+            },
+            "reproductionSelector": {
+                "ruleClassName": "IntegerSetRule",
+                "args": [3, 7]
+            }
+        },
+        {
+            "testTip": "#5 missing implementingType",
+            "name": "Snake",
+            "id": 0,
+            "textureCode": "snake",
+            "friendlySpecies": [
+                "Snake"
+            ],
+            "hostileSpecies": [],
+            "health": 2,
+            "initialState": "ALIVE_AGING",
+            "friendlyCountSelector": {
+                "ruleClassName": "IntegerRangeRule",
+                "args": [2, 3]
+            },
+            "hostileCountSelector": {
+                "ruleClassName": "IntegerRangeRule",
+                "args": [0]
+            },
+            "reproductionSelector": {
+                "ruleClassName": "IntegerSetRule",
+                "args": [3, 7]
+            }
+        },
+        {
+            "testTip": "#6 invalid implementingType",
+            "name": "Snake",
+            "id": 0,
+            "implementingType": "LifeUnt",
+            "textureCode": "snake",
+            "friendlySpecies": [
+                "Snake"
+            ],
+            "hostileSpecies": [],
+            "health": 2,
+            "initialState": "ALIVE_AGING",
+            "friendlyCountSelector": {
+                "ruleClassName": "IntegerRangeRule",
+                "args": [2, 3]
+            },
+            "hostileCountSelector": {
+                "ruleClassName": "IntegerRangeRule",
+                "args": [0]
+            },
+            "reproductionSelector": {
+                "ruleClassName": "IntegerSetRule",
+                "args": [3, 7]
+            }
+        },
+        {
+            "testTip": "#7 missing initialState",
+            "name": "Snake",
+            "id": 0,
+            "implementingType": "LifeUnit",
+            "textureCode": "snake",
+            "friendlySpecies": [
+                "Snake"
+            ],
+            "hostileSpecies": [],
+            "health": 2,
+            "friendlyCountSelector": {
+                "ruleClassName": "IntegerRangeRule",
+                "args": [2, 3]
+            },
+            "hostileCountSelector": {
+                "ruleClassName": "IntegerRangeRule",
+                "args": [0]
+            },
+            "reproductionSelector": {
+                "ruleClassName": "IntegerSetRule",
+                "args": [3, 7]
+            }
+        },
+        {
+            "testTip": "#8 invalid initialState",
+            "name": "Snake",
+            "id": 0,
+            "implementingType": "LifeUnit",
+            "textureCode": "snake",
+            "friendlySpecies": [
+                "Snake"
+            ],
+            "hostileSpecies": [],
+            "health": 2,
+            "initialState": "ALIVE_AGNG",
+            "friendlyCountSelector": {
+                "ruleClassName": "IntegerRangeRule",
+                "args": [2, 3]
+            },
+            "hostileCountSelector": {
+                "ruleClassName": "IntegerRangeRule",
+                "args": [0]
+            },
+            "reproductionSelector": {
+                "ruleClassName": "IntegerSetRule",
+                "args": [3, 7]
+            }
+        },
+        {
+            "testTip": "#9 missing health",
+            "name": "Snake",
+            "id": 0,
+            "implementingType": "LifeUnit",
+            "textureCode": "snake",
+            "friendlySpecies": [
+                "Snake"
+            ],
+            "hostileSpecies": [],
+            "initialState": "ALIVE_AGING",
+            "friendlyCountSelector": {
+                "ruleClassName": "IntegerRangeRule",
+                "args": [2, 3]
+            },
+            "hostileCountSelector": {
+                "ruleClassName": "IntegerRangeRule",
+                "args": [0]
+            },
+            "reproductionSelector": {
+                "ruleClassName": "IntegerSetRule",
+                "args": [3, 7]
+            }
+        },
+        {
+            "testTip": "#10 works fine, missing friendlySpecies",
+            "name": "Snake",
+            "id": 0,
+            "implementingType": "LifeUnit",
+            "textureCode": "snake",
+            "friendlySpecies": [
+                "Snake"
+            ],
+            "hostileSpecies": [],
+            "health": 2,
+            "initialState": "ALIVE_AGING",
+            "friendlyCountSelector": {
+                "ruleClassName": "IntegerRangeRule",
+                "args": [2, 3]
+            },
+            "hostileCountSelector": {
+                "ruleClassName": "IntegerRangeRule",
+                "args": [0]
+            },
+            "reproductionSelector": {
+                "ruleClassName": "IntegerSetRule",
+                "args": [3, 7]
+            }
+        },
+        {
+            "testTip": "#11 works fine, missing hostileSpecies",
+            "name": "Snake",
+            "id": 0,
+            "implementingType": "LifeUnit",
+            "textureCode": "snake",
+            "friendlySpecies": [
+                "Snake"
+            ],
+            "health": 2,
+            "initialState": "ALIVE_AGING",
+            "friendlyCountSelector": {
+                "ruleClassName": "IntegerRangeRule",
+                "args": [2, 3]
+            },
+            "hostileCountSelector": {
+                "ruleClassName": "IntegerRangeRule",
+                "args": [0]
+            },
+            "reproductionSelector": {
+                "ruleClassName": "IntegerSetRule",
+                "args": [3, 7]
+            }
+        },
+        {
+            "testTip": "#12 works fine, missing friendlyCountSelector",
+            "name": "Snake",
+            "id": 0,
+            "implementingType": "LifeUnit",
+            "textureCode": "snake",
+            "friendlySpecies": [
+                "Snake"
+            ],
+            "hostileSpecies": [],
+            "health": 2,
+            "initialState": "ALIVE_AGING",
+            "hostileCountSelector": {
+                "ruleClassName": "IntegerRangeRule",
+                "args": [0]
+            },
+            "reproductionSelector": {
+                "ruleClassName": "IntegerSetRule",
+                "args": [3, 7]
+            }
+        },
+        {
+            "testTip": "#13 works fine, invalid friendlyCountSelector",
+            "name": "Snake",
+            "id": 0,
+            "implementingType": "LifeUnit",
+            "textureCode": "snake",
+            "friendlySpecies": [
+                "Snake"
+            ],
+            "hostileSpecies": [],
+            "health": 2,
+            "initialState": "ALIVE_AGING",
+            "friendlyCountSelector": {
+                "ruleClassName": "IntegengeRule",
+                "args": [2, 3]
+            },
+            "hostileCountSelector": {
+                "ruleClassName": "IntegerRangeRule",
+                "args": [0]
+            },
+            "reproductionSelector": {
+                "ruleClassName": "IntegerSetRule",
+                "args": [3, 7]
+            }
+        },
+        {
+            "testTip": "#14 works fine, test for initialized ColorTintFilter",
+            "name": "Snake",
+            "filterColor": "0x4d8fc1",
+            "id": 0,
+            "implementingType": "LifeUnit",
+            "textureCode": "snake",
+            "friendlySpecies": [
+                "Snake"
+            ],
+            "hostileSpecies": [],
+            "health": 2,
+            "initialState": "ALIVE_AGING",
+            "friendlyCountSelector": {
+                "ruleClassName": "IntegerRangeRule",
+                "args": [2, 3]
+            },
+            "hostileCountSelector": {
+                "ruleClassName": "IntegerRangeRule",
+                "args": [0]
+            },
+            "reproductionSelector": {
+                "ruleClassName": "IntegerSetRule",
+                "args": [3, 7]
+            }
+        }
+    ]
+}

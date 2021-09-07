@@ -42,7 +42,7 @@ public class SpeciesData {
     public final BufferedImageOp filter;
 
     @SuppressWarnings(value = {"unchecked", "unchecked", "unchecked"})
-    protected SpeciesData(int ID, JSONObject obj, HashMap<String, Integer> speciesIDs) throws ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
+    protected SpeciesData(JSONObject obj, HashMap<String, Integer> speciesIDs) throws ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
         String implementingTypeName;
         try {
             implementingTypeName = obj.getString("implementingType");
@@ -51,7 +51,7 @@ public class SpeciesData {
         }
         Class<?> implementingClass = Class.forName(SpeciesLoader.UNIT_CLASS_PATH + implementingTypeName);
         constructor = implementingClass.getConstructor(SpeciesData.class, Integer.class);
-        speciesID = ID;
+        speciesID = obj.getInt("id");
         name = obj.getString("name");
         textureCode = obj.getString("textureCode");
         initialState = State.valueOf(obj.getString("initialState"));
