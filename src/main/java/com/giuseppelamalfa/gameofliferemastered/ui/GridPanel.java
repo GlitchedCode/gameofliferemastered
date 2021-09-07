@@ -72,6 +72,9 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
      */
     @Override
     public void mouseClicked(MouseEvent me) {
+        if (simulation == null) {
+            return;
+        }
         synchronized (simulation) {
             int button = me.getButton();
             if (button == MouseEvent.BUTTON1 & !simulation.isLocked()) {
@@ -91,6 +94,9 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
 
     @Override
     public void mouseMoved(MouseEvent me) {
+        if (simulation == null) {
+            return;
+        }
         synchronized (simulation) {
             Point point = me.getPoint();
             point.x += xoffset;
@@ -171,6 +177,9 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
 
     @Override
     public void keyReleased(KeyEvent e) {
+        if (simulation == null) {
+            return;
+        }
         if (e.getKeyCode() == KeyEvent.VK_SPACE) {
             simulation.setRunning(!simulation.isRunning());
         }
@@ -182,6 +191,10 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
 
         int row = point.y / lineSpacing + startRow;
         int col = point.x / lineSpacing + startColumn;
+
+        if (simulation == null) {
+            return;
+        }
 
         try {
             if (simulation.getUnit(row, col).isAlive()) {
@@ -242,17 +255,18 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
 
     @Override
     public void paintComponent(Graphics g) {
+
+        Graphics2D g2 = (Graphics2D) g;
+        Dimension size = getSize();
+        g2.setColor(getBackground());
+        g2.fillRect(0, 0, size.width, size.height);
+
         if (simulation == null) {
             return;
         }
 
         gameStatusPanel.setTurnCount(simulation.getCurrentTurn());
         gameStatusPanel.setStatus(simulation.getStatusString());
-
-        Graphics2D g2 = (Graphics2D) g;
-        Dimension size = getSize();
-        g2.setColor(getBackground());
-        g2.fillRect(0, 0, size.width, size.height);
 
         int rows, cols;
         int gridRows = simulation.getRowCount(), gridCols = simulation.getColumnCount();

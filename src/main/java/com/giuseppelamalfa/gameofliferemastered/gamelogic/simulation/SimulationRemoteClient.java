@@ -36,7 +36,7 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
  *
  * @author glitchedcode
  */
-public class SimulationRemoteClient implements SimulationInterface {
+public class SimulationRemoteClient extends SimulationInterface {
 
     Grid currentGrid;
 

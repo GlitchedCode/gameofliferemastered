@@ -10,25 +10,13 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.SetUnitRequest
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.SyncGridRequest;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.InvalidRequestException;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.Request;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.SyncSpeciesDataRequest;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.LogMessageRequest;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.GameStatusRequest;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.DisconnectRequest;
 import com.giuseppelamalfa.gameofliferemastered.ApplicationFrame;
 import com.giuseppelamalfa.gameofliferemastered.ui.GridPanel;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.GameMode;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
-import java.io.BufferedReader;
-import java.io.EOFException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -46,131 +34,27 @@ public class SimulationGUIServer extends SimulationCLIServer {
     public SimulationGUIServer(String playerName, int portNumber, int playerCount,
             int rowCount, int columnCount, GameMode mode) throws Exception {
         super(portNumber, playerCount, rowCount, columnCount, mode);
-        nextClientID = 1;
+        playerCount--;
         localPlayerData = new PlayerData(playerName, extractRandomColor());
-        localPlayerData.ID = 0;
+        localPlayerData.ID = getNextClientID();
         currentGrid.addPlayer(localPlayerData);
     }
 
     public SimulationGUIServer(int rowCount, int columnCount) throws Exception {
         super(rowCount, columnCount);
-        currentGrid.setSimulation(this);
         localPlayerData = new PlayerData();
-        localPlayerData.ID = 0;
+        localPlayerData.ID = getNextClientID();
         currentGrid.addPlayer(localPlayerData);
     }
 
     @Override
-    protected void initializeRemoteServer(int portNumber, int playerCount,
-            int rowCount, int columnCount) throws IOException, Exception {
-        if (playerCount < 2 | playerCount > MAX_PLAYER_COUNT) {
-            this.playerCount = DEFAULT_PLAYER_COUNT;
-        } else {
-            this.playerCount = playerCount;
-        }
-
-        for (PlayerData.TeamColor color : PlayerData.TeamColor.values()) {
-            if (color != PlayerData.TeamColor.NONE) {
-                availableColors.add(color);
-            }
-        }
-
-        serverSocket = new ServerSocket(portNumber);
-
-        URL whatismyip = new URL("http://checkip.amazonaws.com");
-        BufferedReader in = new BufferedReader(new InputStreamReader(
-                whatismyip.openStream()));
-
-        serverIP = in.readLine(); //you get the IP as a String
-        this.portNumber = portNumber;
-        ApplicationFrame.writeToStatusLog("Server open at " + serverIP + ":" + portNumber);
-        ApplicationFrame.writeToStatusLog("Max players: " + this.playerCount);
-
-        this.rowCount = rowCount;
-        this.columnCount = columnCount;
-        currentGrid = mode.getNewGrid(rowCount, columnCount);
-        currentGrid.setSimulation(this);
-
-        // Spawn a thread to accept client connections.
-        acceptConnectionThread = new Thread(()
-                -> {
-            try {
-                while (true) {
-                    int clientID = nextClientID;
-                    Socket conn = serverSocket.accept();
-                    ObjectOutputStream outputStream = new ObjectOutputStream(conn.getOutputStream());
-                    nextClientID++;
-
-                    if (connectedClients.size() + 1 < playerCount) {
-                        ClientData client = new ClientData(conn, outputStream, clientID);
-                        client.playerData.color = extractRandomColor();
-                        client.playerData.ID = clientID;
-                        connectedClients.put(clientID, client);
-
-                        ApplicationFrame.writeToStatusLog("Accepting connection from" + conn.getRemoteSocketAddress());
-                        // Make a thread for each client connection to handle their requests separately.
-                        new Thread(()
-                                -> {
-                            ClientData clientData = client;
-                            try {
-                                InputStream input = conn.getInputStream();
-                                ObjectInputStream inputStream = new ObjectInputStream(input);
-
-                                PlayerData tmp = new PlayerData(clientData.playerData);
-                                currentGrid.addPlayer(client.playerData);
-                                outputStream.writeObject(new UpdatePlayerDataRequest(tmp, true, true));
-                                outputStream.writeObject(new SyncGridRequest(currentGrid));
-                                outputStream.writeObject(new GameStatusRequest(isRunning(), getStatusString()));
-                                outputStream.writeObject(new SyncSpeciesDataRequest(SpeciesLoader.getLocalSpeciesJSONString()));
-
-                                for (ClientData data : connectedClients.values()) {
-                                    if (data.playerData.ID != clientID) {
-                                        UpdatePlayerDataRequest req = new UpdatePlayerDataRequest(data.playerData, true);
-                                        sendToAll(req);
-                                    }
-                                }
-
-                                while (true) {
-                                    Request r = (Request) inputStream.readObject();
-                                    handleRequest(r, clientData.playerData.ID);
-                                }
-                            } // These exceptions are caught when the client disconnects
-                            catch (EOFException e) {
-                            } catch (InvalidRequestException | IOException | ClassNotFoundException e) {
-                                ApplicationFrame.writeToStatusLog(e.toString());
-                            }
-
-                            sendToAll(new UpdatePlayerDataRequest(clientData.playerData, false));
-
-                            currentGrid.removePlayer(clientData.playerData.ID);
-                            connectedClients.remove(clientData.playerData.ID);
-                            panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
-                            try {
-                                conn.close();
-                            } catch (IOException e) {
-                            }
-
-                            sendLogMessage(clientData.playerData.name + " left the game.");
-                            if (clientData.playerData.color != PlayerData.TeamColor.NONE) {
-                                availableColors.add(clientData.playerData.color);
-                            }
-                        }).start();
-                    } else {
-                        DisconnectRequest req = new DisconnectRequest("No player slots available. Closing connection.");
-                        outputStream.writeObject(req);
-                        conn.close();
-                    }
-                }
-            } catch (IOException e) {
-                System.out.println(e);
-            }
-        });
-        acceptConnectionThread.start();
+    protected void writeToStatusLog(String msg) {
+        ApplicationFrame.writeToStatusLog(msg);
     }
 
     @Override
     public ArrayList<PlayerData> getPlayerRankings() {
-        if (remoteInstance) {
+        if (isRemoteInstance()) {
             return currentGrid.getPlayerRankings();
         } else {
             return offlineRanking;
@@ -324,7 +208,7 @@ public class SimulationGUIServer extends SimulationCLIServer {
 
     @Override
     public int getLocalPlayerID() {
-        return 0;
+        return localPlayerData.ID;
     }
     
     @Override

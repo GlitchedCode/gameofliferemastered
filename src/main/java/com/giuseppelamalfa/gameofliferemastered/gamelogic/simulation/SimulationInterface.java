@@ -11,52 +11,63 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.Request;
 import java.io.IOException;
 import java.util.ArrayList;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  *
  * @author glitchedcode
  */
-public interface SimulationInterface {
+public abstract class SimulationInterface {
 
-    boolean isLocked();
+    public abstract boolean isLocked();
 
-    boolean isRunning();
+    public abstract boolean isRunning();
 
-    boolean isLocallyControlled();
+    public abstract boolean isLocallyControlled();
 
-    String getGameModeName();
+    public abstract String getGameModeName();
 
-    int getLocalPlayerID();
+    public abstract int getLocalPlayerID();
 
-    PlayerData.TeamColor getPlayerColor(int ID);
+    public abstract PlayerData.TeamColor getPlayerColor(int ID);
 
-    ArrayList<PlayerData> getPlayerRankings();
+    public abstract ArrayList<PlayerData> getPlayerRankings();
 
-    int getRowCount();
+    public abstract int getRowCount();
 
-    int getColumnCount();
+    public abstract int getColumnCount();
 
-    void resize(int rows, int cols);
+    public abstract void resize(int rows, int cols);
 
-    int getSectorSideLength();
+    public abstract int getSectorSideLength();
 
-    String getStatusString();
+    public abstract String getStatusString();
 
-    int getCurrentTurn();
+    public abstract int getCurrentTurn();
 
-    Unit getUnit(int row, int col);
+    public abstract Unit getUnit(int row, int col);
 
-    void removeUnit(int row, int col);
+    public abstract void removeUnit(int row, int col);
 
-    void setUnit(int row, int col, Unit unit);
+    public abstract void setUnit(int row, int col, Unit unit);
 
-    void computeNextTurn() throws Exception;
+    public abstract void computeNextTurn() throws Exception;
 
-    void setRunning(boolean val);
+    public abstract void setRunning(boolean val);
 
-    void handleRequest(Request requestObject, int ID) throws IOException, InvalidRequestException;
+    public void handleRequest(Request request, int clientID) throws IOException, InvalidRequestException {
+        try {
+            Method method = getClass().getDeclaredMethod(request.type.procedureName,
+                    Request.class, Integer.class);
+            method.invoke(this, request, clientID);
+        } catch (NoSuchMethodException e) {
+        } catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+            ex.printStackTrace();
+        }
+    }
 
-    void synchronize();
+    public abstract void synchronize();
 
-    void close();
+    public abstract void close();
 }

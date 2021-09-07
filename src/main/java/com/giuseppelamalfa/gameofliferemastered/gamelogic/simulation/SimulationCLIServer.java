@@ -33,7 +33,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -64,7 +63,7 @@ class ClientData {
  *
  * @author glitchedcode
  */
-public class SimulationCLIServer implements SimulationInterface {
+public class SimulationCLIServer extends SimulationInterface {
 
     public static final Integer DEFAULT_PLAYER_COUNT = 4;
     public static final Integer MAX_PLAYER_COUNT = 8;
@@ -72,15 +71,11 @@ public class SimulationCLIServer implements SimulationInterface {
     public final static Integer GRYD_SYNC_TURN_COUNT = 40;
 
     protected final GameMode mode;
-    protected int nextClientID = 0;
     protected int playerCount;
     protected int rowCount;
     protected int columnCount;
     protected Grid currentGrid;
 
-    protected Thread acceptConnectionThread;
-
-    protected boolean remoteInstance = false;
     static protected final ArrayList<PlayerData> offlineRanking = new ArrayList<>();
     protected ConcurrentHashMap<Integer, ClientData> connectedClients = new ConcurrentHashMap<>();
     protected ServerSocket serverSocket;
@@ -89,9 +84,12 @@ public class SimulationCLIServer implements SimulationInterface {
 
     protected ArrayList<PlayerData.TeamColor> availableColors = new ArrayList<>();
 
+    private boolean remoteInstance = false;
+    private int nextClientID = 0;
+    private Thread acceptConnectionThread;
     private int lastSyncTurn = 0;
 
-    public static void writeToStatusLog(String msg) {
+    protected void writeToStatusLog(String msg) {
         System.out.println(msg);
     }
 
@@ -99,7 +97,7 @@ public class SimulationCLIServer implements SimulationInterface {
         System.out.println(
                 "usage: java -jar liferemastered-headless.jar <args>\n"
                 + "-m <sandbox|competitive>: sets the game mode (default: sandbox)\n"
-                + "-r <rowCount>: grid row count (default: 50true)\n"
+                + "-r <rowCount>: grid row count (default: 50)\n"
                 + "-c <columnCount>: grid column count (default: 70)\n"
                 + "-p <portNumber>: set port number for server socket (default: 7777)\n"
                 + "-P <maxPlayers>: set max player count (default: 4, max: 8)\n"
@@ -192,12 +190,12 @@ public class SimulationCLIServer implements SimulationInterface {
             int rowCount, int columnCount, GameMode mode) throws Exception {
         this.mode = mode;
         initializeRemoteServer(portNumber, playerCount, rowCount, columnCount);
-        remoteInstance = true;
     }
 
     public SimulationCLIServer(int rowCount, int columnCount) throws Exception {
         mode = GameMode.SANDBOX;
         currentGrid = new Grid(rowCount, columnCount);
+        currentGrid.setSimulation(this);
     }
 
     protected void initializeRemoteServer(int portNumber, int playerCount,
@@ -235,10 +233,9 @@ public class SimulationCLIServer implements SimulationInterface {
         acceptConnectionThread = new Thread(() -> {
             try {
                 while (true) {
-                    int clientID = nextClientID;
+                    int clientID = getNextClientID();
                     Socket conn = serverSocket.accept();
                     ObjectOutputStream outputStream = new ObjectOutputStream(conn.getOutputStream());
-                    nextClientID++;
 
                     if (connectedClients.size() < playerCount) {
                         ClientData client = new ClientData(conn, outputStream, clientID);
@@ -304,6 +301,15 @@ public class SimulationCLIServer implements SimulationInterface {
             }
         });
         acceptConnectionThread.start();
+        remoteInstance = true;
+    }
+    
+    protected final boolean isRemoteInstance(){
+        return remoteInstance;
+    }
+    
+    protected final int getNextClientID(){
+        return ++nextClientID;
     }
 
     public final PlayerData.TeamColor extractRandomColor() {

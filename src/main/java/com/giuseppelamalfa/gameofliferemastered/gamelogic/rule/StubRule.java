@@ -13,6 +13,16 @@ import java.io.Serializable;
  */
 public class StubRule<T> implements RuleInterface<T>, Serializable {
 
+    boolean value;
+    
+    public StubRule(boolean value){
+        this.value = value;
+    }
+    
+    public StubRule(){
+        this(false);
+    }
+    
     @Override
     public boolean test(T value) {
         return false;
