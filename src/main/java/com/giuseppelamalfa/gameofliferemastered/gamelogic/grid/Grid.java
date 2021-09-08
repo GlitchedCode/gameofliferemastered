@@ -33,7 +33,7 @@ public class Grid implements Serializable, Cloneable {
     private ConcurrentGrid2DContainer<Unit> board;
     private ConcurrentGrid2DContainer<Boolean> sectorFlags;
 
-    private int turn = 0;
+    protected int turn = 0;
 
     private Integer rowCount;
     private Integer columnCount;

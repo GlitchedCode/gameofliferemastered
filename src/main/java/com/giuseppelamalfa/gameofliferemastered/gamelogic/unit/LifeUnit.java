@@ -25,7 +25,7 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
     protected Set<Integer> friendlySpecies;
     protected Set<Integer> hostileSpecies;
 
-    protected Integer health;
+    protected int health;
     protected boolean healthChanged = false;
 
     protected RuleInterface<Integer> friendlyCountSelector;
@@ -152,6 +152,7 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
      */
     @Override
     public void update() {
+
         if (currentState != nextTurnState) {
             currentState.exit(this);
             currentState = nextTurnState;

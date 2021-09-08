@@ -63,21 +63,18 @@ public class SimulationRemoteClient extends SimulationInterface {
                 -> {
             try {
                 ObjectInputStream input = new ObjectInputStream(clientSocket.getInputStream());
-                while ( true ) {
+                while (true) {
                     Request r = (Request) input.readObject();
                     handleRequest(r, 0);
                 }
-            }
-            catch (EOFException | SocketException e) {
-            }
-            catch (InvalidRequestException | IOException | ClassNotFoundException e) {
+            } catch (EOFException | SocketException e) {
+            } catch (InvalidRequestException | IOException | ClassNotFoundException e) {
                 e.printStackTrace();
                 currentGrid.setRunning(false);
             }
             try {
                 clientSocket.close();
-            }
-            catch (IOException a) {
+            } catch (IOException a) {
             }
         }).start();
 
@@ -152,17 +149,16 @@ public class SimulationRemoteClient extends SimulationInterface {
     @Override
     public void removeUnit(int row, int col) {
         Unit unit = currentGrid.getUnit(row, col);
-        if ( unit == null ) {
+        if (unit == null) {
             return;
         }
-        if ( unit.getPlayerID() != localPlayerData.ID ) {
+        if (unit.getPlayerID() != localPlayerData.ID) {
             return;
         }
 
         try {
             outputStream.writeObject(new SetUnitRequest(row, col, null));
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
             Logger.getLogger(SimulationRemoteClient.class.getName()).log(Level.SEVERE, null, ex);
         }
 
@@ -172,14 +168,13 @@ public class SimulationRemoteClient extends SimulationInterface {
     @Override
     public void setUnit(int row, int col, Unit unit) {
 
-        if ( currentGrid.getUnit(row, col).isAlive()) {
+        if (currentGrid.getUnit(row, col).isAlive()) {
             return;
         }
 
         try {
             outputStream.writeObject(new SetUnitRequest(row, col, unit));
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
             Logger.getLogger(SimulationRemoteClient.class.getName()).log(Level.SEVERE, null, ex);
         }
 
@@ -187,7 +182,7 @@ public class SimulationRemoteClient extends SimulationInterface {
     }
 
     @Override
-    public synchronized void computeNextTurn() throws Exception {
+    public void computeNextTurn() throws Exception {
         currentGrid.computeNextTurn();
     }
 
@@ -195,8 +190,7 @@ public class SimulationRemoteClient extends SimulationInterface {
     public void setRunning(boolean val) {
         try {
             outputStream.writeObject(new GameStatusRequest(val));
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
             Logger.getLogger(SimulationRemoteClient.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -209,9 +203,10 @@ public class SimulationRemoteClient extends SimulationInterface {
         SyncSpeciesDataRequest speciesData = (SyncSpeciesDataRequest) r;
         try {
             SpeciesLoader.loadJSONString(speciesData.jsonString);
-            panel.getPalette().resetPaletteItems();
-        }
-        catch (Exception e) {
+            if (panel != null) {
+                panel.getPalette().resetPaletteItems();
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -219,57 +214,55 @@ public class SimulationRemoteClient extends SimulationInterface {
 
     private void handleSyncGridRequest(Request r, Integer ID) {
         SyncGridRequest sync = (SyncGridRequest) r;
-        if ( sync.grid != null ) {
+        if (sync.grid != null) {
             currentGrid = sync.grid;
             currentGrid.afterSync();
             currentGrid.setSimulation(this);
             currentGrid.setPlayerIDCheckNextTurn();
             currentGrid.addPlayer(localPlayerData);
-            if ( !currentGrid.showWinner() ) {
+            if (!currentGrid.showWinner()) {
                 currentGrid.calculateScore();
             }
         }
 
-        if ( sync.skipTurn ) {
+        if (sync.skipTurn) {
             try {
                 computeNextTurn();
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 Logger.getLogger(SimulationRemoteClient.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
 
-        panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
-        panel.getGameStatusPanel().setShowWinner(currentGrid.showWinner());
-
+        if (panel != null) {
+            panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
+            panel.getGameStatusPanel().setShowWinner(currentGrid.showWinner());
+        }
     }
 
     private void handleUpdatePlayerDataRequest(Request r, Integer ID) {
         UpdatePlayerDataRequest updateRequest = (UpdatePlayerDataRequest) r;
         PlayerData playerData = updateRequest.playerData;
 
-        if ( updateRequest.updateLocal ) {
-            if ( playerData.color != PlayerData.TeamColor.NONE ) {
+        if (updateRequest.updateLocal) {
+            if (playerData.color != PlayerData.TeamColor.NONE) {
                 localPlayerData.color = playerData.color;
             }
-            if ( playerData.ID != -1 ) {
+            if (playerData.ID != -1) {
                 currentGrid.removePlayer(localPlayerData.ID);
                 localPlayerData.ID = playerData.ID;
                 currentGrid.addPlayer(localPlayerData);
             }
         }
-        if ( playerData.ID != localPlayerData.ID ) {
-            if ( updateRequest.connected ) {
+        if (playerData.ID != localPlayerData.ID) {
+            if (updateRequest.connected) {
                 currentGrid.addPlayer(playerData);
-            }
-            else {
+            } else {
                 currentGrid.removePlayer(playerData.ID);
             }
         }
         try {
             panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             // IDK DUDE XDDDDDDDDDD
         }
     }
@@ -280,8 +273,7 @@ public class SimulationRemoteClient extends SimulationInterface {
                 + ": " + msg);
         try {
             clientSocket.close();
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
             Logger.getLogger(SimulationRemoteClient.class.getName()).log(Level.SEVERE, null, ex);
         }
         setRunning(false);
@@ -295,10 +287,9 @@ public class SimulationRemoteClient extends SimulationInterface {
 
     private void handleSetUnitRequest(Request r, Integer ID) {
         SetUnitRequest setUnit = (SetUnitRequest) r;
-        if ( setUnit.unit != null ) {
+        if (setUnit.unit != null) {
             currentGrid.setUnit(setUnit.row, setUnit.col, setUnit.unit);
-        }
-        else {
+        } else {
             currentGrid.removeUnit(setUnit.row, setUnit.col);
         }
         panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
@@ -312,10 +303,8 @@ public class SimulationRemoteClient extends SimulationInterface {
             Method method = SimulationRemoteClient.class.getDeclaredMethod(request.type.procedureName,
                     Request.class, Integer.class);
             method.invoke(this, request, ID);
-        }
-        catch (NoSuchMethodException e) {
-        }
-        catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+        } catch (NoSuchMethodException e) {
+        } catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             ex.printStackTrace();
         }
     }
@@ -335,8 +324,7 @@ public class SimulationRemoteClient extends SimulationInterface {
             panel.getPalette().resetPaletteItems();
             outputStream.writeObject(new UpdatePlayerDataRequest(localPlayerData, false));
             clientSocket.close();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.err.println("e");
         }
     }

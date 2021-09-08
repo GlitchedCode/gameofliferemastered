@@ -46,7 +46,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
     SimulationGUIServer server;
 
     static ImageIcon icon;
-    static JTextArea mainStatusLog;
+    static JTextArea mainStatusLog = new JTextArea();
     boolean isInMenu = true;
 
     String localPlayerName = "Player";

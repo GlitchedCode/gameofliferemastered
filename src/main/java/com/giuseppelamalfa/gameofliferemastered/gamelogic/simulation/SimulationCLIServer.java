@@ -197,6 +197,12 @@ public class SimulationCLIServer extends SimulationInterface {
         currentGrid = new Grid(rowCount, columnCount);
         currentGrid.setSimulation(this);
     }
+    
+    public void flushStreams() throws IOException{
+        for (ClientData data : connectedClients.values()){
+            data.stream.flush();
+        }
+    }
 
     protected void initializeRemoteServer(int portNumber, int playerCount,
             int rowCount, int columnCount) throws IOException, Exception {

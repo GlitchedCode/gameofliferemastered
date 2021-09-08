@@ -5,14 +5,12 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
-import static com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader.localSpeciesDataJSON;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.json.JSONArray;
@@ -22,6 +20,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.BeforeClass;
 
 /**
  *
@@ -29,10 +28,11 @@ import static org.junit.Assert.*;
  */
 public class SpeciesDataTest {
 
-    JSONArray unitDataArray;
-    HashMap<String, Integer> speciesIDs;
+    static JSONArray unitDataArray;
+    static HashMap<String, Integer> speciesIDs;
 
-    public SpeciesDataTest(){
+    @BeforeClass
+    public static void setUpClass() throws Exception {
         InputStream istream = new SpeciesLoader().getClass().
                 getClassLoader().getResourceAsStream("badSpecies.json");
         BufferedReader reader = new BufferedReader(new InputStreamReader(istream));
@@ -53,6 +53,7 @@ public class SpeciesDataTest {
         speciesIDs.put("Cell", 0);
         speciesIDs.put("Snake", 1);
     }
+
     
     @Before
     public void setUp() {

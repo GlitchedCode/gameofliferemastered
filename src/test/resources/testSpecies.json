@@ -1,0 +1,97 @@
+{
+    "author" : "glitchedcode",
+    "README" : {
+        "name": "the species' name",
+        "id" : "the species' numeric ID, must be unique",
+        "textureCode": "the species' texture code",
+        "filterColor": "texture filter color",
+        "friendlySpecies": "a set of species the unit considers friendly",
+        "hostileSpecies": "a set of species the unit considers friendly",
+        "health": "the unit's initial health",
+        "initialState": "the unit's initial state",
+        "friendlyCountSelector, hostileCountSelector, reproductionSelector": {
+            "__help" : "rules for HP reduction and reproduction based on how many friendly or hostile units are adjacent", 
+            "ruleClassName": "rule's class name, derived from com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface",
+            "args": "constructor arguments for rule class"
+        }
+    },
+    "speciesData" : [
+        {
+            "name" : "Cell",
+            "id" : 0,
+            "implementingType" : "LifeUnit",
+            "textureCode" : "cell",
+            "friendlySpecies" : [
+                "Cell"
+            ],
+            "hostileSpecies" : [
+                "Snake"
+            ],
+            "health" : 1,
+            "initialState" : "ALIVE",
+            "friendlyCountSelector" : {
+                "ruleClassName" : "IntegerRangeRule",
+                "args" : [2,3]
+            },
+            "hostileCountSelector" : {
+                "ruleClassName" : "IntegerRangeRule",
+                "args" : [0,1]
+            },
+            "reproductionSelector" : {
+                "ruleClassName" : "IntegerSetRule",
+                "args" : [3]
+            }
+        },
+        {
+            "name" : "Snake",
+            "id" : 1,
+            "implementingType" : "LifeUnit",
+            "textureCode" : "snake",
+            "friendlySpecies" : [
+                "Snake"
+            ],
+            "hostileSpecies" : [
+                "Cell"
+            ],
+            "health" : 2,
+            "initialState" : "ALIVE",
+            "friendlyCountSelector" : {
+                "ruleClassName" : "IntegerRangeRule",
+                "args" : [2, 3]
+            },
+            "hostileCountSelector" : {
+                "ruleClassName" : "IntegerRangeRule",
+                "args" : [1,2]
+            },
+            "reproductionSelector" : {
+                "ruleClassName" : "IntegerSetRule",
+                "args" : [3, 7]
+            }
+        },
+        {
+            "name" : "Mimic",
+            "id" : 2,
+            "implementingType" : "Mimic",
+            "textureCode" : "mimic",
+            "filterColor" : "0x4d8fc1",
+            "friendlySpecies" : [
+                "Mimic"
+            ],
+            "hostileSpecies" : [],
+            "health" : 2,
+            "initialState" : "ALIVE",
+            "friendlyCountSelector" : {
+                "ruleClassName" : "IntegerRangeRule",
+                "args" : [0,0]
+            },
+            "hostileCountSelector" : {
+                "ruleClassName" : "IntegerRangeRule",
+                "args" : [0,5]
+            },
+            "reproductionSelector" : {
+                "ruleClassName" : "IntegerSetRule",
+                "args" : [3]
+            }
+        }
+    ]
+}
