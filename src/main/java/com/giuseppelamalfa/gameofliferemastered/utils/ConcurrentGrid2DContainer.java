@@ -133,6 +133,14 @@ public class ConcurrentGrid2DContainer<T> implements Cloneable, Serializable {
         return null;
     }
 
+    public final int getRowCount() {
+        return rows;
+    }
+
+    public final int getColumnCount() {
+        return cols;
+    }
+
     private static int getRow(int key) {
         return key >> 16;
     }
