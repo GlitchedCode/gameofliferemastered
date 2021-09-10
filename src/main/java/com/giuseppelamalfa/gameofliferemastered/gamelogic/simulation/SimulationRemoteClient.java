@@ -40,7 +40,7 @@ public class SimulationRemoteClient extends SimulationInterface {
 
     Grid currentGrid;
 
-    GridPanel panel;
+    GridPanel panel = new GridPanel();
     Socket clientSocket;
     ObjectOutputStream outputStream;
     String host;
@@ -203,9 +203,7 @@ public class SimulationRemoteClient extends SimulationInterface {
         SyncSpeciesDataRequest speciesData = (SyncSpeciesDataRequest) r;
         try {
             SpeciesLoader.loadJSONString(speciesData.jsonString);
-            if (panel != null) {
-                panel.getPalette().resetPaletteItems();
-            }
+            panel.getPalette().resetPaletteItems();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -233,10 +231,8 @@ public class SimulationRemoteClient extends SimulationInterface {
             }
         }
 
-        if (panel != null) {
-            panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
-            panel.getGameStatusPanel().setShowWinner(currentGrid.showWinner());
-        }
+        panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
+        panel.getGameStatusPanel().setShowWinner(currentGrid.showWinner());
     }
 
     private void handleUpdatePlayerDataRequest(Request r, Integer ID) {

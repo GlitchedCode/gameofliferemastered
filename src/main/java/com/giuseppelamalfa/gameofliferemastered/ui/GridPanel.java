@@ -55,8 +55,8 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
     protected final TimerWrapper timer = new TimerWrapper();
     private boolean initialized = false;
 
-    protected GameStatusPanel gameStatusPanel;
-    protected UnitPalette palette;
+    protected GameStatusPanel gameStatusPanel = new GameStatusPanel();
+    protected UnitPalette palette = new UnitPalette();
 
     public GridPanel() {
         setSideLength(32);
