@@ -5,15 +5,10 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation;
 
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.GameMode;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.Request;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.Grid;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.PipedInputStream;
-import java.util.ArrayList;
+import java.util.concurrent.locks.ReentrantLock;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -30,6 +25,8 @@ public class SimulationCLIServerTest {
     SimulationCLIServer cliServer;
     SimulationRemoteClient[] clients;
 
+    ReentrantLock lock = new ReentrantLock();
+
     @BeforeClass
     public static void setUpClass() throws Exception {
         SpeciesLoader.loadSpeciesFromLocalJSON("testSpecies.json");
@@ -43,6 +40,7 @@ public class SimulationCLIServerTest {
     @Before
     public void setUp() throws Exception {
         cliServer = new SimulationCLIServer(8000, 4, 10, 10, GameMode.SANDBOX);
+        cliServer.computeNextTurn();
 
         clients = new SimulationRemoteClient[]{
             new SimulationRemoteClient("test0", "localhost", 8000),
@@ -50,14 +48,65 @@ public class SimulationCLIServerTest {
             new SimulationRemoteClient("test2", "localhost", 8000),
             new SimulationRemoteClient("test3", "localhost", 8000)
         };
+
+        waitForTurn(1);
+    }
+
+    private void waitForTurn(int turn) {
+        boolean wait = true;
+        while (wait) {
+            sleep(100);
+            wait = false;
+            for (SimulationRemoteClient client : clients) {
+                if (client.getCurrentTurn() != turn) {
+                    wait = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    private static void sleep(int millis) {
+        try {
+            Thread.sleep(millis, 0);
+        } catch (InterruptedException ex) {
+        }
     }
 
     @After
     public void tearDown() {
+        for (SimulationRemoteClient client : clients) {
+            client.close();
+            sleep(200);
+        }
+        cliServer.close();
     }
 
     @Test
-    public void testSynchronization() {
-        
+    public void testSynchronization() throws Exception {
+        System.out.println("synchronization");
+        cliServer.computeNextTurn();
+        sleep(100);
+        for (int r = 0; r < 10; r++) {
+            for (int c = 0; c < 10; c++) {
+                int clientID = (r + c) % 5;
+                if (clientID == 4) {
+                    continue;
+                }
+
+                SimulationRemoteClient client = clients[clientID];
+                client.setUnit(r, c, SpeciesLoader.getNewUnit(0, client.getLocalPlayerID()));
+                sleep(100);
+            }
+        }
+        for (SimulationRemoteClient client : clients) {
+            client.currentGrid = new Grid(10, 10);
+        }
+
+        cliServer.synchronize();
+        waitForTurn(2);
+        for (SimulationRemoteClient client : clients) {
+            assertEquals(true, client.currentGrid.areGridContentsEqual(cliServer.currentGrid));
+        }
     }
 }

@@ -44,18 +44,21 @@ class ClientData {
     public final Socket socket;
     public final ObjectOutputStream stream;
     public final PlayerData playerData = new PlayerData();
+    public final Thread thread;
 
-    public ClientData(Socket socket, ObjectOutputStream stream, int ID) {
+    public ClientData(Socket socket, ObjectOutputStream stream, int ID, Thread thread) {
         this.socket = socket;
         this.stream = stream;
         this.playerData.ID = ID;
+        this.thread = thread;
     }
 
-    public ClientData(Socket socket, ObjectOutputStream stream, int ID, String playerName) {
+    public ClientData(Socket socket, ObjectOutputStream stream, int ID, Thread thread, String playerName) {
         this.socket = socket;
         this.stream = stream;
         this.playerData.ID = ID;
         this.playerData.name = playerName;
+        this.thread = thread;
     }
 }
 
@@ -197,11 +200,8 @@ public class SimulationCLIServer extends SimulationInterface {
         currentGrid = new Grid(rowCount, columnCount);
         currentGrid.setSimulation(this);
     }
-    
-    public void flushStreams() throws IOException{
-        for (ClientData data : connectedClients.values()){
-            data.stream.flush();
-        }
+
+    public void flushStreams() throws IOException {
     }
 
     protected void initializeRemoteServer(int portNumber, int playerCount,
@@ -244,7 +244,7 @@ public class SimulationCLIServer extends SimulationInterface {
                     ObjectOutputStream outputStream = new ObjectOutputStream(conn.getOutputStream());
 
                     if (connectedClients.size() < playerCount) {
-                        ClientData client = new ClientData(conn, outputStream, clientID);
+                        ClientData client = new ClientData(conn, outputStream, clientID, Thread.currentThread());
                         client.playerData.color = extractRandomColor();
                         client.playerData.ID = clientID;
                         connectedClients.put(clientID, client);
@@ -262,8 +262,8 @@ public class SimulationCLIServer extends SimulationInterface {
                                 currentGrid.addPlayer(client.playerData);
                                 outputStream.writeObject(new UpdatePlayerDataRequest(tmp, true, true));
                                 outputStream.writeObject(new SyncSpeciesDataRequest(SpeciesLoader.getLocalSpeciesJSONString()));
-                                outputStream.writeObject(new SyncGridRequest(currentGrid));
                                 outputStream.writeObject(new GameStatusRequest(isRunning(), getStatusString()));
+                                outputStream.writeObject(new SyncGridRequest(currentGrid));
 
                                 for (ClientData data : connectedClients.values()) {
                                     if (data.playerData.ID != clientID) {
@@ -276,8 +276,8 @@ public class SimulationCLIServer extends SimulationInterface {
                                     handleRequest((Request) inputStream.readObject(), clientData.playerData.ID);
                                 }
                             } // These exceptions are caught when the client disconnects
-                            catch (EOFException e) {
-                            } catch (InvalidRequestException | IOException | ClassNotFoundException e) {
+                            catch (IOException e) {
+                            } catch (InvalidRequestException  | ClassNotFoundException e) {
                                 writeToStatusLog(e.toString());
                             }
 
@@ -303,18 +303,18 @@ public class SimulationCLIServer extends SimulationInterface {
 
                 }
             } catch (IOException e) {
-                System.out.println(e);
+                //System.out.println(e);
             }
         });
         acceptConnectionThread.start();
         remoteInstance = true;
     }
-    
-    protected final boolean isRemoteInstance(){
+
+    protected final boolean isRemoteInstance() {
         return remoteInstance;
     }
-    
-    protected final int getNextClientID(){
+
+    protected final int getNextClientID() {
         return ++nextClientID;
     }
 
@@ -587,13 +587,17 @@ public class SimulationCLIServer extends SimulationInterface {
 
     @Override
     public void close() {
+        writeToStatusLog("Shutting server down...");
+        sendToAll(new DisconnectRequest("Server has been shut down."));
         try {
-            for (int i = 0; i < connectedClients.size(); i++) {
-                connectedClients.get(i).socket.close();
+            for (ClientData client : connectedClients.values()) {
+                client.socket.close();
             }
+        } catch (Exception e) {
+        }
+        try {
             serverSocket.close();
         } catch (Exception e) {
-            System.out.println(e);
         }
     }
 

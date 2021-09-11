@@ -292,6 +292,8 @@ public class SimulationRemoteClient extends SimulationInterface {
 
     }
 
+    protected int processedRequests = 0;
+    
     @Override
     public void handleRequest(Request request, int ID)
             throws IOException, InvalidRequestException {
@@ -299,6 +301,7 @@ public class SimulationRemoteClient extends SimulationInterface {
             Method method = SimulationRemoteClient.class.getDeclaredMethod(request.type.procedureName,
                     Request.class, Integer.class);
             method.invoke(this, request, ID);
+            processedRequests++;
         } catch (NoSuchMethodException e) {
         } catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             ex.printStackTrace();
@@ -316,15 +319,23 @@ public class SimulationRemoteClient extends SimulationInterface {
     @Override
     public void close() {
         try {
+            outputStream.writeObject(new DisconnectRequest("Disconnection requested."));
+        } catch (Exception e) {
+        }
+        try {
+            clientSocket.close();
+        } catch (IOException ex) {
+            Logger.getLogger(SimulationRemoteClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        try {
             SpeciesLoader.loadJSONString(SpeciesLoader.getLocalSpeciesJSONString());
             panel.getPalette().resetPaletteItems();
-            outputStream.writeObject(new UpdatePlayerDataRequest(localPlayerData, false));
-            clientSocket.close();
         } catch (Exception e) {
-            System.err.println("e");
+
         }
     }
 
+    @Override
     public void resize(int rows, int cols) {
     }
 }

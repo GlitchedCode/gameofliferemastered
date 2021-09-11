@@ -107,6 +107,36 @@ public class Grid implements Serializable, Cloneable {
         }
     }
 
+    public final boolean areGridContentsEqual(Grid other) {
+        int rows = getRowCount();
+        int cols = getColumnCount();
+
+        if (rows != other.getRowCount() | cols != other.getColumnCount()) {
+            return false;
+        }
+
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                Unit unit = getUnit(r, c);
+                Unit otherUnit = getUnit(r, c);
+                
+                if(!unit.isAlive() | !otherUnit.isAlive()){
+                    if(otherUnit.isAlive() != otherUnit.isAlive()) {
+                        return false;
+                    }else{
+                        continue;
+                    }
+                }
+                
+                if (unit != otherUnit) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     /*
      * GETTERS AND SETTERS
      */
