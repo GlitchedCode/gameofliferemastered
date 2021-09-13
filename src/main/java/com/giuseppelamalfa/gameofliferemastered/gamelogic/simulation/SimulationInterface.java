@@ -58,7 +58,8 @@ public abstract class SimulationInterface {
 
     public void handleRequest(Request request, int clientID) throws IOException, InvalidRequestException {
         try {
-            Method method = getClass().getDeclaredMethod(request.type.procedureName,
+            Class<?> clazz = getClass();
+            Method method = clazz.getDeclaredMethod(request.type.procedureName,
                     Request.class, Integer.class);
             method.invoke(this, request, clientID);
         } catch (NoSuchMethodException e) {

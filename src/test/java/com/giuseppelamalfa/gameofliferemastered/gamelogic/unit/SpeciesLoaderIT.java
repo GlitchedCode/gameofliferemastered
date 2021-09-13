@@ -43,6 +43,10 @@ public class SpeciesLoaderIT {
     @Test
     public void testLoadCorrectSpecies() throws Exception {
         System.out.println("testLoadCorrectSpecies");
-        SpeciesLoader.loadSpeciesFromLocalJSON("testSpecies.json");
+        try {
+            SpeciesLoader.loadSpeciesFromLocalJSON("testSpecies.json");
+        } catch (Exception e) {
+            fail("SpeciesLoader should not throw an exception when loading a correct file.");
+        }
     }
 }

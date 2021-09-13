@@ -14,15 +14,15 @@ public class GameStatusRequest extends Request {
     public final boolean running;
     public final String status;
 
-    public GameStatusRequest(boolean val) {
+    public GameStatusRequest(boolean running) {
         super(RequestType.GAME_STATUS);
-        running = val;
+        this.running = running;
         status = null;
     }
 
-    public GameStatusRequest(boolean val, String status) {
+    public GameStatusRequest(boolean running, String status) {
         super(RequestType.GAME_STATUS);
-        running = val;
+        this.running = running;
         this.status = status;
     }
 }

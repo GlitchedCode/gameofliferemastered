@@ -5,6 +5,7 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation;
 
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.GameMode;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.Grid;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
@@ -20,9 +21,9 @@ import static org.junit.Assert.*;
  *
  * @author glitchedcode
  */
-public class SimulationCLIServerTest {
+public class SimulationCLIServerIT {
 
-    SimulationCLIServer cliServer;
+    SimulationCLIServer server;
     SimulationRemoteClient[] clients;
 
     ReentrantLock lock = new ReentrantLock();
@@ -39,8 +40,8 @@ public class SimulationCLIServerTest {
 
     @Before
     public void setUp() throws Exception {
-        cliServer = new SimulationCLIServer(8000, 4, 10, 10, GameMode.SANDBOX);
-        cliServer.computeNextTurn();
+        server = new SimulationCLIServer(8000, 4, 10, 10, GameMode.SANDBOX);
+        server.computeNextTurn();
 
         clients = new SimulationRemoteClient[]{
             new SimulationRemoteClient("test0", "localhost", 8000),
@@ -79,13 +80,13 @@ public class SimulationCLIServerTest {
             client.close();
             sleep(200);
         }
-        cliServer.close();
+        server.close();
     }
 
     @Test
     public void testSynchronization() throws Exception {
         System.out.println("synchronization");
-        cliServer.computeNextTurn();
+        server.computeNextTurn();
         sleep(100);
         for (int r = 0; r < 10; r++) {
             for (int c = 0; c < 10; c++) {
@@ -96,17 +97,54 @@ public class SimulationCLIServerTest {
 
                 SimulationRemoteClient client = clients[clientID];
                 client.setUnit(r, c, SpeciesLoader.getNewUnit(0, client.getLocalPlayerID()));
-                sleep(100);
+                sleep(200);
             }
         }
         for (SimulationRemoteClient client : clients) {
             client.currentGrid = new Grid(10, 10);
         }
 
-        cliServer.synchronize();
+        server.synchronize();
         waitForTurn(2);
         for (SimulationRemoteClient client : clients) {
-            assertEquals(true, client.currentGrid.areGridContentsEqual(cliServer.currentGrid));
+            assertEquals(true, client.currentGrid.areGridContentsEqual(server.currentGrid));
+        }
+    }
+
+    private boolean isSimulationRunning() {
+        boolean ret = true;
+        for (SimulationRemoteClient client : clients) {
+            ret &= client.isRunning();
+        }
+        return ret & server.isRunning();
+    }
+
+    @Test
+    public void testGameStatusRequest() {
+        System.out.println("cliGameStatusRequest");
+        assertEquals(false, isSimulationRunning());
+        clients[0].setRunning(true);
+        sleep(100);
+        assertEquals(false, isSimulationRunning());
+        clients[1].setRunning(true);
+        sleep(100);
+        clients[2].setRunning(true);
+        sleep(100);
+        clients[3].setRunning(true);
+        assertEquals(true, isSimulationRunning());
+        server.setRunning(false);
+        sleep(100);
+        assertEquals(false, isSimulationRunning());
+    }
+    
+    @Test
+    public void testUpdatePlayerDataRequest() {
+        System.out.println("updatePlayerDataRequest");
+        for(SimulationRemoteClient client: clients) {
+            assertEquals(true, client.localPlayerData.color != PlayerData.TeamColor.NONE);
+        }
+        for(ClientData client : server.connectedClients.values()) {
+            assertEquals(true, client.playerData.name != null);
         }
     }
 }

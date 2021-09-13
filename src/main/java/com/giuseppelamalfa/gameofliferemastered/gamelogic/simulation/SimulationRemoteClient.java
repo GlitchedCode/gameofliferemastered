@@ -23,8 +23,6 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
@@ -195,11 +193,11 @@ public class SimulationRemoteClient extends SimulationInterface {
         }
     }
 
-    private void handleLogMessageRequest(Request r, Integer ID) {
+    void handleLogMessageRequest(Request r, Integer ID) {
         ApplicationFrame.writeToStatusLog(((LogMessageRequest) r).message);
     }
 
-    private void handleSyncSpeciesDataRequest(Request r, Integer ID) {
+    void handleSyncSpeciesDataRequest(Request r, Integer ID) {
         SyncSpeciesDataRequest speciesData = (SyncSpeciesDataRequest) r;
         try {
             SpeciesLoader.loadJSONString(speciesData.jsonString);
@@ -210,7 +208,7 @@ public class SimulationRemoteClient extends SimulationInterface {
 
     }
 
-    private void handleSyncGridRequest(Request r, Integer ID) {
+    void handleSyncGridRequest(Request r, Integer ID) {
         SyncGridRequest sync = (SyncGridRequest) r;
         if (sync.grid != null) {
             currentGrid = sync.grid;
@@ -235,7 +233,7 @@ public class SimulationRemoteClient extends SimulationInterface {
         panel.getGameStatusPanel().setShowWinner(currentGrid.showWinner());
     }
 
-    private void handleUpdatePlayerDataRequest(Request r, Integer ID) {
+    void handleUpdatePlayerDataRequest(Request r, Integer ID) {
         UpdatePlayerDataRequest updateRequest = (UpdatePlayerDataRequest) r;
         PlayerData playerData = updateRequest.playerData;
 
@@ -263,7 +261,7 @@ public class SimulationRemoteClient extends SimulationInterface {
         }
     }
 
-    private void handleDisconnectRequest(Request r, Integer ID) {
+    void handleDisconnectRequest(Request r, Integer ID) {
         String msg = ((DisconnectRequest) r).message;
         ApplicationFrame.writeToStatusLog("Disconnected from " + clientSocket.getRemoteSocketAddress()
                 + ": " + msg);
@@ -276,12 +274,12 @@ public class SimulationRemoteClient extends SimulationInterface {
 
     }
 
-    private void handleGameStatusRequest(Request r, Integer ID) {
+    void handleGameStatusRequest(Request r, Integer ID) {
         GameStatusRequest req = ((GameStatusRequest) r);
         currentGrid.setRunning(req.running);
     }
 
-    private void handleSetUnitRequest(Request r, Integer ID) {
+    void handleSetUnitRequest(Request r, Integer ID) {
         SetUnitRequest setUnit = (SetUnitRequest) r;
         if (setUnit.unit != null) {
             currentGrid.setUnit(setUnit.row, setUnit.col, setUnit.unit);
@@ -290,22 +288,6 @@ public class SimulationRemoteClient extends SimulationInterface {
         }
         panel.getGameStatusPanel().setPlayerPanels(getPlayerRankings());
 
-    }
-
-    protected int processedRequests = 0;
-    
-    @Override
-    public void handleRequest(Request request, int ID)
-            throws IOException, InvalidRequestException {
-        try {
-            Method method = SimulationRemoteClient.class.getDeclaredMethod(request.type.procedureName,
-                    Request.class, Integer.class);
-            method.invoke(this, request, ID);
-            processedRequests++;
-        } catch (NoSuchMethodException e) {
-        } catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            ex.printStackTrace();
-        }
     }
 
     @Override

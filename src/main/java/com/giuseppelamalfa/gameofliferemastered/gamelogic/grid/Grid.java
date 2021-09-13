@@ -33,8 +33,6 @@ public class Grid implements Serializable, Cloneable {
     private ConcurrentGrid2DContainer<Unit> board;
     private ConcurrentGrid2DContainer<Boolean> sectorFlags;
 
-    protected int turn = 0;
-
     private Integer rowCount;
     private Integer columnCount;
     private Integer sectorRowCount;
@@ -45,6 +43,8 @@ public class Grid implements Serializable, Cloneable {
     private Point bottomRightActive;
     private Point topLeftProcessed;
     private Point bottomRightProcessed;
+
+    int turn = 0;
 
     private final ConcurrentHashMap<Integer, PlayerData> players = new ConcurrentHashMap<>();
     private ArrayList<PlayerData> orderedPlayers = new ArrayList<>(); // players ordered by their ranking
@@ -119,15 +119,15 @@ public class Grid implements Serializable, Cloneable {
             for (int c = 0; c < cols; c++) {
                 Unit unit = getUnit(r, c);
                 Unit otherUnit = getUnit(r, c);
-                
-                if(!unit.isAlive() | !otherUnit.isAlive()){
-                    if(otherUnit.isAlive() != otherUnit.isAlive()) {
+
+                if (!unit.isAlive() | !otherUnit.isAlive()) {
+                    if (otherUnit.isAlive() != otherUnit.isAlive()) {
                         return false;
-                    }else{
+                    } else {
                         continue;
                     }
                 }
-                
+
                 if (unit != otherUnit) {
                     return false;
                 }

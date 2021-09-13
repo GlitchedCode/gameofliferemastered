@@ -28,6 +28,8 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
  */
 public class SimulationGUIServer extends SimulationCLIServer {
 
+    static protected final ArrayList<PlayerData> offlineRanking = new ArrayList<>();
+    
     PlayerData localPlayerData;
     GridPanel panel;
 

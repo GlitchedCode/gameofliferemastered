@@ -79,7 +79,7 @@ public class SimulationCLIServer extends SimulationInterface {
     protected int columnCount;
     protected Grid currentGrid;
 
-    static protected final ArrayList<PlayerData> offlineRanking = new ArrayList<>();
+    //static protected final ArrayList<PlayerData> offlineRanking = new ArrayList<>();
     protected ConcurrentHashMap<Integer, ClientData> connectedClients = new ConcurrentHashMap<>();
     protected ServerSocket serverSocket;
     protected String serverIP;
@@ -199,9 +199,6 @@ public class SimulationCLIServer extends SimulationInterface {
         mode = GameMode.SANDBOX;
         currentGrid = new Grid(rowCount, columnCount);
         currentGrid.setSimulation(this);
-    }
-
-    public void flushStreams() throws IOException {
     }
 
     protected void initializeRemoteServer(int portNumber, int playerCount,
@@ -561,28 +558,17 @@ public class SimulationCLIServer extends SimulationInterface {
     protected HashSet<Integer> clientsRequestingPauseFlip = new HashSet<>();
 
     protected void handleGameStatusRequest(Request r, Integer clientID) {
-        if (!connectedClients.containsKey(clientID) || ((GameStatusRequest) r).running == isRunning()) {
+        GameStatusRequest gameStatus = (GameStatusRequest) r;
+        if (!connectedClients.containsKey(clientID) || gameStatus.running == isRunning()) {
             return;
         }
 
         clientsRequestingPauseFlip.add(clientID);
-        float diff = (clientsRequestingPauseFlip.size() / connectedClients.size()) - 0.5f;
-        if (diff >= 0) {
-            setRunning(!isRunning());
+        float diff = ((float)clientsRequestingPauseFlip.size() / (float)connectedClients.size()) - 0.5f;
+        if (diff >= 0f) {
+            setRunning(gameStatus.running);
         }
 
-    }
-
-    @Override
-    public void handleRequest(Request request, int clientID) throws IOException, InvalidRequestException {
-        try {
-            Method method = getClass().getDeclaredMethod(request.type.procedureName,
-                    Request.class, Integer.class);
-            method.invoke(this, request, clientID);
-        } catch (NoSuchMethodException e) {
-        } catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            ex.printStackTrace();
-        }
     }
 
     @Override
