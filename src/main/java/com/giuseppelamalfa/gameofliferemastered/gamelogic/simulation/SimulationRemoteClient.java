@@ -45,10 +45,18 @@ public class SimulationRemoteClient extends SimulationInterface {
     int portNumber;
     PlayerData localPlayerData;
 
+    ArrayList<DisconnectEventListener> disconnectListeners = new ArrayList<>();
+
+    public void addDisconnectEventListener(DisconnectEventListener listener) {
+        disconnectListeners.add(listener);
+    }
+
     public SimulationRemoteClient(String playerName, String host, int portNumber) throws IOException, Exception {
         localPlayerData = new PlayerData(playerName);
         init(host, portNumber);
     }
+
+    boolean requestedClosure = false;
 
     public void init(String host, int portNumber) throws IOException, Exception {
         clientSocket = new Socket(host, portNumber);
@@ -73,6 +81,10 @@ public class SimulationRemoteClient extends SimulationInterface {
             try {
                 clientSocket.close();
             } catch (IOException a) {
+            }
+
+            if (!requestedClosure) {
+                disconnectListeners.forEach((el) -> el.onDisconnect());
             }
         }).start();
 
@@ -300,6 +312,7 @@ public class SimulationRemoteClient extends SimulationInterface {
 
     @Override
     public void close() {
+        requestedClosure = true;
         try {
             outputStream.writeObject(new DisconnectRequest("Disconnection requested."));
         } catch (Exception e) {

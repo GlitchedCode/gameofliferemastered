@@ -44,7 +44,7 @@ public class Grid implements Serializable, Cloneable {
     private Point topLeftProcessed;
     private Point bottomRightProcessed;
 
-    int turn = 0;
+    int turn = 0; // default accessor needed for testing
 
     private final ConcurrentHashMap<Integer, PlayerData> players = new ConcurrentHashMap<>();
     private ArrayList<PlayerData> orderedPlayers = new ArrayList<>(); // players ordered by their ranking
@@ -484,25 +484,31 @@ public class Grid implements Serializable, Cloneable {
      * Removes a player and it's units from the game.
      *
      * @param id player's ID
+     * @return true if player ID is found, false otherwise
      */
-    public void removePlayer(int id) {
+    public boolean removePlayer(int id) {
         gridLock.lock();
+        boolean ret = false;
         try {
-            for (int r = 0; r < rowCount; r++) {
-                for (int c = 0; c < columnCount; c++) {
-                    Unit unit = getUnit(r, c);
-                    if (unit != null) {
-                        if (unit.getPlayerID() == id) {
-                            setToPosition(r, c, null);
+            if (players.containsKey(id)) {
+                for (int r = 0; r < rowCount; r++) {
+                    for (int c = 0; c < columnCount; c++) {
+                        Unit unit = getUnit(r, c);
+                        if (unit != null) {
+                            if (unit.getPlayerID() == id) {
+                                setToPosition(r, c, null);
+                            }
                         }
                     }
                 }
+                players.remove(id);
+                ret = true;
             }
-            players.remove(id);
         } finally {
             gridLock.unlock();
         }
         orderPlayersByScore();
+        return ret;
     }
 
     /**

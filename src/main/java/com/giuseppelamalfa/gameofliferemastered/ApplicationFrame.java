@@ -11,6 +11,7 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationI
 import com.giuseppelamalfa.gameofliferemastered.utils.ImageManager;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.*;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.GameMode;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.DisconnectEventListener;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
 import com.giuseppelamalfa.gameofliferemastered.utils.DeferredImageManager;
 import java.awt.event.KeyEvent;
@@ -19,6 +20,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JLayeredPane;
 import java.net.URL;
 import java.awt.Color;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
@@ -29,7 +32,7 @@ import javax.swing.text.PlainDocument;
  *
  * @author glitchedcode
  */
-public class ApplicationFrame extends javax.swing.JFrame implements KeyListener {
+public class ApplicationFrame extends javax.swing.JFrame implements KeyListener, DisconnectEventListener {
 
     static public final int BOARD_UPDATE_MS = 150;
     static public final int MAX_PLAYER_NAME_LENGTH = 30;
@@ -75,6 +78,14 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
         requestFocus();
         tmp.initializeGridPanel(gridPanel);
         mainStatusLog = statusLog;
+        addWindowListener(new WindowAdapter() {
+            public void WindowClosing(WindowEvent e) {
+                if(client != null)
+                    client.close();
+                if(server != null)
+                    server.close();
+            }
+        });
 
         if ( !tileManager.isInitialized() ) {
             throw new Exception("Failed to initialize tile manager.");
@@ -478,6 +489,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
                 playerNameField.setEditable(false);
 
                 client.initializeGridPanel(gridPanel);
+                client.addDisconnectEventListener(this);
                 gridPanel.setSimulation(client);
             }
         }
@@ -496,6 +508,12 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener 
         }
     }//GEN-LAST:event_JoinGameHandler
 
+    public void onDisconnect(){
+        JoinGameHandler(null);
+        if(!isInMenu)
+            swapCanvas();
+    }
+    
     private void StartSandboxServerHandler(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_StartSandboxServerHandler
         if ( !hostSandboxGameButton.isEnabled() ) {
             return;

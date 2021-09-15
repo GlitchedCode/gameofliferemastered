@@ -21,14 +21,11 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.UpdatePlayerDa
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
 import com.giuseppelamalfa.gameofliferemastered.utils.TimerWrapper;
 import java.io.BufferedReader;
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
@@ -400,18 +397,18 @@ public class SimulationCLIServer extends SimulationInterface {
 
     @Override
     public void computeNextTurn() throws Exception {
-        currentGrid.computeNextTurn();
         // Syncronize grid and player data if the simulation is stepped forward manually
         if (!isRunning()) {
             sendToAll(new SyncGridRequest(null, true));
         }
+        currentGrid.computeNextTurn();
     }
 
     @Override
     public void synchronize() {
-        if (getCurrentTurn() == lastSyncTurn) {
+        /*if (getCurrentTurn() == lastSyncTurn) {
             return;
-        }
+        }*/
         lastSyncTurn = getCurrentTurn();
         try {
             sendToAll(new SyncGridRequest((Grid) currentGrid.clone()));

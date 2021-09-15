@@ -48,15 +48,14 @@ public class CompetitiveGrid extends Grid {
 
     }
 
-    public final static int SIMULATION_PHASE_LENGTH = 80;
-    public final static int PLACEMENT_PHASE_TIME = 20;
+    public final static int SIMULATION_PHASE_LENGTH = 40;
+    public final static int PLACEMENT_PHASE_TIME = 10;
     public final static int GAME_START_WAIT_TIME = 10;
 
     int currentPhaseNumber = 0;
     int secondsPassed = 0;
     State currentState;
     boolean showWinner = false;
-    boolean started = false;
 
     private transient TimerWrapper timer = new TimerWrapper();
 
@@ -72,6 +71,7 @@ public class CompetitiveGrid extends Grid {
         competitive = true;
         gameModeName = "Competitive";
         setState(State.WAITING);
+        syncTurnCount = 0;
     }
 
     @Override
@@ -81,8 +81,8 @@ public class CompetitiveGrid extends Grid {
     @Override
     public synchronized void computeNextTurn() throws Exception {
         super.computeNextTurn();
-        if ( getCurrentTurn() % SIMULATION_PHASE_LENGTH == 0 ) {
-            setState(State.PLACEMENT_PHASE);
+        if (getCurrentTurn() % SIMULATION_PHASE_LENGTH == 0) {
+            setState(State.GAME_STARTED);
         }
     }
 
@@ -99,7 +99,7 @@ public class CompetitiveGrid extends Grid {
     @Override
     public void addPlayer(PlayerData player) {
         super.addPlayer(player);
-        if ( getPlayerCount() == 2 & currentState == State.WAITING ) {
+        if (getPlayerCount() == 2 & currentState == State.WAITING) {
             setState(State.GAME_STARTED);
         }
     }
@@ -110,32 +110,39 @@ public class CompetitiveGrid extends Grid {
      * @param id player's ID
      */
     @Override
-    public void removePlayer(int id) {
-        super.removePlayer(id);
-        if ( getPlayerCount() <= 2 ) {
+    public boolean removePlayer(int id) {
+        if (!super.removePlayer(id)) {
+            return false;
+        }
+        if (getPlayerCount() <= 2) {
             setState(State.WAITING);
         }
+        return true;
     }
 
     @Override
     public void afterSync() {
         super.afterSync();
         secondsPassed = 0;
+        started = turn != 0;
         timer = new TimerWrapper();
-        setState(currentState);
+        currentState.enter(this);
     }
 
     private void setState(State state) {
         timer.cancel();
+        secondsPassed = 0;
         currentState = state;
 
         SimulationInterface sim = getSimulation();
-        if ( sim != null ) {
+        if (sim != null) {
+            isRunning = false;
             sim.synchronize();
         }
-
         state.enter(this);
     }
+
+    boolean started = false;
 
     private void resetGame() {
         isLocked = true;
@@ -143,18 +150,22 @@ public class CompetitiveGrid extends Grid {
         started = false;
         gameStatus = "Waiting for players...";
         clearBoard();
+        turn = 0;
     }
 
     private void startGame() {
         isRunning = false;
+        isLocked = true;
+
+        showWinner = started;
+        started = true;
+        clearBoard(false);
 
         timer.scheduleAtFixedRate(() -> {
             int remaining = GAME_START_WAIT_TIME - secondsPassed;
-            if ( remaining <= 0 ) {
-                secondsPassed = 0;
+            if (remaining <= 0) {
                 setState(State.PLACEMENT_PHASE);
-            }
-            else {
+            } else {
                 secondsPassed++;
                 gameStatus = "Starting in " + remaining + " seconds.";
             }
@@ -164,22 +175,13 @@ public class CompetitiveGrid extends Grid {
     private void endPhase() {
         isRunning = false;
         isLocked = false;
-
-        if ( !started ) {
-            started = true;
-        }
-        else {
-            showWinner = true;
-        }
-        clearBoard(false);
+        showWinner = false;
 
         timer.scheduleAtFixedRate(() -> {
             int remaining = PLACEMENT_PHASE_TIME - secondsPassed;
-            if ( remaining <= 0 ) {
-                secondsPassed = 0;
+            if (remaining <= 0) {
                 setState(State.SIMULATION_PHASE);
-            }
-            else {
+            } else {
                 secondsPassed++;
                 gameStatus = "Placement: " + remaining + " seconds left.";
             }
@@ -189,7 +191,6 @@ public class CompetitiveGrid extends Grid {
     private void startPhase() {
         isRunning = true;
         isLocked = true;
-        showWinner = false;
 
         currentPhaseNumber++;
         gameStatus = "Running phase " + currentPhaseNumber;
@@ -201,8 +202,7 @@ public class CompetitiveGrid extends Grid {
         try {
             CompetitiveGrid ret = (CompetitiveGrid) super.clone();
             return ret;
-        }
-        catch (CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             System.out.println("com.giuseppelamalfa.gameofliferemastered.gamelogic.Grid.clone() failed idk");
             return this;
         }

@@ -89,12 +89,8 @@ public class SimulationGUIServer extends SimulationCLIServer {
 
     @Override
     public void computeNextTurn() throws Exception {
-        currentGrid.computeNextTurn();
-        // Syncronize grid and player data if the simulation is stepped forward manually
-        if (!isRunning()) {
-            sendToAll(new SyncGridRequest(null, true));
-            panel.getGameStatusPanel().setShowWinner(currentGrid.showWinner());
-        }
+        super.computeNextTurn();
+        panel.getGameStatusPanel().setShowWinner(currentGrid.showWinner());
     }
 
     @Override
