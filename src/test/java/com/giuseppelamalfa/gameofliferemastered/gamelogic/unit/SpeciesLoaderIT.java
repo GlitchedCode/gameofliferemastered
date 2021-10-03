@@ -5,11 +5,6 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -19,20 +14,12 @@ import static org.junit.Assert.*;
  */
 public class SpeciesLoaderIT {
 
-    @Before
-    public void setUp() {
-    }
-
-    @After
-    public void tearDown() {
-        SpeciesLoader.tearDown();
-    }
-
     @Test
     public void testLoadIncorrectSpecies() {
         System.out.println("tesLoadIncorrectSpecies");
         try {
-            SpeciesLoader.loadSpeciesFromLocalJSON("badSpecies.json");
+            SpeciesLoader loader = new SpeciesLoader();
+            loader.loadSpeciesFromLocalJSON("badSpecies.json");
         } catch (Exception ex) {
             return;
         }
@@ -44,9 +31,21 @@ public class SpeciesLoaderIT {
     public void testLoadCorrectSpecies() throws Exception {
         System.out.println("testLoadCorrectSpecies");
         try {
-            SpeciesLoader.loadSpeciesFromLocalJSON("testSpecies.json");
+            SpeciesLoader loader = new SpeciesLoader();
+            loader.loadSpeciesFromLocalJSON("testSpecies.json");
         } catch (Exception e) {
             fail("SpeciesLoader should not throw an exception when loading a correct file.");
+        }
+    }
+    
+    @Test
+    public void testCorrectSpeciesTexture() throws Exception {
+        System.out.println("testCorrectSpeciesTexture");
+        try {
+            SpeciesLoader loader = new SpeciesLoader();            
+            loader.loadSpeciesFromLocalJSON("testSpecies.json");
+        } catch (Exception e) {
+            fail("Exception thrown during test.");
         }
     }
 }

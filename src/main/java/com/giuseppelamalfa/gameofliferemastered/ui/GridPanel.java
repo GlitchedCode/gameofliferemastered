@@ -213,6 +213,8 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
         this.simulation = simulation;
         setSideLength(sideLength);
 
+        palette.setSimulation(simulation);
+        
         gameStatusPanel.setTurnCount(simulation.getCurrentTurn());
         gameStatusPanel.setPlayerPanels(simulation.getPlayerRankings());
         gameStatusPanel.setGameModeName(simulation.getGameModeName());
@@ -226,7 +228,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
     }
 
     public void setSimulation(SimulationInterface grid) {
-        GridPanel.this.setSimulation(grid, false);
+        setSimulation(grid, false);
     }
 
     public void setScreenOrigin(Point newOrigin) {

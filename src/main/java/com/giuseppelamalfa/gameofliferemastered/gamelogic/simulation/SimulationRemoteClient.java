@@ -44,6 +44,7 @@ public class SimulationRemoteClient extends SimulationInterface {
     String host;
     int portNumber;
     PlayerData localPlayerData;
+    SpeciesLoader speciesLoader = new SpeciesLoader();
 
     ArrayList<DisconnectEventListener> disconnectListeners = new ArrayList<>();
 
@@ -58,7 +59,7 @@ public class SimulationRemoteClient extends SimulationInterface {
 
     boolean requestedClosure = false;
 
-    public void init(String host, int portNumber) throws IOException, Exception {
+    void init(String host, int portNumber) throws IOException, Exception {
         clientSocket = new Socket(host, portNumber);
         outputStream = new ObjectOutputStream(clientSocket.getOutputStream());
 
@@ -124,6 +125,11 @@ public class SimulationRemoteClient extends SimulationInterface {
     @Override
     public ArrayList<PlayerData> getPlayerRankings() {
         return currentGrid.getPlayerRankings();
+    }
+    
+    @Override
+    public SpeciesLoader getSpeciesLoader(){
+        return speciesLoader;
     }
 
     @Override
@@ -193,7 +199,7 @@ public class SimulationRemoteClient extends SimulationInterface {
 
     @Override
     public void computeNextTurn() throws Exception {
-        currentGrid.computeNextTurn();
+        currentGrid.computeNextTurn(speciesLoader);
     }
 
     @Override
@@ -212,7 +218,7 @@ public class SimulationRemoteClient extends SimulationInterface {
     void handleSyncSpeciesDataRequest(Request r, Integer ID) {
         SyncSpeciesDataRequest speciesData = (SyncSpeciesDataRequest) r;
         try {
-            SpeciesLoader.loadJSONString(speciesData.jsonString);
+            speciesLoader.loadJSONString(speciesData.jsonString);
             panel.getPalette().resetPaletteItems();
         } catch (Exception e) {
             e.printStackTrace();
@@ -323,7 +329,6 @@ public class SimulationRemoteClient extends SimulationInterface {
             Logger.getLogger(SimulationRemoteClient.class.getName()).log(Level.SEVERE, null, ex);
         }
         try {
-            SpeciesLoader.loadJSONString(SpeciesLoader.getLocalSpeciesJSONString());
             panel.getPalette().resetPaletteItems();
         } catch (Exception e) {
 

@@ -24,29 +24,12 @@ import static org.junit.Assert.*;
 public class DeadUnitTest {
 
     static DeadUnit dead = new DeadUnit();
+    SpeciesLoader loader = new SpeciesLoader();
 
-    @BeforeClass
-    public static void setUpClass() {
-        try {
-            SpeciesLoader.loadSpeciesFromLocalJSON("testSpecies.json");
-        } catch (Exception ex) {
-            Logger.getLogger(LifeUnitTest.class.getName()).log(Level.SEVERE, null, ex);
-        }
+    public DeadUnitTest() throws Exception {
+        loader.loadSpeciesFromLocalJSON("testSpecies.json");
     }
-
-    @AfterClass
-    public static void tearDownClass() {
-        SpeciesLoader.tearDown();
-    }
-
-    @Before
-    public void setUp() {
-    }
-
-    @After
-    public void tearDown() {
-    }
-
+    
     /**
      * Test of getBornUnit method, of class DeadUnit.
      */
@@ -54,7 +37,7 @@ public class DeadUnitTest {
     public void testGetBornUnit() {
         System.out.println("getBornUnit");
         Unit[] notEnoughUnits = {
-            SpeciesLoader.getNewUnit(1),
+            loader.getNewUnit(1),
             dead,
             dead,
             dead,
@@ -67,9 +50,9 @@ public class DeadUnitTest {
         }
 
         Unit[] enoughUnits = {
-            SpeciesLoader.getNewUnit(1),
-            SpeciesLoader.getNewUnit(1),
-            SpeciesLoader.getNewUnit(1),
+            loader.getNewUnit(1),
+            loader.getNewUnit(1),
+            loader.getNewUnit(1),
             dead,
             dead,
             dead,
@@ -80,23 +63,23 @@ public class DeadUnitTest {
         }
 
         Unit[] tooManyUnits = {
-            SpeciesLoader.getNewUnit(1),
-            SpeciesLoader.getNewUnit(1),
-            SpeciesLoader.getNewUnit(1),
-            SpeciesLoader.getNewUnit(1),
-            SpeciesLoader.getNewUnit(1),
-            SpeciesLoader.getNewUnit(1),
-            SpeciesLoader.getNewUnit(1),
-            SpeciesLoader.getNewUnit(1),
+            loader.getNewUnit(1),
+            loader.getNewUnit(1),
+            loader.getNewUnit(1),
+            loader.getNewUnit(1),
+            loader.getNewUnit(1),
+            loader.getNewUnit(1),
+            loader.getNewUnit(1),
+            loader.getNewUnit(1),
         };
         for (Unit unit : tooManyUnits) {
             unit.update();
         }
 
-        assertEquals(true, DeadUnit.getBornUnit(notEnoughUnits) == null);
-        assertEquals(true, DeadUnit.getBornUnit(tooManyUnits) == null);
+        assertEquals(true, dead.getBornUnit(notEnoughUnits, loader) == null);
+        assertEquals(true, dead.getBornUnit(tooManyUnits, loader) == null);
         
-        Unit result = DeadUnit.getBornUnit(enoughUnits);
+        Unit result = dead.getBornUnit(enoughUnits, loader);
         assertEquals(true, result != null);
     }
 }

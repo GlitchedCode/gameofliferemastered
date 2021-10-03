@@ -5,6 +5,7 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.ui;
 
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationInterface;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
 import com.giuseppelamalfa.gameofliferemastered.utils.ImageManager;
 import java.awt.BasicStroke;
@@ -61,9 +62,11 @@ public class UnitPalette extends JPanel implements MouseListener {
     static public final Color UNSELECTED_BGCOLOR = new Color(0, 0, 0, 255);
     static public final Color INACTIVE_OVERLAY_COLOR = new Color(0, 0, 0, 127);
 
-    protected int selectedIndex = 0;
-    protected ArrayList<PaletteItem> items = new ArrayList<>();
-    protected ImageManager tileManager;
+    int selectedIndex = 0;
+    ArrayList<PaletteItem> items = new ArrayList<>();
+    ImageManager tileManager;
+    
+    SpeciesLoader speciesLoader = new SpeciesLoader();
 
     /*
     * MOUSE INPUT HANDLING
@@ -100,9 +103,9 @@ public class UnitPalette extends JPanel implements MouseListener {
     @Override
     public void mousePressed(MouseEvent me) {
     }
-
-    public ArrayList<PaletteItem> getPaletteItems() {
-        return items;
+    
+    public void setSimulation(SimulationInterface simulation){
+        speciesLoader = simulation.getSpeciesLoader();
     }
 
     public void addPaletteItem(int speciesID, boolean active, int count) throws Exception {
@@ -159,7 +162,7 @@ public class UnitPalette extends JPanel implements MouseListener {
         if ( !item.active | item.count == 0 ) {
             return null;
         }
-        Unit ret = (Unit) SpeciesLoader.getNewUnit(item.getSpeciesID(), playerID);
+        Unit ret = (Unit) speciesLoader.getNewUnit(item.getSpeciesID(), playerID);
         if ( item.count < 0 ) {
             item.count--;
         }
@@ -224,19 +227,19 @@ public class UnitPalette extends JPanel implements MouseListener {
 
         g2.setStroke(new BasicStroke(1));
 
-        for (int i = 0; i < items.size(); i++) {
-            PaletteItem item = items.get(i);
-            offset = i * (1 + ICON_SIDE_LENGTH);
+        for (int index : speciesLoader.getSpeciesIDs()) {
+            PaletteItem item = items.get(index);
+            offset = index * (1 + ICON_SIDE_LENGTH);
             // icon
             AffineTransform xform = new AffineTransform();
             xform.translate(offset, 1);
             xform.scale(ICON_SCALE, ICON_SCALE);
-            Image img = tileManager.getImage(SpeciesLoader.getSpeciesData(item.speciesID).textureCode);
+            Image img = tileManager.getImage(speciesLoader.getSpeciesData(item.speciesID).textureCode);
             g2.drawImage(img, xform, this);
 
             g2.setColor(getForeground());
             g2.setFont(new Font("SansSerif", Font.PLAIN, 12));
-            offset = i * (1 + ICON_SIDE_LENGTH);
+            offset = index * (1 + ICON_SIDE_LENGTH);
 
             // count
             if ( item.count >= 0 ) {
@@ -254,8 +257,8 @@ public class UnitPalette extends JPanel implements MouseListener {
     public void resetPaletteItems() throws Exception {
         items.clear();
         selectedIndex = 0;
-        for (int c = 0; c < SpeciesLoader.getSpeciesCount(); c++) {
-            addPaletteItem(c, true);
+        for (int index : speciesLoader.getSpeciesIDs() ){
+            addPaletteItem(index, true);
         }
     }
 

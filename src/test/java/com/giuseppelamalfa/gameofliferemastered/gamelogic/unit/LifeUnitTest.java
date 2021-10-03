@@ -5,12 +5,6 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -21,27 +15,10 @@ import static org.junit.Assert.*;
 public class LifeUnitTest {
 
     static DeadUnit dead = new DeadUnit();
+    SpeciesLoader loader = new SpeciesLoader();
 
-    @BeforeClass
-    public static void setUpClass() {
-        try {
-            SpeciesLoader.loadSpeciesFromLocalJSON("testSpecies.json");
-        } catch (Exception ex) {
-            Logger.getLogger(LifeUnitTest.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-        SpeciesLoader.tearDown();
-    }
-
-    @Before
-    public void setUp() {
-    }
-
-    @After
-    public void tearDown() {
+    public LifeUnitTest() throws Exception {
+        loader.loadSpeciesFromLocalJSON("testSpecies.json");    
     }
 
     @Test
@@ -49,10 +26,10 @@ public class LifeUnitTest {
         System.out.println("testFriendlyRule");
 
         Unit[] enoughUnits = {
-            SpeciesLoader.getNewUnit(1),
-            SpeciesLoader.getNewUnit(1),
-            SpeciesLoader.getNewUnit(1),
-            SpeciesLoader.getNewUnit(0),
+            loader.getNewUnit(1),
+            loader.getNewUnit(1),
+            loader.getNewUnit(1),
+            loader.getNewUnit(0),
             dead,
             dead,
             dead,
@@ -63,11 +40,11 @@ public class LifeUnitTest {
         }
 
         Unit[] tooManyUnits = {
-            SpeciesLoader.getNewUnit(1),
-            SpeciesLoader.getNewUnit(1),
-            SpeciesLoader.getNewUnit(1),
-            SpeciesLoader.getNewUnit(1),
-            SpeciesLoader.getNewUnit(0),
+            loader.getNewUnit(1),
+            loader.getNewUnit(1),
+            loader.getNewUnit(1),
+            loader.getNewUnit(1),
+            loader.getNewUnit(0),
             dead,
             dead,
             dead
@@ -77,8 +54,8 @@ public class LifeUnitTest {
         }
 
         Unit[] notEnoughUnits = {
-            SpeciesLoader.getNewUnit(1),
-            SpeciesLoader.getNewUnit(0),
+            loader.getNewUnit(1),
+            loader.getNewUnit(0),
             dead,
             dead,
             dead,
@@ -90,7 +67,7 @@ public class LifeUnitTest {
             unit.update();
         }
 
-        Unit instance = SpeciesLoader.getNewUnit(1); // snake unit with 2hp
+        Unit instance = loader.getNewUnit(1); // snake unit with 2hp
         instance.update();
 
         int previousHealth = instance.getHealth();
@@ -110,10 +87,10 @@ public class LifeUnitTest {
         System.out.println("testHostileRule");
 
         Unit[] enoughUnits = {
-            SpeciesLoader.getNewUnit(0),
-            SpeciesLoader.getNewUnit(0),
-            SpeciesLoader.getNewUnit(1),
-            SpeciesLoader.getNewUnit(1),
+            loader.getNewUnit(0),
+            loader.getNewUnit(0),
+            loader.getNewUnit(1),
+            loader.getNewUnit(1),
             dead,
             dead,
             dead,
@@ -124,12 +101,12 @@ public class LifeUnitTest {
         }
 
         Unit[] tooManyUnits = {
-            SpeciesLoader.getNewUnit(0),
-            SpeciesLoader.getNewUnit(0),
-            SpeciesLoader.getNewUnit(0),
-            SpeciesLoader.getNewUnit(0),
-            SpeciesLoader.getNewUnit(1),
-            SpeciesLoader.getNewUnit(1),
+            loader.getNewUnit(0),
+            loader.getNewUnit(0),
+            loader.getNewUnit(0),
+            loader.getNewUnit(0),
+            loader.getNewUnit(1),
+            loader.getNewUnit(1),
             dead,
             dead,
         };
@@ -138,8 +115,8 @@ public class LifeUnitTest {
         }
 
         Unit[] notEnoughUnits = {
-            SpeciesLoader.getNewUnit(1),
-            SpeciesLoader.getNewUnit(1),
+            loader.getNewUnit(1),
+            loader.getNewUnit(1),
             dead,
             dead,
             dead,
@@ -148,7 +125,7 @@ public class LifeUnitTest {
             dead
         };
 
-        Unit instance = SpeciesLoader.getNewUnit(1); // snake unit with 2hp
+        Unit instance = loader.getNewUnit(1); // snake unit with 2hp
         instance.update();
         int previousHealth = instance.getHealth();
         instance.computeNextTurn(enoughUnits);
@@ -168,7 +145,7 @@ public class LifeUnitTest {
     @Test
     public void testKill() {
         System.out.println("kill");
-        Unit instance = SpeciesLoader.getNewUnit(0);
+        Unit instance = loader.getNewUnit(0);
         instance.kill();
         assertEquals(instance.isAlive(), false);
     }
@@ -179,7 +156,7 @@ public class LifeUnitTest {
     @Test
     public void testIsAlive() {
         System.out.println("isAlive");
-        Unit instance = SpeciesLoader.getNewUnit(0);
+        Unit instance = loader.getNewUnit(0);
         instance.update();
         boolean result = instance.isAlive();
         assertEquals(result, true);
@@ -191,9 +168,9 @@ public class LifeUnitTest {
     @Test
     public void testAttack() {
         System.out.println("attack");
-        LifeUnit snake = (LifeUnit) SpeciesLoader.getNewUnit(1);
-        LifeUnit cell = (LifeUnit) SpeciesLoader.getNewUnit(0);
-        Unit mimic = SpeciesLoader.getNewUnit(2);
+        LifeUnit snake = (LifeUnit) loader.getNewUnit(1);
+        LifeUnit cell = (LifeUnit) loader.getNewUnit(0);
+        Unit mimic = loader.getNewUnit(2);
         
         snake.update();
         cell.update();
@@ -218,7 +195,7 @@ public class LifeUnitTest {
     public void testIncrementHealth() {
         System.out.println("incrementHealth");
         int increment = 2;
-        Unit instance = SpeciesLoader.getNewUnit(1);
+        Unit instance = loader.getNewUnit(1);
         int previous = instance.getHealth();
         instance.incrementHealth(increment);
         assertEquals(true, previous + increment == instance.getHealth());

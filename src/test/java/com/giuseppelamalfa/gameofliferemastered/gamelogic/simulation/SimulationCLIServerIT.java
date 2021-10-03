@@ -25,22 +25,15 @@ public class SimulationCLIServerIT {
 
     SimulationCLIServer server;
     SimulationRemoteClient[] clients;
-
+    SpeciesLoader loader;
+    
     ReentrantLock lock = new ReentrantLock();
-
-    @BeforeClass
-    public static void setUpClass() throws Exception {
-        SpeciesLoader.loadSpeciesFromLocalJSON("testSpecies.json");
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-        SpeciesLoader.tearDown();
-    }
 
     @Before
     public void setUp() throws Exception {
         server = new SimulationCLIServer(8000, 4, 10, 10, GameMode.SANDBOX);
+        server.reloadSpeciesConf("testSpecies.json");
+        loader = server.getSpeciesLoader();
         server.computeNextTurn();
 
         clients = new SimulationRemoteClient[]{
@@ -96,7 +89,7 @@ public class SimulationCLIServerIT {
                 }
 
                 SimulationRemoteClient client = clients[clientID];
-                client.setUnit(r, c, SpeciesLoader.getNewUnit(0, client.getLocalPlayerID()));
+                client.setUnit(r, c, loader.getNewUnit(0, client.getLocalPlayerID()));
                 sleep(200);
             }
         }

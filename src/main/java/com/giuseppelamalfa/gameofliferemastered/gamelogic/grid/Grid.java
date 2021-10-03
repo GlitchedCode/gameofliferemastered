@@ -53,7 +53,7 @@ public class Grid implements Serializable, Cloneable {
     private transient SimulationInterface simulation;
     private transient Lock gridLock = new ReentrantLock();
     private transient Lock turnLock = new ReentrantLock();
-
+    
     protected static final DeadUnit deadUnit = new DeadUnit();
     protected static final int PROCESSOR_COUNT = Runtime.getRuntime().availableProcessors();
 
@@ -69,6 +69,7 @@ public class Grid implements Serializable, Cloneable {
      *
      * @param rows Number of rows
      * @param cols Number of columns
+     * @param loader
      * @throws Exception
      */
     public Grid(Integer rows, Integer cols) throws Exception {
@@ -106,7 +107,7 @@ public class Grid implements Serializable, Cloneable {
             return this;
         }
     }
-
+    
     public final boolean areGridContentsEqual(Grid other) {
         int rows = getRowCount();
         int cols = getColumnCount();
@@ -328,7 +329,7 @@ public class Grid implements Serializable, Cloneable {
         }
     }
 
-    private void sectorSurviveReproduce(int sectorRow, int sectorColumn) throws GameLogicException {
+    private void sectorSurviveReproduce(int sectorRow, int sectorColumn, SpeciesLoader speciesLoader) throws GameLogicException {
         gridLock.lock();
         Point topLeftBoundary = getSectorTopLeftBoundary(sectorRow, sectorColumn);
         Point bottomRightBoundary = getSectorBottomRightBoundary(sectorRow, sectorColumn);
@@ -341,11 +342,11 @@ public class Grid implements Serializable, Cloneable {
             gridLock.unlock();
         }
         boolean active = survivalStep(topLeftBoundary, bottomRightBoundary);
-        active = active | reproductionStep(topLeftBoundary, bottomRightBoundary);
+        active = active | reproductionStep(topLeftBoundary, bottomRightBoundary, speciesLoader);
         sectorFlags.put(sectorRow, sectorColumn, active);
     }
 
-    private void startBatchSurviveReproduce(ConcurrentLinkedQueue<SectorCoords> processedSectors) throws GameLogicException, InterruptedException {
+    private void startBatchSurviveReproduce(ConcurrentLinkedQueue<SectorCoords> processedSectors, SpeciesLoader speciesLoader) throws GameLogicException, InterruptedException {
         ArrayList<Thread> threads = new ArrayList<>();
 
         // Divide the sectors we need to process into batches
@@ -359,7 +360,7 @@ public class Grid implements Serializable, Cloneable {
                     SectorCoords coords = processedSectors.poll();
                     try {
                         if (coords != null) {
-                            sectorSurviveReproduce(coords.row, coords.col);
+                            sectorSurviveReproduce(coords.row, coords.col, speciesLoader);
                         }
                     } catch (GameLogicException ex) {
                         Logger.getLogger(Grid.class.getName()).log(Level.SEVERE, null, ex);
@@ -375,7 +376,7 @@ public class Grid implements Serializable, Cloneable {
         while (!processedSectors.isEmpty()) {
             SectorCoords coords = processedSectors.poll();
             if (coords != null) {
-                sectorSurviveReproduce(coords.row, coords.col);
+                sectorSurviveReproduce(coords.row, coords.col, speciesLoader);
             }
         }
 
@@ -392,7 +393,7 @@ public class Grid implements Serializable, Cloneable {
      *
      * @throws Exception
      */
-    private void advance() throws Exception {
+    private void advance(SpeciesLoader speciesLoader) throws Exception {
         turnLock.lock();
         try {
             unitFoundThisTurn = false;
@@ -409,7 +410,7 @@ public class Grid implements Serializable, Cloneable {
             }
 
             if (processedSectors.size() > 0) {
-                startBatchSurviveReproduce(processedSectors);
+                startBatchSurviveReproduce(processedSectors, speciesLoader);
             }
 
             cleanupStep();
@@ -428,8 +429,8 @@ public class Grid implements Serializable, Cloneable {
         }
     }
 
-    public synchronized void computeNextTurn() throws Exception {
-        advance();
+    public synchronized void computeNextTurn(SpeciesLoader speciesLoader) throws Exception {
+        advance(speciesLoader);
     }
 
     /**
@@ -727,7 +728,7 @@ public class Grid implements Serializable, Cloneable {
         return aliveNextTurn;
     }
 
-    private boolean reproductionStep(Point topLeftBoundary, Point bottomRightBoundary) {
+    private boolean reproductionStep(Point topLeftBoundary, Point bottomRightBoundary, SpeciesLoader speciesLoader) {
         boolean aliveNextTurn = false;
         for (int row = topLeftBoundary.y; row <= bottomRightBoundary.y; row++) {
             for (int col = topLeftBoundary.x; col <= bottomRightBoundary.x; col++) {
@@ -742,7 +743,7 @@ public class Grid implements Serializable, Cloneable {
                 // Run reproduction checks only if there are adjacent alive units
                 for (int i = 0; i < 8; i++) {
                     if (adjacentUnits[i].isAlive()) {
-                        bornUnit = DeadUnit.getBornUnit(adjacentUnits);
+                        bornUnit = deadUnit.getBornUnit(adjacentUnits, speciesLoader);
                         break;
                     }
                 }

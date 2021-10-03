@@ -88,6 +88,7 @@ public class SimulationCLIServer extends SimulationInterface {
     private int nextClientID = 0;
     private Thread acceptConnectionThread;
     private int lastSyncTurn = 0;
+    private final SpeciesLoader speciesLoader = new SpeciesLoader();
 
     protected void writeToStatusLog(String msg) {
         System.out.println(msg);
@@ -132,8 +133,6 @@ public class SimulationCLIServer extends SimulationInterface {
 
         // Read command line arguments
         try {
-            SpeciesLoader.loadSpeciesFromLocalJSON();
-
             for (int i = 0; i < args.length; i++) {
                 String currentArg = args[i];
                 switch (currentArg) {
@@ -189,15 +188,21 @@ public class SimulationCLIServer extends SimulationInterface {
     public SimulationCLIServer(int portNumber, int playerCount,
             int rowCount, int columnCount, GameMode mode) throws Exception {
         this.mode = mode;
+        speciesLoader.loadSpeciesFromLocalJSON();
         initializeRemoteServer(portNumber, playerCount, rowCount, columnCount);
     }
 
     public SimulationCLIServer(int rowCount, int columnCount) throws Exception {
         mode = GameMode.SANDBOX;
+        speciesLoader.loadSpeciesFromLocalJSON();
         currentGrid = new Grid(rowCount, columnCount);
         currentGrid.setSimulation(this);
     }
 
+    void reloadSpeciesConf(String path) throws Exception{
+        speciesLoader.loadSpeciesFromLocalJSON(path);
+    }
+    
     protected void initializeRemoteServer(int portNumber, int playerCount,
             int rowCount, int columnCount) throws IOException, Exception {
         if (playerCount < 2 | playerCount > MAX_PLAYER_COUNT) {
@@ -255,7 +260,7 @@ public class SimulationCLIServer extends SimulationInterface {
                                 PlayerData tmp = new PlayerData(clientData.playerData);
                                 currentGrid.addPlayer(client.playerData);
                                 outputStream.writeObject(new UpdatePlayerDataRequest(tmp, true, true));
-                                outputStream.writeObject(new SyncSpeciesDataRequest(SpeciesLoader.getLocalSpeciesJSONString()));
+                                outputStream.writeObject(new SyncSpeciesDataRequest(speciesLoader.getJSONString()));
                                 outputStream.writeObject(new GameStatusRequest(isRunning(), getStatusString()));
                                 outputStream.writeObject(new SyncGridRequest(currentGrid));
 
@@ -356,6 +361,11 @@ public class SimulationCLIServer extends SimulationInterface {
     public ArrayList<PlayerData> getPlayerRankings() {
         return currentGrid.getPlayerRankings();
     }
+    
+    @Override
+    public SpeciesLoader getSpeciesLoader(){
+        return speciesLoader;
+    }
 
     @Override
     public int getRowCount() {
@@ -401,7 +411,7 @@ public class SimulationCLIServer extends SimulationInterface {
         if (!isRunning()) {
             sendToAll(new SyncGridRequest(null, true));
         }
-        currentGrid.computeNextTurn();
+        currentGrid.computeNextTurn(speciesLoader);
     }
 
     @Override

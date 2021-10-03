@@ -11,6 +11,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -23,15 +25,15 @@ public class SpeciesLoader {
     static public final String RULE_CLASS_PATH = "com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.";
     static public final String UNIT_CLASS_PATH = "com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.";
 
-    static String localSpeciesDataJSON = "";
+    String loadedJSON = "";
 
-    static HashMap<Integer, SpeciesData> speciesData;
-
-    public static synchronized void loadSpeciesFromLocalJSON(String path)
+    HashMap<Integer, SpeciesData> speciesData = new HashMap<>();
+    
+    public synchronized void loadSpeciesFromLocalJSON(String path)
             throws IOException, ClassNotFoundException, InstantiationException,
             IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, Exception {
 
-        // Load species.json into localSpeciesDataJSON
+        // Load species.json into loadedJSON
         InputStream istream = new SpeciesLoader().getClass().
                 getClassLoader().getResourceAsStream(path);
         BufferedReader reader = new BufferedReader(new InputStreamReader(istream));
@@ -40,20 +42,16 @@ public class SpeciesLoader {
         while ((line = reader.readLine()) != null) {
             strBuilder.append(line);
         }
-        localSpeciesDataJSON = strBuilder.toString();
+        loadedJSON = strBuilder.toString();
 
-        loadJSONString(localSpeciesDataJSON);
+        loadJSONString(loadedJSON);
     }
 
-    public static synchronized void loadSpeciesFromLocalJSON() 
-            throws IOException, ClassNotFoundException, InstantiationException,
-            IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, Exception {
+    public synchronized void loadSpeciesFromLocalJSON() throws Exception {
         loadSpeciesFromLocalJSON("species.json");
     }
 
-    public static synchronized void loadJSONString(String jsonString)
-            throws ClassNotFoundException, InstantiationException, IllegalAccessException,
-            IllegalArgumentException, InvocationTargetException, NoSuchMethodException, Exception {
+    public synchronized void loadJSONString(String jsonString) throws Exception {
 
         speciesData = new HashMap<>();
         HashMap<String, Integer> speciesIDs = new HashMap<>();
@@ -83,19 +81,19 @@ public class SpeciesLoader {
         }
     }
 
-    public static String getLocalSpeciesJSONString() {
-        return localSpeciesDataJSON;
+    public String getJSONString() {
+        return loadedJSON;
     }
 
-    public static synchronized SpeciesData getSpeciesData(int index) {
+    public synchronized SpeciesData getSpeciesData(int index) {
         return speciesData.get(index);
     }
 
-    public static synchronized int getSpeciesCount() {
-        return speciesData.size();
+    public synchronized Set<Integer> getSpeciesIDs() {
+        return speciesData.keySet();
     }
 
-    public static synchronized Unit getNewUnit(int speciesID, int playerID) throws IllegalArgumentException {
+    public synchronized Unit getNewUnit(int speciesID, int playerID) throws IllegalArgumentException {
         try {
             SpeciesData data = speciesData.get(speciesID);
             return (Unit) data.constructor.newInstance(data, playerID);
@@ -105,12 +103,12 @@ public class SpeciesLoader {
         }
     }
 
-    public static synchronized Unit getNewUnit(int speciesID) throws IllegalArgumentException {
+    public synchronized Unit getNewUnit(int speciesID) throws IllegalArgumentException {
         return getNewUnit(speciesID, 0);
     }
 
-    public static synchronized void tearDown() {
-        localSpeciesDataJSON = "";
+    public synchronized void tearDown() {
+        loadedJSON = "";
         speciesData = null;
     }
 

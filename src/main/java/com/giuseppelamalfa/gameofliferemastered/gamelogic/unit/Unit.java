@@ -39,6 +39,8 @@ public interface Unit {
     // del giocatore proprietario ed alla direzione relativa in cui si trova.
     // La direzione è momentaneamente ignorata in ogni implementazione.
     public boolean attack(int adjacencyPosition, Unit target);
+    // Restituisce i dati di specie utilizzati durante l'inizializzazione.
+    public SpeciesData getSpeciesData();
     // Restituisce l'ID della specie a cui appartiene l'unità.
     public int getSpeciesID();
     // Restituisce l'ID della specie a cui l'unità può dare vita durante la fase

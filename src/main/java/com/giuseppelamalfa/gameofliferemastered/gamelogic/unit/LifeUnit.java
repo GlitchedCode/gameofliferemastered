@@ -19,41 +19,30 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
 
     public final int speciesID;
 
-    protected State currentState = State.INVALID;
-    protected State nextTurnState = State.INVALID;
+    public final SpeciesData speciesData;
+    
+    private State currentState = State.INVALID;
+    private State nextTurnState = State.INVALID;
 
-    protected Set<Integer> friendlySpecies;
-    protected Set<Integer> hostileSpecies;
+    private int health;
 
-    protected int health;
-    protected boolean healthChanged = false;
+    private final int playerID;
+    private boolean competitive = false;
 
-    protected RuleInterface<Integer> friendlyCountSelector;
-    protected RuleInterface<Integer> hostileCountSelector;
-    protected RuleInterface<Integer> reproductionSelector;
-
-    protected final int playerID;
-    protected boolean competitive = false;
-
-    private void initSpeciesData(SpeciesData data) {
+    protected void initSpeciesData(SpeciesData data) {
         health = data.health;
         nextTurnState = data.initialState;
-
-        friendlySpecies = data.friendlySpecies;
-        hostileSpecies = data.hostileSpecies;
-
-        friendlyCountSelector = data.friendlyCountSelector;
-        hostileCountSelector = data.hostileCountSelector;
-        reproductionSelector = data.reproductionSelector;
     }
 
     public LifeUnit(SpeciesData data) {
+        speciesData = data;
         speciesID = data.speciesID;
         playerID = 0;
         initSpeciesData(data);
     }
 
     public LifeUnit(SpeciesData data, Integer playerID) {
+        speciesData = data;
         this.playerID = playerID;
         speciesID = data.speciesID;
 
@@ -61,6 +50,7 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
     }
 
     public LifeUnit(SpeciesData data, Integer playerID, Boolean competitive) {
+        speciesData = data;
         this.playerID = playerID;
         speciesID = data.speciesID;
         this.competitive = competitive;
@@ -99,7 +89,7 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
                 continue;
             }
 
-            if (friendlySpecies.contains(current.getSpeciesID())) {
+            if (getFriendlySpecies().contains(current.getSpeciesID())) {
                 friendlyCount++;
             }
 
@@ -114,8 +104,8 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
 
         // rule #1: population
         // rule #2: hostility
-        boolean friendlyPenalty = !friendlyCountSelector.test(friendlyCount);
-        boolean hostilePenalty = !hostileCountSelector.test(hostileCount);
+        boolean friendlyPenalty = !getFriendlyCountSelector().test(friendlyCount);
+        boolean hostilePenalty = !getHostileCountSelector().test(hostileCount);
 
         if (friendlyPenalty | hostilePenalty) {
             healthIncrement--;
@@ -159,7 +149,6 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
             currentState.enter(this);
         }
         nextTurnState = State.INVALID;
-        healthChanged = false;
     }
 
     @Override
@@ -185,6 +174,11 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
         return currentState.reproductionModifier(isAlive(), adjacencyPostition);
     }
 
+    protected boolean isHostile(Unit unit){
+        return (competitive & unit.getPlayerID() != playerID)
+                | getHostileSpecies().contains(unit.getSpeciesID());
+    }
+    
     /**
      * Returns true if the unit can attack based on the unit's position relative
      * to the caller
@@ -195,8 +189,7 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
     @Override
     public boolean attack(int adjacencyPosition, Unit unit) {
         boolean ret = currentState.attackModifier(isAlive(), adjacencyPosition);
-        ret &= (competitive & unit.getPlayerID() != playerID)
-                | hostileSpecies.contains(unit.getSpeciesID());
+        ret &= isHostile(unit);
         if (ret) {
             unit.incrementHealth(-1);
         }
@@ -218,6 +211,10 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
         return nextTurnState;
     }
 
+    protected final void setCurrentState(State arg) {
+        currentState = arg;
+    }
+    
     /**
      * Get the unit's state in the current turn
      *
@@ -237,6 +234,11 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
     public int getSpeciesID() {
         return speciesID;
     }
+    
+    @Override
+    public SpeciesData getSpeciesData() {
+        return speciesData;
+    }
 
     @Override
     public int getBornSpeciesID() {
@@ -248,7 +250,7 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
      */
     @Override
     public final Set<Integer> getFriendlySpecies() {
-        return friendlySpecies;
+        return speciesData.friendlySpecies;
     }
 
     /**
@@ -256,17 +258,17 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
      */
     @Override
     public final Set<Integer> getHostileSpecies() {
-        return hostileSpecies;
+        return speciesData.hostileSpecies;
     }
 
     @Override
     public RuleInterface<Integer> getFriendlyCountSelector() {
-        return friendlyCountSelector;
+        return speciesData.friendlyCountSelector;
     }
 
     @Override
     public RuleInterface<Integer> getHostileCountSelector() {
-        return hostileCountSelector;
+        return speciesData.hostileCountSelector;
     }
 
     /**
@@ -275,9 +277,13 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
      */
     @Override
     public RuleInterface<Integer> getReproductionSelector() {
-        return reproductionSelector;
+        return speciesData.reproductionSelector;
     }
 
+    protected final void setHealth(int arg){
+        health = arg;
+    }
+    
     /**
      * @return unit's health points
      */
@@ -294,12 +300,11 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
     @Override
     public void incrementHealth(int increment) {
         health = health + increment;
-        healthChanged = true;
     }
 
     @Override
     public String toString() {
-        String ret = SpeciesLoader.getSpeciesData(speciesID).name;
+        String ret = speciesData.name;
         ret += "@" + hashCode();
         ret += " " + currentState.toString();
         return ret;
@@ -317,12 +322,12 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
 
     @Override
     public String getTextureCode() {
-        return SpeciesLoader.getSpeciesData(speciesID).textureCode;
+        return speciesData.textureCode;
     }
 
     @Override
     public BufferedImageOp getFilter() {
-        return SpeciesLoader.getSpeciesData(speciesID).filter;
+        return speciesData.filter;
     }
 
 }

@@ -60,7 +60,7 @@ public class DeadUnit implements Unit, Serializable, Cloneable {
 
     // This function implements rule #3: reproduction
     @SuppressWarnings("unchecked")
-    public static final Unit getBornUnit(Unit[] adjacentUnits) {
+    public final Unit getBornUnit(Unit[] adjacentUnits, SpeciesLoader speciesLoader) {
         // Contains how many units of a given species are adjacent.
         HashMap<Integer, ReproductionCounter> reproductionCounters = new HashMap<>();
         int candidate = -1;
@@ -92,7 +92,7 @@ public class DeadUnit implements Unit, Serializable, Cloneable {
             }
             else {
                 reproductionCounters.put(species, new ReproductionCounter(current.getPlayerID()));
-                reproductionSelectors.put(species, SpeciesLoader.getSpeciesData(species).reproductionSelector);
+                reproductionSelectors.put(species, speciesLoader.getSpeciesData(species).reproductionSelector);
             }
         }
 
@@ -127,7 +127,7 @@ public class DeadUnit implements Unit, Serializable, Cloneable {
 
         // If we have exactly as many units are necessary for reproduction,
         // we instantiate a new unit and store it in bornUnit.
-        return SpeciesLoader.getNewUnit(candidate, candidateCounter.getPlayerID());
+        return speciesLoader.getNewUnit(candidate, candidateCounter.getPlayerID());
     }
 
     /**
@@ -136,6 +136,11 @@ public class DeadUnit implements Unit, Serializable, Cloneable {
      */
     @Override
     public void computeNextTurn(Unit[] adjacentUnits) {
+    }
+    
+    @Override
+    public SpeciesData getSpeciesData(){
+        return null;
     }
 
     @Override

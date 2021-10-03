@@ -6,14 +6,11 @@
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.grid;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationInterface;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
 import java.util.ArrayList;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -23,16 +20,10 @@ import static org.junit.Assert.*;
  */
 public class GridTest {
 
-    public GridTest() {
-    }
-
-    @BeforeClass
-    public static void setUpClass() throws Exception {
-        SpeciesLoader.loadSpeciesFromLocalJSON("testSpecies.json");
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
+    SpeciesLoader loader = new SpeciesLoader();
+    
+    public GridTest() throws Exception {
+        loader.loadSpeciesFromLocalJSON("testSpecies.json");
     }
 
     @Before
@@ -51,7 +42,7 @@ public class GridTest {
         System.out.println("getCurrentTurn");
         Grid instance = new Grid(64, 64);
         assertEquals(true, instance.getCurrentTurn() == 0);
-        instance.computeNextTurn();
+        instance.computeNextTurn(loader);
         assertEquals(true, instance.getCurrentTurn() == 1);
     }
 
@@ -85,7 +76,7 @@ public class GridTest {
             players[i].ID = i;
             instance.addPlayer(players[i]);
             for (int j = 0; j <= i; j++) {
-                instance.setUnit(i, j, SpeciesLoader.getNewUnit(0, i));
+                instance.setUnit(i, j, loader.getNewUnit(0, i));
             }
         }
         ArrayList<PlayerData> result = instance.getPlayerRankings();
@@ -104,10 +95,22 @@ public class GridTest {
         PlayerData player = new PlayerData();
         player.ID = 0;
         instance.addPlayer(player);
-        Unit unit = SpeciesLoader.getNewUnit(0, 0);
+        Unit unit = loader.getNewUnit(0, 0);
         instance.setUnit(64, 64, unit);
         assertEquals(unit, instance.getUnit(64, 64));
         instance.resize(64, 64);
         assertEquals(false, instance.getUnit(64, 64).isAlive());
+    }
+    
+    @Test
+    public void testAreGridContentsEqual() {
+        System.out.println("areGridContentsEqual");
+        Grid other = null;
+        Grid instance = null;
+        boolean expResult = false;
+        boolean result = instance.areGridContentsEqual(other);
+        assertEquals(expResult, result);
+        // TODO review the generated test code and remove the default call to fail.
+        fail("The test case is a prototype.");
     }
 }

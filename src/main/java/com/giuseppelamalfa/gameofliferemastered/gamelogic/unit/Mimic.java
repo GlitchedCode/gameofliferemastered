@@ -5,6 +5,9 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
+import java.util.Set;
+
 /**
  *
  * @author glitchedcode
@@ -16,18 +19,40 @@ public class Mimic extends LifeUnit {
     private int turnsTillReplication = 0;
 
     private Unit replicationTarget;
-    private int replicatedSpeciesID = -1;
+    private SpeciesData replicatedSpeciesData = null;
+    
+    private Set<Integer> friendlySpecies;
+    private Set<Integer> hostileSpecies;
+    
+    private RuleInterface<Integer> friendlyCountSelector;
+    private RuleInterface<Integer> hostileCountSelector;
+    private RuleInterface<Integer> reproductionSelector;
 
+    @Override
+    protected void initSpeciesData(SpeciesData data){
+        super.initSpeciesData(data);
+        
+        friendlySpecies =  data.friendlySpecies;
+        hostileSpecies = data.hostileSpecies;
+        
+        friendlyCountSelector = data.friendlyCountSelector;
+        hostileCountSelector = data.hostileCountSelector;
+        reproductionSelector = data.friendlyCountSelector;
+    }
+    
     public Mimic(SpeciesData data) {
         super(data);
+        initSpeciesData(data);
     }
 
     public Mimic(SpeciesData data, Integer playerID) {
         super(data, playerID);
+        initSpeciesData(data);
     }
 
     public Mimic(SpeciesData data, Integer playerID, Boolean competitive) {
         super(data, playerID, competitive);
+        initSpeciesData(data);
     }
 
     @Override
@@ -36,7 +61,7 @@ public class Mimic extends LifeUnit {
         for (int i = 0; i < 8; i++) // conto le unità ostili ed amichevoli
         {
             Unit current = adjacentUnits[i];
-            if(replicatedSpeciesID != -1 | replicationTarget != null) {
+            if(replicatedSpeciesData != null | replicationTarget != null) {
                 break;
             }
             if (current.getSpeciesID() != speciesID & current.isAlive()) {
@@ -47,10 +72,10 @@ public class Mimic extends LifeUnit {
 
     @Override
     public boolean attack(int adjacencyPosition, Unit unit) {
-        boolean ret = currentState.attackModifier(isAlive(), adjacencyPosition);
-        ret &= (competitive & unit.getPlayerID() != playerID)
+        boolean ret = getCurrentState().attackModifier(isAlive(), adjacencyPosition);
+        ret &= (isCompetitive() & unit.getPlayerID() != getPlayerID())
                 | (hostileSpecies.contains(unit.getSpeciesID())
-                ^ (replicatedSpeciesID == -1 & unit.getSpeciesID() != speciesID));
+                ^ (replicatedSpeciesData == null & unit.getSpeciesID() != speciesID));
         if (ret) {
             unit.incrementHealth(-1);
         }
@@ -70,37 +95,35 @@ public class Mimic extends LifeUnit {
     }
 
     protected void replicate(Unit unit) {
-        replicatedSpeciesID = unit.getSpeciesID();
-        SpeciesData data = SpeciesLoader.getSpeciesData(replicatedSpeciesID);
-        SpeciesData myData = SpeciesLoader.getSpeciesData(speciesID);
+        replicatedSpeciesData = unit.getSpeciesData();
 
-        currentState = unit.getCurrentState();
         friendlySpecies = unit.getFriendlySpecies();
         hostileSpecies = unit.getHostileSpecies();
         friendlyCountSelector = unit.getFriendlyCountSelector();
         hostileCountSelector = unit.getHostileCountSelector();
         reproductionSelector = unit.getReproductionSelector();
-        currentState = unit.getCurrentState();
+        setCurrentState(unit.getCurrentState());
 
-        health = data.health - (health - myData.health);
-        if (health < 1) {
-            health = 1;
+        int inc = replicatedSpeciesData.health - speciesData.health;
+        incrementHealth(inc);
+        if (getHealth() < 1) {
+            setHealth(1);
         }
     }
 
     @Override
     public String getTextureCode() {
-        if (replicatedSpeciesID == -1) {
-            return SpeciesLoader.getSpeciesData(speciesID).textureCode;
+        if (replicatedSpeciesData == null) {
+            return super.getTextureCode();
         }
-        return SpeciesLoader.getSpeciesData(replicatedSpeciesID).textureCode;
+        return replicatedSpeciesData.textureCode;
     }
 
     @Override
     public int getSpeciesID() {
-        if (replicatedSpeciesID != -1) {
-            return replicatedSpeciesID;
+        if (replicatedSpeciesData == null) {
+            return super.getSpeciesID();
         }
-        return speciesID;
+        return replicatedSpeciesData.speciesID;
     }
 }

@@ -8,6 +8,7 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.InvalidRequestException;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.Request;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
 import java.io.IOException;
 import java.util.ArrayList;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
@@ -19,7 +20,7 @@ import java.lang.reflect.Method;
  * @author glitchedcode
  */
 public abstract class SimulationInterface {
-
+    
     public abstract boolean isLocked();
 
     public abstract boolean isRunning();
@@ -33,6 +34,8 @@ public abstract class SimulationInterface {
     public abstract PlayerData.TeamColor getPlayerColor(int ID);
 
     public abstract ArrayList<PlayerData> getPlayerRankings();
+    
+    public abstract SpeciesLoader getSpeciesLoader();
 
     public abstract int getRowCount();
 
