@@ -323,7 +323,7 @@ public class SimulationRemoteClient extends SimulationInterface {
     public void saveGrid() throws Exception{
         LocalDateTime now = LocalDateTime.now();
         String isoFormat = DateTimeFormatter.ISO_INSTANT.format(now.toInstant(ZoneOffset.UTC));
-        currentGrid.writeToFile("grid-"+isoFormat);
+        currentGrid.writeBoardToFile("grid-"+isoFormat);
     }
     
     @Override

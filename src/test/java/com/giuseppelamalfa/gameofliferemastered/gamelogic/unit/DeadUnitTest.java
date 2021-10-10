@@ -5,15 +5,6 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
-import java.awt.image.BufferedImageOp;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 

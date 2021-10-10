@@ -13,6 +13,8 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.*;
 import com.giuseppelamalfa.gameofliferemastered.utils.*;
 import java.awt.Point;
 import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -55,7 +57,7 @@ public class Grid implements Serializable, Cloneable {
     private transient SimulationInterface simulation;
     private transient Lock gridLock = new ReentrantLock();
     private transient Lock turnLock = new ReentrantLock();
-    
+
     protected static final DeadUnit deadUnit = new DeadUnit();
     protected static final int PROCESSOR_COUNT = Runtime.getRuntime().availableProcessors();
 
@@ -109,7 +111,7 @@ public class Grid implements Serializable, Cloneable {
             return this;
         }
     }
-    
+
     public final boolean areGridContentsEqual(Grid other) {
         int rows = getRowCount();
         int cols = getColumnCount();
@@ -140,10 +142,25 @@ public class Grid implements Serializable, Cloneable {
         return true;
     }
 
-    public synchronized void writeToFile(String fileName) throws Exception{
-        new ObjectOutputStream(new FileOutputStream(fileName+".ser")).writeObject(this);
+    public synchronized void writeBoardToFile(String fileName) throws Exception {
+        new ObjectOutputStream(new FileOutputStream(fileName + ".ser")).writeObject(board);
     }
-    
+
+    @SuppressWarnings("unchecked")
+    boolean loadBoardFromResources(String path) throws Exception {
+        InputStream istream = getClass().getClassLoader().getResourceAsStream(path);
+        ObjectInputStream objstream = new ObjectInputStream(istream);
+        ConcurrentGrid2DContainer<Unit> board = (ConcurrentGrid2DContainer<Unit>) objstream.readObject();
+        if (board == null) {
+            return false;
+        }
+        if (board.getColumnCount() != getColumnCount() | board.getRowCount() != getRowCount()) {
+            return false;
+        }
+        this.board = board;
+        return true;
+    }
+
     /*
      * GETTERS AND SETTERS
      */

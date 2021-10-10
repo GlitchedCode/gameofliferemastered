@@ -8,7 +8,6 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic.grid;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
@@ -133,34 +132,14 @@ public class GridIT {
         assertEquals(0, grid.getUnitScoreIncrement(unit));
     }
     
-    Grid loadFromResources(String path) throws Exception {
-        InputStream istream = getClass().getClassLoader().getResourceAsStream(path);
-        ObjectInputStream objstream = new ObjectInputStream(istream);
-        Grid ret = (Grid) objstream.readObject();
-        ret.afterSync();
-        return ret; 
-    } 
-    
-    void printGrid(Grid g){
-        for(int r = 0; r < g.getRowCount(); r++){
-            for (int c = 0; c < g.getColumnCount(); c++) {
-                if(g.getUnit(r, c).isAlive()){
-                    System.out.print('X');
-                } else {
-                    System.out.print('O');
-                }
-            }
-        }
-    }
-    
     @Test
     public void testGosperCompare() throws Exception {
         System.out.println("testGosperCompare");
-        grid = loadFromResources("grid/gosperStarting.ser");
-        Grid after = loadFromResources("grid/gosper10T.ser");
         
-        printGrid(grid);
-        printGrid(after);
+        grid = new Grid(30,50);
+        grid.loadBoardFromResources("grid/30x50gosperStarting.ser");
+        Grid after = new Grid(30,50);
+        after.loadBoardFromResources("grid/30x50gosper10T.ser");
         
         for(int i = 0; i < 10; i++){
             grid.computeNextTurn(loader);
