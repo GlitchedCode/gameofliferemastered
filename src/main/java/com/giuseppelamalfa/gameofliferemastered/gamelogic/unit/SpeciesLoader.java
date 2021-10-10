@@ -35,8 +35,7 @@ public class SpeciesLoader {
             IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, Exception {
 
         // Load species.json into loadedJSON
-        InputStream istream = new SpeciesLoader().getClass().
-                getClassLoader().getResourceAsStream(path);
+        InputStream istream = getClass().getClassLoader().getResourceAsStream(path);
         BufferedReader reader = new BufferedReader(new InputStreamReader(istream));
         StringBuilder strBuilder = new StringBuilder();
         String line;

@@ -24,9 +24,7 @@
             "friendlySpecies" : [
                 "Cell"
             ],
-            "hostileSpecies" : [
-                "Snake"
-            ],
+            "hostileSpecies" : [],
             "health" : 1,
             "initialState" : "ALIVE",
             "friendlyCountSelector" : {
