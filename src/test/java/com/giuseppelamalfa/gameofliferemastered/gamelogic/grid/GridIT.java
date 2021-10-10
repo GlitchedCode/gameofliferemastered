@@ -8,8 +8,6 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic.grid;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import org.junit.After;
 import org.junit.Before;
@@ -136,12 +134,12 @@ public class GridIT {
     public void testGosperCompare() throws Exception {
         System.out.println("testGosperCompare");
         
-        grid = new Grid(30,50);
-        grid.loadBoardFromResources("grid/30x50gosperStarting.ser");
-        Grid after = new Grid(30,50);
-        after.loadBoardFromResources("grid/30x50gosper10T.ser");
+        grid = new Grid(50,70);
+        grid.loadBoardFromResources("grid/gosperStarting.ser");
+        Grid after = new Grid(50,70);
+        after.loadBoardFromResources("grid/gosper40T.ser");
         
-        for(int i = 0; i < 10; i++){
+        for(int i = 0; i < 40; i++){
             grid.computeNextTurn(loader);
         }
         

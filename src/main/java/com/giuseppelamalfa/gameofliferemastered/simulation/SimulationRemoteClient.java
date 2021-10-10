@@ -235,7 +235,7 @@ public class SimulationRemoteClient extends SimulationInterface {
             currentGrid = sync.grid;
             currentGrid.afterSync();
             currentGrid.setSimulation(this);
-            currentGrid.setPlayerIDCheckNextTurn();
+            //currentGrid.setPlayerIDCheckNextTurn();
             currentGrid.addPlayer(localPlayerData);
             if (!currentGrid.showWinner()) {
                 currentGrid.calculateScore();
