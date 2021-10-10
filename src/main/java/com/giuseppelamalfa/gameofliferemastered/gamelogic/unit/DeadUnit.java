@@ -252,9 +252,6 @@ public class DeadUnit implements Unit, Serializable, Cloneable {
     public String getTextureCode() { return ""; }
     
     @Override
-    public BufferedImageOp getFilter() { return null; }
-
-    @Override
     public String toString() {
         return "";
     }

@@ -24,10 +24,12 @@ import java.awt.image.ImageObserver;
 import javax.swing.JPanel;
 import javax.swing.ToolTipManager;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationInterface;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
 import com.giuseppelamalfa.gameofliferemastered.utils.TimerWrapper;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
+import java.awt.image.BufferedImageOp;
 
 /**
  *
@@ -39,6 +41,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
 
     protected int sideLength;
     protected SimulationInterface simulation;
+    protected SpeciesLoader speciesLoader;
     protected ImageManager tileManager;
 
     protected Point screenOrigin = new Point();
@@ -182,6 +185,12 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
         }
         if (e.getKeyCode() == KeyEvent.VK_SPACE) {
             simulation.setRunning(!simulation.isRunning());
+        } else if (e.getKeyCode() == KeyEvent.VK_HOME) {
+            try {
+                simulation.saveGrid();
+            } catch (Exception ex) {
+                Logger.getLogger(GridPanel.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
 
@@ -211,6 +220,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
 
     public void setSimulation(SimulationInterface simulation, boolean resetOrigin) {
         this.simulation = simulation;
+        speciesLoader = simulation.getSpeciesLoader();
         setSideLength(sideLength);
 
         palette.setSimulation(simulation);
@@ -336,7 +346,8 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
         AffineTransform oldXForm = g.getTransform();
 
         g.setTransform(xform);
-        g.drawImage(tileManager.getImage(unit.getTextureCode()), unit.getFilter(), 0, 0);
+        BufferedImageOp filter = speciesLoader.getSpeciesFilter(unit.getSpeciesID());
+        g.drawImage(tileManager.getImage(unit.getTextureCode()), filter, 0, 0);
 
         g.setTransform(oldXForm);
     }

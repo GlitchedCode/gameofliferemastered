@@ -10,6 +10,7 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.StubRule;
 import com.giuseppelamalfa.gameofliferemastered.utils.ColorTintFilter;
 import java.awt.Color;
 import java.awt.image.BufferedImageOp;
+import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
@@ -24,10 +25,8 @@ import org.json.JSONObject;
  *
  * @author glitchedcode
  */
-public class SpeciesData {
-
-    //public final Class<?>               implementingClass;
-    public final Constructor<?> constructor;
+public class SpeciesData implements Serializable{
+    
     public final int speciesID;
     public final String name;
     public final String textureCode;
@@ -38,8 +37,11 @@ public class SpeciesData {
     public final RuleInterface<Integer> friendlyCountSelector;
     public final RuleInterface<Integer> hostileCountSelector;
     public final RuleInterface<Integer> reproductionSelector;
-
-    public final BufferedImageOp filter;
+    
+    // WARNING: THE FOLLOWING TRANSIENT FIELDS SHOULD ONLY
+    // BE ACCESSED FROM SPECIESLOADER!
+    protected final transient Constructor<?> constructor;
+    protected final transient BufferedImageOp filter;
 
     @SuppressWarnings(value = {"unchecked", "unchecked", "unchecked"})
     protected SpeciesData(JSONObject obj, HashMap<String, Integer> speciesIDs) throws ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {

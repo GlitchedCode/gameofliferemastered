@@ -73,5 +73,7 @@ public abstract class SimulationInterface {
 
     public abstract void synchronize();
 
+    public abstract void saveGrid() throws Exception;
+    
     public abstract void close();
 }

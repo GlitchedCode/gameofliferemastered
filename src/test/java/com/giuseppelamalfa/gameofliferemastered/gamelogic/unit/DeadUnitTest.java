@@ -27,7 +27,7 @@ public class DeadUnitTest {
     SpeciesLoader loader = new SpeciesLoader();
 
     public DeadUnitTest() throws Exception {
-        loader.loadSpeciesFromLocalJSON("testSpecies.json");
+        loader.loadSpeciesFromLocalJSON("species/testSpecies.json");
     }
     
     /**

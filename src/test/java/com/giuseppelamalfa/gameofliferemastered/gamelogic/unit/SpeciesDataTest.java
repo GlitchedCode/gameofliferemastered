@@ -34,7 +34,7 @@ public class SpeciesDataTest {
     @BeforeClass
     public static void setUpClass() throws Exception {
         InputStream istream = new SpeciesLoader().getClass().
-                getClassLoader().getResourceAsStream("badSpecies.json");
+                getClassLoader().getResourceAsStream("species/badSpecies.json");
         BufferedReader reader = new BufferedReader(new InputStreamReader(istream));
         StringBuilder strBuilder = new StringBuilder();
         String line;

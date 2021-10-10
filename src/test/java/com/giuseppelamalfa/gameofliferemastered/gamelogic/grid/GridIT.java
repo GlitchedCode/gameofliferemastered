@@ -25,7 +25,7 @@ public class GridIT {
     PlayerData player1;
 
     public GridIT() throws Exception {
-        loader.loadSpeciesFromLocalJSON("testSpecies.json");
+        loader.loadSpeciesFromLocalJSON("species/testSpecies.json");
     }
 
     @Before

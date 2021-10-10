@@ -18,7 +18,7 @@ public class LifeUnitTest {
     SpeciesLoader loader = new SpeciesLoader();
 
     public LifeUnitTest() throws Exception {
-        loader.loadSpeciesFromLocalJSON("testSpecies.json");    
+        loader.loadSpeciesFromLocalJSON("species/testSpecies.json");    
     }
 
     @Test

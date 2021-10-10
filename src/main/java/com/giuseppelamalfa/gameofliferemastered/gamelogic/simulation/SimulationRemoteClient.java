@@ -29,6 +29,9 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 
 /**
  *
@@ -316,6 +319,13 @@ public class SimulationRemoteClient extends SimulationInterface {
         this.panel = panel;
     }
 
+    @Override
+    public void saveGrid() throws Exception{
+        LocalDateTime now = LocalDateTime.now();
+        String isoFormat = DateTimeFormatter.ISO_INSTANT.format(now.toInstant(ZoneOffset.UTC));
+        currentGrid.writeToFile("grid-"+isoFormat);
+    }
+    
     @Override
     public void close() {
         requestedClosure = true;

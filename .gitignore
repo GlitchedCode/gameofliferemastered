@@ -40,3 +40,6 @@ gradle-app.setting
 
 # Visual paradigm backup files
 *.bak*
+
+# Generic serialized grid files
+grid-*.ser

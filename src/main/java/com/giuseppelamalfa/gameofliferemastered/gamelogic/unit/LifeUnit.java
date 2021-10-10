@@ -324,10 +324,4 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
     public String getTextureCode() {
         return speciesData.textureCode;
     }
-
-    @Override
-    public BufferedImageOp getFilter() {
-        return speciesData.filter;
-    }
-
 }

@@ -19,7 +19,7 @@ public class SpeciesLoaderIT {
         System.out.println("tesLoadIncorrectSpecies");
         try {
             SpeciesLoader loader = new SpeciesLoader();
-            loader.loadSpeciesFromLocalJSON("badSpecies.json");
+            loader.loadSpeciesFromLocalJSON("species/badSpecies.json");
         } catch (Exception ex) {
             return;
         }
@@ -32,7 +32,7 @@ public class SpeciesLoaderIT {
         System.out.println("testLoadCorrectSpecies");
         try {
             SpeciesLoader loader = new SpeciesLoader();
-            loader.loadSpeciesFromLocalJSON("testSpecies.json");
+            loader.loadSpeciesFromLocalJSON("species/testSpecies.json");
         } catch (Exception e) {
             fail("SpeciesLoader should not throw an exception when loading a correct file.");
         }
@@ -43,7 +43,7 @@ public class SpeciesLoaderIT {
         System.out.println("testCorrectSpeciesTexture");
         try {
             SpeciesLoader loader = new SpeciesLoader();            
-            loader.loadSpeciesFromLocalJSON("testSpecies.json");
+            loader.loadSpeciesFromLocalJSON("species/testSpecies.json");
         } catch (Exception e) {
             fail("Exception thrown during test.");
         }

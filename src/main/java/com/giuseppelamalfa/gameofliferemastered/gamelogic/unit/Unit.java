@@ -49,7 +49,7 @@ public interface Unit {
     // Restituisce il codice per la texture che rappresenta l'unità.
     public String getTextureCode();
     // Restituisce il filtro da applicare alla texture che rappresenta l'unità.
-    public BufferedImageOp getFilter();
+    //public BufferedImageOp getFilter();
     // Restituisce un insieme di specie le cui unità sono considerate amichevoli.
     public Set<Integer> getFriendlySpecies();
     // Restituisce un insieme di specie le cui unità sono considerate ostili.

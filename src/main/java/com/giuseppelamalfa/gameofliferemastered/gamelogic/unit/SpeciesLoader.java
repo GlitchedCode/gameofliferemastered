@@ -5,6 +5,7 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
+import java.awt.image.BufferedImageOp;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,7 +29,7 @@ public class SpeciesLoader {
     String loadedJSON = "";
 
     HashMap<Integer, SpeciesData> speciesData = new HashMap<>();
-    
+
     public synchronized void loadSpeciesFromLocalJSON(String path)
             throws IOException, ClassNotFoundException, InstantiationException,
             IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, Exception {
@@ -87,6 +88,15 @@ public class SpeciesLoader {
 
     public synchronized SpeciesData getSpeciesData(int index) {
         return speciesData.get(index);
+    }
+
+    public synchronized BufferedImageOp getSpeciesFilter(int index) {
+        SpeciesData data = getSpeciesData(index);
+        if (data != null) {
+            return data.filter;
+        } else {
+            return null;
+        }
     }
 
     public synchronized Set<Integer> getSpeciesIDs() {

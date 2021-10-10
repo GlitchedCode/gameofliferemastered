@@ -12,6 +12,8 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationI
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.*;
 import com.giuseppelamalfa.gameofliferemastered.utils.*;
 import java.awt.Point;
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
@@ -138,6 +140,10 @@ public class Grid implements Serializable, Cloneable {
         return true;
     }
 
+    public synchronized void writeToFile(String fileName) throws Exception{
+        new ObjectOutputStream(new FileOutputStream(fileName+".ser")).writeObject(this);
+    }
+    
     /*
      * GETTERS AND SETTERS
      */

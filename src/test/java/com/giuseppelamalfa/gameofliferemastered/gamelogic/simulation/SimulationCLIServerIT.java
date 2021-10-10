@@ -11,9 +11,7 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.Grid;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
 import java.util.concurrent.locks.ReentrantLock;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -32,7 +30,7 @@ public class SimulationCLIServerIT {
     @Before
     public void setUp() throws Exception {
         server = new SimulationCLIServer(8000, 4, 10, 10, GameMode.SANDBOX);
-        server.reloadSpeciesConf("testSpecies.json");
+        server.reloadSpeciesConf("species/testSpecies.json");
         loader = server.getSpeciesLoader();
         server.computeNextTurn();
 

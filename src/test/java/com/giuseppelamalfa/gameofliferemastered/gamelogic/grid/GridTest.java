@@ -23,7 +23,7 @@ public class GridTest {
     SpeciesLoader loader = new SpeciesLoader();
     
     public GridTest() throws Exception {
-        loader.loadSpeciesFromLocalJSON("testSpecies.json");
+        loader.loadSpeciesFromLocalJSON("species/testSpecies.json");
     }
 
     @Before
@@ -100,17 +100,5 @@ public class GridTest {
         assertEquals(unit, instance.getUnit(64, 64));
         instance.resize(64, 64);
         assertEquals(false, instance.getUnit(64, 64).isAlive());
-    }
-    
-    @Test
-    public void testAreGridContentsEqual() {
-        System.out.println("areGridContentsEqual");
-        Grid other = null;
-        Grid instance = null;
-        boolean expResult = false;
-        boolean result = instance.areGridContentsEqual(other);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 }
