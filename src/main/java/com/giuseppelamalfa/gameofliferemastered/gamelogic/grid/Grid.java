@@ -8,7 +8,7 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic.grid;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.State;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.GameLogicException;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationInterface;
+import com.giuseppelamalfa.gameofliferemastered.simulation.SimulationInterface;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.*;
 import com.giuseppelamalfa.gameofliferemastered.utils.*;
 import java.awt.Point;

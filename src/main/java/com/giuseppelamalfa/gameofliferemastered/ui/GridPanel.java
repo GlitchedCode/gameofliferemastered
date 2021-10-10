@@ -23,7 +23,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.ImageObserver;
 import javax.swing.JPanel;
 import javax.swing.ToolTipManager;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationInterface;
+import com.giuseppelamalfa.gameofliferemastered.simulation.SimulationInterface;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
 import com.giuseppelamalfa.gameofliferemastered.utils.TimerWrapper;
 import java.util.logging.Level;

@@ -6,7 +6,7 @@
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.grid;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationInterface;
+import com.giuseppelamalfa.gameofliferemastered.simulation.SimulationInterface;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
 import com.giuseppelamalfa.gameofliferemastered.utils.TimerWrapper;
 import java.io.Serializable;

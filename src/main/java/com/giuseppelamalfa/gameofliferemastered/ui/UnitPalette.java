@@ -5,7 +5,7 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.ui;
 
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationInterface;
+import com.giuseppelamalfa.gameofliferemastered.simulation.SimulationInterface;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
 import com.giuseppelamalfa.gameofliferemastered.utils.ImageManager;
 import java.awt.BasicStroke;

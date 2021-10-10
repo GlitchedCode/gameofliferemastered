@@ -3,21 +3,21 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation;
+package com.giuseppelamalfa.gameofliferemastered.simulation;
 
 import com.giuseppelamalfa.gameofliferemastered.ApplicationFrame;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.GameMode;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.Grid;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.DisconnectRequest;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.GameStatusRequest;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.InvalidRequestException;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.LogMessageRequest;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.Request;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.SetUnitRequest;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.SyncGridRequest;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.SyncSpeciesDataRequest;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.request.UpdatePlayerDataRequest;
+import com.giuseppelamalfa.gameofliferemastered.simulation.request.DisconnectRequest;
+import com.giuseppelamalfa.gameofliferemastered.simulation.request.GameStatusRequest;
+import com.giuseppelamalfa.gameofliferemastered.simulation.request.InvalidRequestException;
+import com.giuseppelamalfa.gameofliferemastered.simulation.request.LogMessageRequest;
+import com.giuseppelamalfa.gameofliferemastered.simulation.request.Request;
+import com.giuseppelamalfa.gameofliferemastered.simulation.request.SetUnitRequest;
+import com.giuseppelamalfa.gameofliferemastered.simulation.request.SyncGridRequest;
+import com.giuseppelamalfa.gameofliferemastered.simulation.request.SyncSpeciesDataRequest;
+import com.giuseppelamalfa.gameofliferemastered.simulation.request.UpdatePlayerDataRequest;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
 import com.giuseppelamalfa.gameofliferemastered.utils.TimerWrapper;
 import java.io.BufferedReader;

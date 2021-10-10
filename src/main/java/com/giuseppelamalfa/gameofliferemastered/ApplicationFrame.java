@@ -5,14 +5,13 @@
  */
 package com.giuseppelamalfa.gameofliferemastered;
 
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationRemoteClient;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationGUIServer;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationInterface;
+import com.giuseppelamalfa.gameofliferemastered.simulation.SimulationRemoteClient;
+import com.giuseppelamalfa.gameofliferemastered.simulation.SimulationGUIServer;
+import com.giuseppelamalfa.gameofliferemastered.simulation.SimulationInterface;
 import com.giuseppelamalfa.gameofliferemastered.utils.ImageManager;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.*;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.GameMode;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.DisconnectEventListener;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
+import com.giuseppelamalfa.gameofliferemastered.simulation.DisconnectEventListener;
 import com.giuseppelamalfa.gameofliferemastered.utils.DeferredImageManager;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;

@@ -10,7 +10,6 @@ import java.util.HashSet;
 import java.util.Set;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.StubRule;
-import java.awt.image.BufferedImageOp;
 import java.io.Serializable;
 
 class ReproductionCounter {
