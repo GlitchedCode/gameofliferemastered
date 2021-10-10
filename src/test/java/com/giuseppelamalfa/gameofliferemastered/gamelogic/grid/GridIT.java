@@ -110,7 +110,7 @@ public class GridIT {
         
         grid.removePlayer(ID);
         for(int i = 0; i < 10; i++){
-            assertEquals(false, grid.getUnit(i, i).isAlive());
+            assertEquals(true, grid.getUnit(i, i).isAlive());
         }
         found = false;
         for (PlayerData player : grid.getPlayerRankings()){

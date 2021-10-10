@@ -70,9 +70,9 @@ public class CompetitiveGrid extends Grid {
     public CompetitiveGrid(Integer rows, Integer cols) throws Exception {
         super(rows, cols);
         competitive = true;
-        gameModeName = "Competitive";
+        setGameModeName("Competitive");
         setState(State.WAITING);
-        syncTurnCount = 0;
+        setSyncTurnCount(0);
     }
 
     @Override
@@ -149,7 +149,7 @@ public class CompetitiveGrid extends Grid {
         isLocked = true;
         isRunning = false;
         started = false;
-        gameStatus = "Waiting for players...";
+        setGameStatus("Waiting for players...");
         clearBoard();
         turn = 0;
     }
@@ -168,7 +168,7 @@ public class CompetitiveGrid extends Grid {
                 setState(State.PLACEMENT_PHASE);
             } else {
                 secondsPassed++;
-                gameStatus = "Starting in " + remaining + " seconds.";
+                setGameStatus("Starting in " + remaining + " seconds.");
             }
         }, 0, 1000);
     }
@@ -184,7 +184,7 @@ public class CompetitiveGrid extends Grid {
                 setState(State.SIMULATION_PHASE);
             } else {
                 secondsPassed++;
-                gameStatus = "Placement: " + remaining + " seconds left.";
+                setGameStatus("Placement: " + remaining + " seconds left.");
             }
         }, 0, 1000);
     }
@@ -194,7 +194,7 @@ public class CompetitiveGrid extends Grid {
         isLocked = true;
 
         currentPhaseNumber++;
-        gameStatus = "Running phase " + currentPhaseNumber;
+        setGameStatus("Running phase " + currentPhaseNumber);
     }
 
     @Override

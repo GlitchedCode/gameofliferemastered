@@ -57,15 +57,16 @@ public class Grid implements Serializable, Cloneable {
     private transient Lock gridLock = new ReentrantLock();
     private transient Lock turnLock = new ReentrantLock();
 
+    private String gameModeName = "Sandbox";
+    private String gameStatus = "Paused";
+    private int syncTurnCount = 40;
+    
     protected static final DeadUnit deadUnit = new DeadUnit();
-    protected static final int PROCESSOR_COUNT = Runtime.getRuntime().availableProcessors();
-
-    protected String gameModeName = "Sandbox";
-    protected String gameStatus = "Paused";
+    protected static final int PROCESSOR_COUNT = Runtime.getRuntime().availableProcessors();    
+    
     protected boolean isRunning = false;
     protected boolean isLocked = false;
     protected boolean competitive = false;
-    protected int syncTurnCount = 40;
 
     /**
      * Constructor
@@ -90,7 +91,27 @@ public class Grid implements Serializable, Cloneable {
         topLeftProcessed = new Point(topLeftActive);
         bottomRightProcessed = new Point(bottomRightActive);
     }
+    
+    protected void setGameModeName(String arg) {
+        if(arg != null) {
+            gameModeName = arg;
+        } else {
+            gameModeName = "";
+        }
+    }
+    
+    protected void setGameStatus(String arg) {
+        if(arg != null) {
+            gameStatus = arg;
+        } else {
+            gameStatus = "";
+        }
+    }
 
+    protected void setSyncTurnCount(int arg) {
+        syncTurnCount = Math.max(0, arg);
+    }
+    
     @Override
     @SuppressWarnings({"unchecked"})
     public Object clone() throws CloneNotSupportedException {
