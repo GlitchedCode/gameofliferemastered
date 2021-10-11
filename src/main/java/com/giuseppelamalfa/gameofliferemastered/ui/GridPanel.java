@@ -346,7 +346,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
         AffineTransform oldXForm = g.getTransform();
 
         g.setTransform(xform);
-        BufferedImageOp filter = speciesLoader.getSpeciesFilter(unit.getSpeciesID());
+        BufferedImageOp filter = speciesLoader.getSpeciesFilter(unit.getActualSpeciesID());
         g.drawImage(tileManager.getImage(unit.getTextureCode()), filter, 0, 0);
 
         g.setTransform(oldXForm);

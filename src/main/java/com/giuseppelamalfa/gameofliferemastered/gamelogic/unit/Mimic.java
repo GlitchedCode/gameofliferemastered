@@ -122,7 +122,7 @@ public class Mimic extends LifeUnit {
     @Override
     public int getSpeciesID() {
         if (replicatedSpeciesData == null) {
-            return super.getSpeciesID();
+            return getActualSpeciesID();
         }
         return replicatedSpeciesData.speciesID;
     }

@@ -191,6 +191,11 @@ public class DeadUnit implements Unit, Serializable, Cloneable {
     }
 
     @Override
+    public int getActualSpeciesID() {
+        return -1;
+    }
+    
+    @Override
     public int getSpeciesID() {
         return -1;
     }

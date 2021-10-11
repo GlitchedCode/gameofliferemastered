@@ -224,14 +224,15 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
         return currentState;
     }
 
-    /**
-     * Get the unit's texture code
-     *
-     * @return
-     */
+    @Override
+    public int getActualSpeciesID() {
+        return speciesID;
+    }
+    
+    
     @Override
     public int getSpeciesID() {
-        return speciesID;
+        return getActualSpeciesID();
     }
     
     @Override

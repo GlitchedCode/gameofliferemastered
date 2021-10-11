@@ -40,6 +40,8 @@ public interface Unit {
     public boolean attack(int adjacencyPosition, Unit target);
     // Restituisce i dati di specie utilizzati durante l'inizializzazione.
     public SpeciesData getSpeciesData();
+    // Restituisce l'ID della specie a cui appartiene originalmente l'unità.
+    public int getActualSpeciesID();
     // Restituisce l'ID della specie a cui appartiene l'unità.
     public int getSpeciesID();
     // Restituisce l'ID della specie a cui l'unità può dare vita durante la fase
