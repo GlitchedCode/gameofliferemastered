@@ -9,6 +9,7 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.GameLogicException;
 import java.util.Set;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  *
@@ -33,7 +34,7 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
 
     protected void initSpeciesData(SpeciesData data) {
         health = data.health;
-        nextState = data.initialState;
+        state = data.initialState;
     }
 
     public LifeUnit(SpeciesData data) {
@@ -119,7 +120,7 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
         if (health + healthIncrement < 1) { // rule #5: hp
             nextState = State.DEAD;
         }
-        
+
         if (nextState != state & healthIncrement != 0) {
             setStateChanged();
         }
@@ -152,13 +153,15 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
     public void update() {
         health += healthIncrement;
         healthIncrement = 0;
-        
-        if (state != nextState & nextState != State.INVALID) {
+
+        if (state != nextState
+                & nextState != State.INVALID
+                & nextState != null) {
             state.exit(this);
             state = nextState;
             state.enter(this);
         }
-        nextState = State.INVALID;
+        nextState = nextState.INVALID;
         stateChanged = false;
     }
 
@@ -223,7 +226,7 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
     }
 
     protected final void setCurrentState(State arg) {
-        if(arg != state){
+        if (arg != state) {
             state = arg;
             setStateChanged();
         }
@@ -295,7 +298,7 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
     }
 
     protected final void setHealth(int arg) {
-        if(arg != health){
+        if (arg != health) {
             health = arg;
             setStateChanged();
         }
@@ -335,5 +338,46 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
             System.out.println("com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit.clone()");
             return this;
         }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final LifeUnit other = (LifeUnit) obj;
+        if (this.speciesID != other.speciesID) {
+            return false;
+        }
+        if (this.health != other.health) {
+            return false;
+        }
+        if (this.playerID != other.playerID) {
+            return false;
+        }
+        if (this.competitive != other.competitive) {
+            return false;
+        }
+        if (this.state != other.state) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 73 * hash + this.speciesID;
+        hash = 73 * hash + Objects.hashCode(this.state);
+        hash = 73 * hash + this.health;
+        hash = 73 * hash + this.playerID;
+        hash = 73 * hash + (this.competitive ? 1 : 0);
+        return hash;
     }
 }

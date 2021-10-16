@@ -320,7 +320,7 @@ public class Grid implements Serializable, Cloneable {
             if (!players.containsKey(unit.getPlayerID())) {
                 return;
             }
-            unit.update();
+            //unit.update();
             setToPosition(row, col, unit);
         } finally {
             turnLock.unlock();

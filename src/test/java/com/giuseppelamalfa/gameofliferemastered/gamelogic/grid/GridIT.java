@@ -124,7 +124,6 @@ public class GridIT {
     public void testGetUnitScoreIncrement() throws GameLogicException {
         System.out.println("getUnitScoreIncrement");
         Unit unit = loader.getNewUnit(0);
-        assertEquals(0, grid.getUnitScoreIncrement(unit));
         grid.setUnit(0, 0, unit);
         assertEquals(1, grid.getUnitScoreIncrement(unit));
         unit.kill();

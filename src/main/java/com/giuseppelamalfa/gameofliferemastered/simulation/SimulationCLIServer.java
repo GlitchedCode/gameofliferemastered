@@ -223,11 +223,15 @@ public class SimulationCLIServer extends SimulationInterface {
 
         serverSocket = new ServerSocket(portNumber);
 
-        URL whatismyip = new URL("http://checkip.amazonaws.com");
-        BufferedReader in = new BufferedReader(new InputStreamReader(
-                whatismyip.openStream()));
+        try{
+            URL whatismyip = new URL("http://checkip.amazonaws.com");
+            BufferedReader in = new BufferedReader(new InputStreamReader(
+                    whatismyip.openStream()));
+            serverIP = in.readLine(); //you get the IP as a String
 
-        serverIP = in.readLine(); //you get the IP as a String
+        } catch (Exception e){
+            serverIP = "localhost";
+        }
         this.portNumber = portNumber;
         writeToStatusLog("Server open at " + serverIP + ":" + portNumber);
         writeToStatusLog("Game mode: " + mode.toString());

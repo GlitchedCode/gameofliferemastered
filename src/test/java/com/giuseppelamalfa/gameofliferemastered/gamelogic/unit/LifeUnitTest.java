@@ -35,9 +35,6 @@ public class LifeUnitTest {
             dead,
             dead
         };
-        for (Unit unit : enoughUnits) {
-            unit.update();
-        }
 
         Unit[] tooManyUnits = {
             loader.getNewUnit(1),
@@ -49,9 +46,6 @@ public class LifeUnitTest {
             dead,
             dead
         };
-        for (Unit unit : tooManyUnits) {
-            unit.update();
-        }
 
         Unit[] notEnoughUnits = {
             loader.getNewUnit(1),
@@ -63,12 +57,8 @@ public class LifeUnitTest {
             dead,
             dead
         };
-        for (Unit unit : notEnoughUnits) {
-            unit.update();
-        }
 
         Unit instance = loader.getNewUnit(1); // snake unit with 2hp
-        instance.update();
 
         int previousHealth = instance.getHealth();
         instance.computeNextTurn(enoughUnits);
@@ -100,9 +90,6 @@ public class LifeUnitTest {
             dead,
             dead
         };
-        for(Unit unit: enoughUnits){
-            unit.update();
-        }
 
         Unit[] tooManyUnits = {
             loader.getNewUnit(0),
@@ -114,9 +101,6 @@ public class LifeUnitTest {
             dead,
             dead,
         };
-        for(Unit unit: tooManyUnits){
-            unit.update();
-        }
 
         Unit[] notEnoughUnits = {
             loader.getNewUnit(1),
@@ -130,7 +114,7 @@ public class LifeUnitTest {
         };
 
         Unit instance = loader.getNewUnit(1); // snake unit with 2hp
-        instance.update();
+
         int previousHealth = instance.getHealth();
         instance.computeNextTurn(enoughUnits);
         instance.update();
@@ -165,7 +149,6 @@ public class LifeUnitTest {
     public void testIsAlive() {
         System.out.println("isAlive");
         Unit instance = loader.getNewUnit(0);
-        instance.update();
         boolean result = instance.isAlive();
         assertEquals(result, true);
     }
@@ -179,10 +162,6 @@ public class LifeUnitTest {
         LifeUnit snake = (LifeUnit) loader.getNewUnit(1);
         LifeUnit cell = (LifeUnit) loader.getNewUnit(0);
         Unit mimic = loader.getNewUnit(2);
-        
-        snake.update();
-        cell.update();
-        mimic.update();
         
         //assertEquals(true, cell.attack(0, snake));
         assertEquals(true, snake.attack(0, cell));
@@ -211,12 +190,8 @@ public class LifeUnitTest {
             dead,
             dead
         };
-        for(Unit unit: enoughUnits){
-            unit.update();
-        }
         
         Unit instance = loader.getNewUnit(1);
-        instance.update();
         
         int increment = 2;
         int previous = instance.getHealth();

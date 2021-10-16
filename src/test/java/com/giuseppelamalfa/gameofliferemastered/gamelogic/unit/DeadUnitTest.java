@@ -36,9 +36,6 @@ public class DeadUnitTest {
             dead,
             dead,
             dead,};
-        for (Unit unit : notEnoughUnits) {
-            unit.update();
-        }
 
         Unit[] enoughUnits = {
             loader.getNewUnit(1),
@@ -49,9 +46,6 @@ public class DeadUnitTest {
             dead,
             dead,
             dead,};
-        for (Unit unit : enoughUnits) {
-            unit.update();
-        }
 
         Unit[] tooManyUnits = {
             loader.getNewUnit(1),
@@ -63,9 +57,6 @@ public class DeadUnitTest {
             loader.getNewUnit(1),
             loader.getNewUnit(1),
         };
-        for (Unit unit : tooManyUnits) {
-            unit.update();
-        }
 
         assertEquals(true, dead.getBornUnit(notEnoughUnits, loader) == null);
         assertEquals(true, dead.getBornUnit(tooManyUnits, loader) == null);

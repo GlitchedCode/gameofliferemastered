@@ -6,6 +6,7 @@
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -166,4 +167,58 @@ public class Mimic extends LifeUnit {
         }
         return reproductionSelector;
     }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Mimic other = (Mimic) obj;
+        if (this.turnsTillReplication != other.turnsTillReplication) {
+            return false;
+        }
+        if (this.replicated != other.replicated) {
+            return false;
+        }
+        if (this.replicatedID != other.replicatedID) {
+            return false;
+        }
+        if (!Objects.equals(this.friendlySpecies, other.friendlySpecies)) {
+            return false;
+        }
+        if (!Objects.equals(this.hostileSpecies, other.hostileSpecies)) {
+            return false;
+        }
+        if (!Objects.equals(this.friendlyCountSelector, other.friendlyCountSelector)) {
+            return false;
+        }
+        if (!Objects.equals(this.hostileCountSelector, other.hostileCountSelector)) {
+            return false;
+        }
+        if (!Objects.equals(this.reproductionSelector, other.reproductionSelector)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 29 * hash + this.turnsTillReplication;
+        hash = 29 * hash + (this.replicated ? 1 : 0);
+        hash = 29 * hash + this.replicatedID;
+        hash = 29 * hash + Objects.hashCode(this.friendlySpecies);
+        hash = 29 * hash + Objects.hashCode(this.hostileSpecies);
+        hash = 29 * hash + Objects.hashCode(this.friendlyCountSelector);
+        hash = 29 * hash + Objects.hashCode(this.hostileCountSelector);
+        hash = 29 * hash + Objects.hashCode(this.reproductionSelector);
+        return hash;
+    }
+
 }

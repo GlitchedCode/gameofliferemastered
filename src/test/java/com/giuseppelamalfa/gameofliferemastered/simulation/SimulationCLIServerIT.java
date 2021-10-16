@@ -9,6 +9,7 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.GameMode;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.Grid;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
 import java.util.concurrent.locks.ReentrantLock;
 import org.junit.After;
 import org.junit.Before;
@@ -73,7 +74,18 @@ public class SimulationCLIServerIT {
         }
         server.close();
     }
-
+    
+    @Test
+    public void testSetUnit(){
+        System.out.println("setUnit");
+        
+        Unit unitFromOwner = loader.getNewUnit(0, clients[0].getLocalPlayerID());
+        clients[0].setUnit(0, 0, unitFromOwner);
+        sleep(100);
+        Unit unitFromStranger = clients[1].getUnit(0, 0);
+        assertEquals(unitFromOwner, unitFromStranger);
+    }
+    
     @Test
     public void testSynchronization() throws Exception {
         System.out.println("synchronization");
