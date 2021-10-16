@@ -42,7 +42,6 @@ public class Grid implements Serializable, Cloneable {
     private Integer sectorRowCount;
     private Integer sectorColumnCount;
 
-    private boolean unitFoundThisTurn = false;
     private Point topLeftActive;
     private Point bottomRightActive;
     private Point topLeftProcessed;
@@ -447,7 +446,6 @@ public class Grid implements Serializable, Cloneable {
     private void advance(SpeciesLoader speciesLoader) throws Exception {
         turnLock.lock();
         try {
-            unitFoundThisTurn = false;
             ConcurrentLinkedQueue<SectorCoords> processedSectors = new ConcurrentLinkedQueue<>();
 
             // Loop through every active sector and any adjacent inactive sectors
@@ -676,13 +674,6 @@ public class Grid implements Serializable, Cloneable {
     private void moveProcessBoundaryToInclude(Integer row, Integer col) {
         gridLock.lock();
         try {
-            /*
-            if (!unitFoundThisTurn) {
-                topLeftProcessed.move(col, row);
-                bottomRightProcessed.move(col, row);
-                unitFoundThisTurn = true;
-                return;
-            }*/
 
             if (row < topLeftProcessed.y) {
                 topLeftProcessed.y = row;
@@ -787,7 +778,7 @@ public class Grid implements Serializable, Cloneable {
 
                 // Expand the board's processing area accordingly as we
                 // process more units
-                if (current.getNextTurnState() != State.DEAD) {
+                if (current.isStateChanged()) {
                     moveProcessBoundaryToInclude(row, col);
                     activeNextTurn = true;
                 }
@@ -798,7 +789,7 @@ public class Grid implements Serializable, Cloneable {
     }
 
     private boolean reproductionStep(Point topLeftBoundary, Point bottomRightBoundary, SpeciesLoader speciesLoader) throws GameLogicException {
-        boolean aliveNextTurn = false;
+        boolean activeNextTurn = false;
         for (int row = topLeftBoundary.y; row <= bottomRightBoundary.y; row++) {
             for (int col = topLeftBoundary.x; col <= bottomRightBoundary.x; col++) {
                 Unit unit = board.get(row, col);
@@ -818,13 +809,13 @@ public class Grid implements Serializable, Cloneable {
                 }
 
                 if (bornUnit != null) {
-                    aliveNextTurn = true;
+                    activeNextTurn = true;
                     setToPosition(row, col, bornUnit);
                     moveProcessBoundaryToInclude(row, col);
                 }
             }
         }
-        return aliveNextTurn;
+        return activeNextTurn;
     }
 
     private void cleanupRows(int firstRow, int lastRow) {

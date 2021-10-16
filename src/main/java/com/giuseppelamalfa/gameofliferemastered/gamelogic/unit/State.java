@@ -12,7 +12,6 @@ import java.io.Serializable;
  * @author glitchedcode
  */
 public enum State implements Serializable {
-    INVALID,
     DEAD,
     ALIVE,
     ALIVE_AGING {

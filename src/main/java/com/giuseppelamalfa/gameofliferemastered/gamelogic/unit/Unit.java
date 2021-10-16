@@ -13,65 +13,67 @@ import java.util.Set;
  *
  * @author glitchedcode
  */
-public interface Unit {
+public abstract class Unit {
 
     // Utile durante i calcoli.
     public static Integer getOppositeDirection(Integer adjacencyPosition) {
         return (adjacencyPosition + 4) % 8;
     }
     // Restituisce l'ID del giocatore proprietario di questa unità.
-    public int getPlayerID();
+    public abstract int getPlayerID();
     // Restituisce vero se l'unità considera ostili unità di altri giocatori.
-    public boolean isCompetitive();
+    public abstract boolean isCompetitive();
     // Determina se l'unità deve considerare ostili unità di altri giocatori.
-    public void setCompetitive(boolean val);
+    public abstract void setCompetitive(boolean val);
     // Imposta internamente lo stato dell'unità per il turno successivo.
-    public void computeNextTurn(Unit[] adjacentUnits);
+    public abstract void computeNextTurn(Unit[] adjacentUnits);
     // Restituisce true se lo stato dell'unità cambierà il prossimo turno.
-    public boolean isStateChanged();
+    public abstract boolean isStateChanged();
     // Transiziona l'unità allo stato del turno successivo.
-    public void update();
+    public abstract void update();
     // Imposta l'unità come morta nel turno attuale e nel prossimo.
-    public void kill();
+    public abstract void kill();
     // Determina se l'unità può riprodursi verso una certa direzione.
     // Momentaneamente questo metodo dovrebbe restituire sempre true.
-    public boolean reproduce(int adjacencyPosition);
+    public abstract boolean reproduce(int adjacencyPosition);
     // Determina se l'unità può attaccarne un'altra in base alla specie, all'ID
     // del giocatore proprietario ed alla direzione relativa in cui si trova.
     // La direzione è momentaneamente ignorata in ogni implementazione.
-    public boolean attack(int adjacencyPosition, Unit target);
+    public abstract boolean attack(int adjacencyPosition, Unit target);
     // Restituisce i dati di specie utilizzati durante l'inizializzazione.
-    public SpeciesData getSpeciesData();
+    public abstract SpeciesData getSpeciesData();
     // Restituisce l'ID della specie a cui appartiene originalmente l'unità.
-    public int getActualSpeciesID();
+    public abstract int getActualSpeciesID();
     // Restituisce l'ID della specie a cui appartiene l'unità.
-    public int getSpeciesID();
+    public abstract int getSpeciesID();
     // Restituisce l'ID della specie a cui l'unità può dare vita durante la fase
     // di riproduzione.
-    public int getBornSpeciesID();
-    // Restituisce il filtro da applicare alla texture che rappresenta l'unità.
-    //public BufferedImageOp getFilter();
+    public abstract int getBornSpeciesID();
     // Restituisce un insieme di specie le cui unità sono considerate amichevoli.
-    public Set<Integer> getFriendlySpecies();
+    public abstract Set<Integer> getFriendlySpecies();
     // Restituisce un insieme di specie le cui unità sono considerate ostili.
-    public Set<Integer> getHostileSpecies();
+    public abstract Set<Integer> getHostileSpecies();
     // Restituisce la regola da soddisfare durante la fase di sopravvivenza per
     // il numero di unità amichevoli
-    public RuleInterface<Integer> getFriendlyCountSelector();
+    public abstract RuleInterface<Integer> getFriendlyCountSelector();
     // Restituisce la regola da soddisfare durante la fase di sopravvivenza per
     // il numero di unità ostili
-    public RuleInterface<Integer> getHostileCountSelector();
+    public abstract RuleInterface<Integer> getHostileCountSelector();
     // Restituisce la regola da soddisfare durante la fase di riproduzione per
     // determinare se una nuova unità può nascere in una data cella.
-    public RuleInterface<Integer> getReproductionSelector();
+    public abstract RuleInterface<Integer> getReproductionSelector();
     // Restituisce true se l'unità è viva.
-    public boolean isAlive();
+    public abstract boolean isAlive();
     // Restituisce il numero di punti salute dell'unità.
-    public Integer getHealth();
+    public abstract Integer getHealth();
     // Somma l'intero passato come argomento al numero di punti salute dell'unità.
-    public void incrementHealth(int increment);
+    public abstract void incrementHealth(int increment);
     // Restituisce lo stato attuale dell'unità.
-    public State getCurrentState();
+    public abstract State getCurrentState();
     // Restituisce lo stato dell'unità per il turno successivo.
-    public State getNextTurnState() throws GameLogicException;
+    public abstract State getNextTurnState() throws GameLogicException;
+    
+    // Fa in modo che l'unità risulti viva dal prossimo turno in poi
+    protected abstract void markAsNewborn();
+
 }

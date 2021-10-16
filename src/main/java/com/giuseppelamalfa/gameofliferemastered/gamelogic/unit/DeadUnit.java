@@ -26,10 +26,9 @@ class ReproductionCounter {
     }
 
     void increment(int playerID) {
-        if ( playerIDCounts.containsKey(playerID) ) {
+        if (playerIDCounts.containsKey(playerID)) {
             playerIDCounts.put(playerID, playerIDCounts.get(playerID) + 1);
-        }
-        else {
+        } else {
             playerIDCounts.put(playerID, 1);
         }
         count++;
@@ -43,7 +42,7 @@ class ReproductionCounter {
         int ret = -1;
         int max = 0;
         for (int id : playerIDCounts.keySet()) {
-            if ( max < playerIDCounts.get(id) ) {
+            if (max < playerIDCounts.get(id)) {
                 max = playerIDCounts.get(id);
                 ret = id;
             }
@@ -55,7 +54,7 @@ class ReproductionCounter {
 /**
  * @author glitchedcode
  */
-public class DeadUnit implements Unit, Serializable, Cloneable {
+public class DeadUnit extends Unit implements Serializable, Cloneable {
 
     // This function implements rule #3: reproduction
     @SuppressWarnings("unchecked")
@@ -72,13 +71,13 @@ public class DeadUnit implements Unit, Serializable, Cloneable {
         for (int i = 0; i < 8; i++) {
             Unit current = adjacentUnits[i];
 
-            if ( !current.isAlive() ) // there is no adjacent unit in this direction
+            if (!current.isAlive()) // there is no adjacent unit in this direction
             {
                 continue;
             }
 
             Integer oppositeDir = Unit.getOppositeDirection(i);
-            if ( !current.reproduce(oppositeDir) ) // this unit doesn't reproduce from this direction
+            if (!current.reproduce(oppositeDir)) // this unit doesn't reproduce from this direction
             {
                 continue;
             }
@@ -86,10 +85,9 @@ public class DeadUnit implements Unit, Serializable, Cloneable {
             int species = current.getBornSpeciesID();
             // Add new species to the map as we find them in
             // nearby cells
-            if ( reproductionCounters.keySet().contains(species) ) {
+            if (reproductionCounters.keySet().contains(species)) {
                 reproductionCounters.get(species).increment(current.getPlayerID());
-            }
-            else {
+            } else {
                 reproductionCounters.put(species, new ReproductionCounter(current.getPlayerID()));
                 reproductionSelectors.put(species, speciesLoader.getSpeciesData(species).reproductionSelector);
             }
@@ -98,35 +96,36 @@ public class DeadUnit implements Unit, Serializable, Cloneable {
         // Choose the candidate species to generate based on the reproduction
         // counters taken above and thei order in the Species enum
         for (int current : reproductionCounters.keySet()) {
-            if ( current == -1 ) {
+            if (current == -1) {
                 continue;
             }
 
             ReproductionCounter currentCounter = reproductionCounters.get(current);
             RuleInterface<Integer> selector = reproductionSelectors.get(current);
 
-            if ( currentCounter.getCount() == candidateCounter.getCount() ) {
-                if ( current < candidate
-                        & selector.test(currentCounter.getCount()) ) {
+            if (currentCounter.getCount() == candidateCounter.getCount()) {
+                if (current < candidate
+                        & selector.test(currentCounter.getCount())) {
                     candidate = current;
                     candidateCounter = currentCounter;
                 }
-            }
-            else if ( currentCounter.getCount() > candidateCounter.getCount()
-                    & selector.test(currentCounter.getCount()) ) {
+            } else if (currentCounter.getCount() > candidateCounter.getCount()
+                    & selector.test(currentCounter.getCount())) {
                 candidate = current;
                 candidateCounter = currentCounter;
             }
         }
 
-        if ( candidate == -1 ) // neighboring units do not satisfy reproduction requirements
+        if (candidate == -1) // neighboring units do not satisfy reproduction requirements
         {
             return null;
         }
 
         // If we have exactly as many units are necessary for reproduction,
-        // we instantiate a new unit and store it in bornUnit.
-        return speciesLoader.getNewUnit(candidate, candidateCounter.getPlayerID());
+        // we instantiate a new unit, mark it as a newborn and return it.
+        Unit ret = speciesLoader.getNewUnit(candidate, candidateCounter.getPlayerID());
+        ret.markAsNewborn();
+        return ret;
     }
 
     /**
@@ -136,12 +135,12 @@ public class DeadUnit implements Unit, Serializable, Cloneable {
     @Override
     public void computeNextTurn(Unit[] adjacentUnits) {
     }
-    
+
     @Override
-    public SpeciesData getSpeciesData(){
+    public SpeciesData getSpeciesData() {
         return null;
     }
-    
+
     @Override
     public final boolean isStateChanged() {
         return false;
@@ -187,29 +186,29 @@ public class DeadUnit implements Unit, Serializable, Cloneable {
 
     @Override
     public State getNextTurnState() {
-        return State.INVALID;
+        return null;
     }
 
     @Override
     public State getCurrentState() {
-        return State.INVALID;
+        return null;
     }
 
     @Override
     public int getActualSpeciesID() {
         return -1;
     }
-    
+
     @Override
     public int getSpeciesID() {
         return -1;
     }
 
     @Override
-    public int getBornSpeciesID(){
+    public int getBornSpeciesID() {
         return -1;
     }
-    
+
     @Override
     public Set<Integer> getFriendlySpecies() {
         return new HashSet<>();
@@ -219,11 +218,11 @@ public class DeadUnit implements Unit, Serializable, Cloneable {
     public Set<Integer> getHostileSpecies() {
         return new HashSet<>();
     }
-    
+
     static StubRule<Integer> stub = new StubRule<>();
-    
+
     @Override
-    public RuleInterface<Integer> getFriendlyCountSelector(){
+    public RuleInterface<Integer> getFriendlyCountSelector() {
         return stub;
     }
 
@@ -231,7 +230,7 @@ public class DeadUnit implements Unit, Serializable, Cloneable {
     public RuleInterface<Integer> getHostileCountSelector() {
         return stub;
     }
-    
+
     @Override
     public RuleInterface<Integer> getReproductionSelector() {
         return stub;
@@ -247,19 +246,22 @@ public class DeadUnit implements Unit, Serializable, Cloneable {
     }
 
     @Override
+    protected void markAsNewborn() {
+    }
+
+    @Override
     public Object clone() {
         try {
             return (DeadUnit) super.clone();
-        }
-        catch (CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             System.out.println("com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.DeadUnit.clone() failed idk");
             return this;
         }
     }
-    
+
     @Override
     public String toString() {
         return "";
     }
-    
+
 }

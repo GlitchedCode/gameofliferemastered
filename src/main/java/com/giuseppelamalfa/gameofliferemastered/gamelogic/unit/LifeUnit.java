@@ -15,14 +15,14 @@ import java.util.Objects;
  *
  * @author glitchedcode
  */
-public class LifeUnit implements Unit, Serializable, Cloneable {
+public class LifeUnit extends Unit implements Serializable, Cloneable {
 
     public final int speciesID;
 
     public final SpeciesData speciesData;
 
-    private State state = State.INVALID;
-    private transient State nextState = State.INVALID;
+    private State state = null;
+    private transient State nextState = null;
 
     private int health;
     private transient int healthIncrement = 0;
@@ -154,14 +154,12 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
         health += healthIncrement;
         healthIncrement = 0;
 
-        if (state != nextState
-                & nextState != State.INVALID
-                & nextState != null) {
+        if (state != nextState & nextState != null) {
             state.exit(this);
             state = nextState;
             state.enter(this);
         }
-        nextState = nextState.INVALID;
+        nextState = null;
         stateChanged = false;
     }
 
@@ -173,7 +171,7 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
 
     @Override
     public boolean isAlive() {
-        return state != State.DEAD & state != State.INVALID;
+        return state != State.DEAD & state != null;
     }
 
     /**
@@ -219,8 +217,8 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
      */
     @Override
     public State getNextTurnState() throws GameLogicException {
-        if (nextState == State.INVALID) {
-            return state;
+        if (nextState == null) {
+            return getCurrentState();
         }
         return nextState;
     }
@@ -321,6 +319,13 @@ public class LifeUnit implements Unit, Serializable, Cloneable {
     public void incrementHealth(int increment) {
         healthIncrement += increment;
     }
+    
+    @Override
+    protected void markAsNewborn(){
+        state = State.DEAD;
+        nextState = State.ALIVE;
+    }
+    
 
     @Override
     public String toString() {
