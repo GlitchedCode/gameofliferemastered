@@ -141,6 +141,11 @@ public class DeadUnit implements Unit, Serializable, Cloneable {
     public SpeciesData getSpeciesData(){
         return null;
     }
+    
+    @Override
+    public final boolean isStateChanged() {
+        return false;
+    }
 
     @Override
     public void update() {
@@ -251,9 +256,6 @@ public class DeadUnit implements Unit, Serializable, Cloneable {
             return this;
         }
     }
-    
-    @Override
-    public String getTextureCode() { return ""; }
     
     @Override
     public String toString() {

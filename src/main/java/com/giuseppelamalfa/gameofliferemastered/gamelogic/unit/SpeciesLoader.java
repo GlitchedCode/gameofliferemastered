@@ -96,6 +96,17 @@ public class SpeciesLoader {
             return null;
         }
     }
+    
+    public synchronized String getSpeciesTextureCode(int index) {
+        SpeciesData data = getSpeciesData(index);
+        if (data != null) {
+            return data.textureCode;
+        } else {
+            return null;
+        }
+    }
+    
+    
 
     public synchronized Set<Integer> getSpeciesIDs() {
         return speciesData.keySet();

@@ -6,6 +6,7 @@
 package com.giuseppelamalfa.gameofliferemastered.simulation;
 
 import com.giuseppelamalfa.gameofliferemastered.ApplicationFrame;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.GameLogicException;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.GameMode;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.Grid;
@@ -195,14 +196,14 @@ public class SimulationCLIServer extends SimulationInterface {
         initializeRemoteServer(portNumber, playerCount, rowCount, columnCount);
     }
 
-    public SimulationCLIServer(int rowCount, int columnCount) throws Exception {
+    protected SimulationCLIServer(int rowCount, int columnCount) throws Exception {
         mode = GameMode.SANDBOX;
         speciesLoader.loadSpeciesFromLocalJSON();
         currentGrid = new Grid(rowCount, columnCount);
         currentGrid.setSimulation(this);
     }
 
-    void reloadSpeciesConf(String path) throws Exception{
+    public void reloadSpeciesConf(String path) throws Exception{
         speciesLoader.loadSpeciesFromLocalJSON(path);
     }
     
@@ -532,7 +533,7 @@ public class SimulationCLIServer extends SimulationInterface {
         }
     }
 
-    protected void handleSetUnitRequest(Request r, Integer clientID) {
+    protected void handleSetUnitRequest(Request r, Integer clientID) throws GameLogicException {
         ClientData data = connectedClients.get(clientID);
         PlayerData playerData;
         if (data == null) {

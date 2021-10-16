@@ -43,3 +43,10 @@ gradle-app.setting
 
 # Generic serialized grid files
 grid-*.ser
+
+# Private files
+*private*
+
+
+# Lock files
+*.lck

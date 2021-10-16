@@ -18,9 +18,10 @@ public class Mimic extends LifeUnit {
 
     private int turnsTillReplication = 0;
 
-    private Unit replicationTarget;
-    private SpeciesData replicatedSpeciesData = null;
+    private transient Unit replicationTarget;
+    private boolean replicated = false;
     
+    private int replicatedID;
     private Set<Integer> friendlySpecies;
     private Set<Integer> hostileSpecies;
     
@@ -61,7 +62,7 @@ public class Mimic extends LifeUnit {
         for (int i = 0; i < 8; i++) // conto le unità ostili ed amichevoli
         {
             Unit current = adjacentUnits[i];
-            if(replicatedSpeciesData != null | replicationTarget != null) {
+            if(replicationTarget != null) {
                 break;
             }
             if (current.getSpeciesID() != speciesID & current.isAlive()) {
@@ -75,7 +76,7 @@ public class Mimic extends LifeUnit {
         boolean ret = getCurrentState().attackModifier(isAlive(), adjacencyPosition);
         ret &= (isCompetitive() & unit.getPlayerID() != getPlayerID())
                 | (hostileSpecies.contains(unit.getSpeciesID())
-                ^ (replicatedSpeciesData == null & unit.getSpeciesID() != speciesID));
+                ^ (!replicated & unit.getSpeciesID() != speciesID));
         if (ret) {
             unit.incrementHealth(-1);
         }
@@ -83,20 +84,23 @@ public class Mimic extends LifeUnit {
     }
 
     @Override
-    protected void endStep() {
+    public void update() {
+        super.update();
+
+        // Replication moved to update to avoid modifying grid state during survival/reproduction steps
         if (turnsTillReplication > 0) {
             turnsTillReplication--;
         } else if (replicationTarget != null) {
             replicate(replicationTarget);
             turnsTillReplication = REPLICATION_COOLDOWN;
         }
-        super.endStep();
         replicationTarget = null;
     }
 
     protected void replicate(Unit unit) {
-        replicatedSpeciesData = unit.getSpeciesData();
+        SpeciesData otherData = unit.getSpeciesData();
 
+        replicatedID = otherData.speciesID;
         friendlySpecies = unit.getFriendlySpecies();
         hostileSpecies = unit.getHostileSpecies();
         friendlyCountSelector = unit.getFriendlyCountSelector();
@@ -104,26 +108,62 @@ public class Mimic extends LifeUnit {
         reproductionSelector = unit.getReproductionSelector();
         setCurrentState(unit.getCurrentState());
 
-        int inc = replicatedSpeciesData.health - speciesData.health;
-        incrementHealth(inc);
-        if (getHealth() < 1) {
+        int inc = otherData.health - speciesData.health;
+        if (getHealth() + inc < 1) {
             setHealth(1);
+        } else {
+            incrementHealth(inc);
         }
-    }
-
-    @Override
-    public String getTextureCode() {
-        if (replicatedSpeciesData == null) {
-            return super.getTextureCode();
-        }
-        return replicatedSpeciesData.textureCode;
     }
 
     @Override
     public int getSpeciesID() {
-        if (replicatedSpeciesData == null) {
+        if (!replicated) {
             return getActualSpeciesID();
         }
-        return replicatedSpeciesData.speciesID;
+        return replicatedID;
+    }
+    
+    /**
+     * @return set with friendly species
+     */
+    @Override
+    public final Set<Integer> getFriendlySpecies() {
+        if(!replicated) {
+            return super.getFriendlySpecies();
+        }
+        return friendlySpecies;
+    }
+
+    @Override
+    public final Set<Integer> getHostileSpecies() {
+        if(!replicated) {
+            return super.getHostileSpecies();
+        }
+        return hostileSpecies;
+    }
+
+    @Override
+    public RuleInterface<Integer> getFriendlyCountSelector() {
+        if(!replicated) {
+            return super.getFriendlyCountSelector();
+        }
+        return friendlyCountSelector;
+    }
+
+    @Override
+    public RuleInterface<Integer> getHostileCountSelector() {
+        if(!replicated) {
+            return super.getHostileCountSelector();
+        }
+        return hostileCountSelector;
+    }
+
+    @Override
+    public RuleInterface<Integer> getReproductionSelector() {
+        if(!replicated) {
+            return super.getReproductionSelector();
+        }
+        return reproductionSelector;
     }
 }

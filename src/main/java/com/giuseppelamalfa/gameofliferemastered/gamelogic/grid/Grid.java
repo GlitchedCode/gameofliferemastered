@@ -32,7 +32,7 @@ import java.util.logging.Logger;
  */
 public class Grid implements Serializable, Cloneable {
 
-    public final Integer SECTOR_SIDE_LENGTH = 32;
+    public final Integer SECTOR_SIDE_LENGTH = 16;
 
     private ConcurrentGrid2DContainer<Unit> board;
     private ConcurrentGrid2DContainer<Boolean> sectorFlags;
@@ -60,10 +60,10 @@ public class Grid implements Serializable, Cloneable {
     private String gameModeName = "Sandbox";
     private String gameStatus = "Paused";
     private int syncTurnCount = 40;
-    
+
     protected static final DeadUnit deadUnit = new DeadUnit();
-    protected static final int PROCESSOR_COUNT = Runtime.getRuntime().availableProcessors();    
-    
+    protected static final int PROCESSOR_COUNT = Runtime.getRuntime().availableProcessors();
+
     protected boolean isRunning = false;
     protected boolean isLocked = false;
     protected boolean competitive = false;
@@ -91,17 +91,17 @@ public class Grid implements Serializable, Cloneable {
         topLeftProcessed = new Point(topLeftActive);
         bottomRightProcessed = new Point(bottomRightActive);
     }
-    
+
     protected void setGameModeName(String arg) {
-        if(arg != null) {
+        if (arg != null) {
             gameModeName = arg;
         } else {
             gameModeName = "";
         }
     }
-    
+
     protected void setGameStatus(String arg) {
-        if(arg != null) {
+        if (arg != null) {
             gameStatus = arg;
         } else {
             gameStatus = "";
@@ -111,7 +111,7 @@ public class Grid implements Serializable, Cloneable {
     protected void setSyncTurnCount(int arg) {
         syncTurnCount = Math.max(0, arg);
     }
-    
+
     @Override
     @SuppressWarnings({"unchecked"})
     public Object clone() throws CloneNotSupportedException {
@@ -295,6 +295,8 @@ public class Grid implements Serializable, Cloneable {
             if (found.isAlive()) {
                 incrementPlayerScore(found.getPlayerID(), -getUnitScoreIncrement(found));
                 board.remove(row, col);
+                moveProcessBoundaryToInclude(row, col);
+                touchSector(row / SECTOR_SIDE_LENGTH, col / SECTOR_SIDE_LENGTH);
                 orderPlayersByScore();
             }
         } finally {
@@ -309,7 +311,7 @@ public class Grid implements Serializable, Cloneable {
      * @param col Column location.
      * @param unit Unit to be set.
      */
-    public final void setUnit(int row, int col, Unit unit) {
+    public final void setUnit(int row, int col, Unit unit) throws GameLogicException {
         turnLock.lock();
         try {
             if (unit == null) {
@@ -320,7 +322,6 @@ public class Grid implements Serializable, Cloneable {
             }
             unit.update();
             setToPosition(row, col, unit);
-            correctProcessRegion();
         } finally {
             turnLock.unlock();
         }
@@ -464,7 +465,6 @@ public class Grid implements Serializable, Cloneable {
             }
 
             cleanupStep();
-            correctProcessRegion();
             orderPlayersByScore();
             turn += 1;
 
@@ -552,7 +552,7 @@ public class Grid implements Serializable, Cloneable {
                         }
                     }
                 }
-                */
+                 */
                 players.remove(id);
                 ret = true;
             }
@@ -571,8 +571,7 @@ public class Grid implements Serializable, Cloneable {
     public final void setPlayerIDCheckNextTurn() {
         runPlayerIDCheck = true;
     }
-    */
-    
+     */
     /**
      * @param ID player's ID
      * @return Player's color, or PlayerData.TeamColor.NONE if not found.
@@ -600,6 +599,18 @@ public class Grid implements Serializable, Cloneable {
         }
     }
 
+    protected final void touchSector(int row, int col) {
+        sectorFlags.put(row, col, true);
+        sectorFlags.put(row, col - 1, true);
+        sectorFlags.put(row - 1, col, true);
+        sectorFlags.put(row - 1, col - 1, true);
+        sectorFlags.put(row, col + 1, true);
+        sectorFlags.put(row + 1, col, true);
+        sectorFlags.put(row + 1, col + 1, true);
+        sectorFlags.put(row - 1, col + 1, true);
+        sectorFlags.put(row + 1, col - 1, true);
+    }
+
     /**
      * Sets a given unit to the given coordinates on the game board
      *
@@ -607,11 +618,12 @@ public class Grid implements Serializable, Cloneable {
      * @param col row
      * @param unit unit to be set
      */
-    protected final void setToPosition(Integer row, Integer col, Unit unit) {
+    protected final void setToPosition(Integer row, Integer col, Unit unit) throws GameLogicException{
         Unit previous = board.get(row, col);
-        if (previous.getPlayerID() != -1) {
-            incrementPlayerScore(previous.getPlayerID(), -getUnitScoreIncrement(previous));
-            board.remove(row, col);
+        if (previous.isAlive() | previous.getPlayerID() != -1) {
+            throw new GameLogicException(unit, "setToPosition should only be called on non-empty cells");
+            //incrementPlayerScore(previous.getPlayerID(), -getUnitScoreIncrement(previous));
+            //board.remove(row, col);
         }
 
         if (unit != null) {
@@ -625,7 +637,7 @@ public class Grid implements Serializable, Cloneable {
                 gridLock.unlock();
             }
             moveProcessBoundaryToInclude(row, col);
-            sectorFlags.put(row / SECTOR_SIDE_LENGTH, col / SECTOR_SIDE_LENGTH, true);
+            touchSector(row / SECTOR_SIDE_LENGTH, col / SECTOR_SIDE_LENGTH);
             orderPlayersByScore();
         }
     }
@@ -664,12 +676,13 @@ public class Grid implements Serializable, Cloneable {
     private void moveProcessBoundaryToInclude(Integer row, Integer col) {
         gridLock.lock();
         try {
+            /*
             if (!unitFoundThisTurn) {
                 topLeftProcessed.move(col, row);
                 bottomRightProcessed.move(col, row);
                 unitFoundThisTurn = true;
                 return;
-            }
+            }*/
 
             if (row < topLeftProcessed.y) {
                 topLeftProcessed.y = row;
@@ -685,6 +698,8 @@ public class Grid implements Serializable, Cloneable {
         } finally {
             gridLock.unlock();
         }
+
+        correctProcessRegion();
     }
 
     private void correctProcessRegion() {
@@ -757,7 +772,7 @@ public class Grid implements Serializable, Cloneable {
 
     // Next turn computation helper functions.
     private boolean survivalStep(Point topLeftBoundary, Point bottomRightBoundary) throws GameLogicException {
-        boolean aliveNextTurn = false;
+        boolean activeNextTurn = false;
 
         for (int row = topLeftBoundary.y; row <= bottomRightBoundary.y; row++) {
             for (int col = topLeftBoundary.x; col <= bottomRightBoundary.x; col++) {
@@ -774,15 +789,15 @@ public class Grid implements Serializable, Cloneable {
                 // process more units
                 if (current.getNextTurnState() != State.DEAD) {
                     moveProcessBoundaryToInclude(row, col);
-                    aliveNextTurn = true;
+                    activeNextTurn = true;
                 }
             }
         }
 
-        return aliveNextTurn;
+        return activeNextTurn;
     }
 
-    private boolean reproductionStep(Point topLeftBoundary, Point bottomRightBoundary, SpeciesLoader speciesLoader) {
+    private boolean reproductionStep(Point topLeftBoundary, Point bottomRightBoundary, SpeciesLoader speciesLoader) throws GameLogicException {
         boolean aliveNextTurn = false;
         for (int row = topLeftBoundary.y; row <= bottomRightBoundary.y; row++) {
             for (int col = topLeftBoundary.x; col <= bottomRightBoundary.x; col++) {
@@ -859,6 +874,14 @@ public class Grid implements Serializable, Cloneable {
                     Logger.getLogger(Grid.class.getName()).log(Level.SEVERE, null, ex);
                 }
             });
+
+            for (int r = 0; r < sectorFlags.getRowCount(); r++) {
+                for (int c = 0; c < sectorFlags.getColumnCount(); c++) {
+                    if (sectorFlags.get(r, c)) {
+                        touchSector(r, c);
+                    }
+                }
+            }
         } finally {
             gridLock.unlock();
         }

@@ -27,6 +27,8 @@ public interface Unit {
     public void setCompetitive(boolean val);
     // Imposta internamente lo stato dell'unità per il turno successivo.
     public void computeNextTurn(Unit[] adjacentUnits);
+    // Restituisce true se lo stato dell'unità cambierà il prossimo turno.
+    public boolean isStateChanged();
     // Transiziona l'unità allo stato del turno successivo.
     public void update();
     // Imposta l'unità come morta nel turno attuale e nel prossimo.
@@ -47,8 +49,6 @@ public interface Unit {
     // Restituisce l'ID della specie a cui l'unità può dare vita durante la fase
     // di riproduzione.
     public int getBornSpeciesID();
-    // Restituisce il codice per la texture che rappresenta l'unità.
-    public String getTextureCode();
     // Restituisce il filtro da applicare alla texture che rappresenta l'unità.
     //public BufferedImageOp getFilter();
     // Restituisce un insieme di specie le cui unità sono considerate amichevoli.

@@ -12,6 +12,7 @@ import com.giuseppelamalfa.gameofliferemastered.simulation.request.Request;
 import com.giuseppelamalfa.gameofliferemastered.simulation.request.LogMessageRequest;
 import com.giuseppelamalfa.gameofliferemastered.simulation.request.DisconnectRequest;
 import com.giuseppelamalfa.gameofliferemastered.ApplicationFrame;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.GameLogicException;
 import com.giuseppelamalfa.gameofliferemastered.ui.GridPanel;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.GameMode;
@@ -157,7 +158,7 @@ public class SimulationGUIServer extends SimulationCLIServer {
     }
 
     @Override
-    protected void handleSetUnitRequest(Request r, Integer clientID) {
+    protected void handleSetUnitRequest(Request r, Integer clientID) throws GameLogicException {
         ClientData data = connectedClients.get(clientID);
         PlayerData playerData;
         if (data == null) {

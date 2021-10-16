@@ -5,6 +5,7 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.grid;
 
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.GameLogicException;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
@@ -30,7 +31,7 @@ public class GridIT {
 
     @Before
     public void setUp() throws Exception {
-        grid = new Grid(10, 10);
+        grid = new Grid(64, 64);
         player1 = new PlayerData("Player1");
         player1.ID = 0;
         grid.addPlayer(player1);
@@ -44,7 +45,7 @@ public class GridIT {
      * Test of setUnit, getUnit and removeUnit methods, of class Grid.
      */
     @Test
-    public void testSetRemoveUnit() {
+    public void testSetRemoveUnit() throws GameLogicException {
         System.out.println("removeUnit");
         int row = 0;
         int col = 0;
@@ -68,7 +69,7 @@ public class GridIT {
      * Test of clearBoard method, of class Grid.
      */
     @Test
-    public void testClearBoard() {
+    public void testClearBoard() throws GameLogicException {
         System.out.println("clearBoard");
 
         for (int i = 1; i < 4; i++) {
@@ -90,7 +91,7 @@ public class GridIT {
     }
 
     @Test
-    public void testRemovePlayer() {
+    public void testRemovePlayer() throws GameLogicException {
         System.out.println("removePlayer");
         PlayerData player2 = new PlayerData();
         int ID = 1;
@@ -120,7 +121,7 @@ public class GridIT {
     }
 
     @Test
-    public void testGetUnitScoreIncrement() {
+    public void testGetUnitScoreIncrement() throws GameLogicException {
         System.out.println("getUnitScoreIncrement");
         Unit unit = loader.getNewUnit(0);
         assertEquals(0, grid.getUnitScoreIncrement(unit));
@@ -131,19 +132,37 @@ public class GridIT {
     }
     
     @Test
-    public void testGosperCompare() throws Exception {
-        System.out.println("testGosperCompare");
+    public void testSectorAndProcessBoundary() throws Exception {
+        System.out.println("sectorAndProcessBoundary");
         
-        grid = new Grid(50,70);
-        grid.loadBoardFromResources("grid/gosperStarting.ser");
-        Grid after = new Grid(50,70);
-        after.loadBoardFromResources("grid/gosper40T.ser");
+        /*
+         x
+          x
+        xxx
+        */
+        grid.setUnit(0, 1, loader.getNewUnit(0));
+        grid.setUnit(1, 2, loader.getNewUnit(0));
+        grid.setUnit(2, 0, loader.getNewUnit(0));
+        grid.setUnit(2, 1, loader.getNewUnit(0));
+        grid.setUnit(2, 2, loader.getNewUnit(0));
         
-        for(int i = 0; i < 40; i++){
-            grid.computeNextTurn(loader);
-        }
+        /*
+         x
+        x x
+         x
+        */
+        grid.setUnit(0, 11, loader.getNewUnit(0));
+        grid.setUnit(1, 10, loader.getNewUnit(0));
+        grid.setUnit(1, 12, loader.getNewUnit(0));
+        grid.setUnit(2, 11, loader.getNewUnit(0));
         
-        assertEquals(true, grid.areGridContentsEqual(after));
+        grid.computeNextTurn(loader);
+        
+        Unit unit = loader.getNewUnit(0);
+        grid.setUnit(33, 33, unit);
+        
+        assertEquals(true, unit.isAlive());
+        grid.computeNextTurn(loader);
+        assertEquals(false, unit.isAlive());
     }
-
 }

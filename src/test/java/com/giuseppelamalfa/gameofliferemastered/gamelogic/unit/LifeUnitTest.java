@@ -72,13 +72,17 @@ public class LifeUnitTest {
 
         int previousHealth = instance.getHealth();
         instance.computeNextTurn(enoughUnits);
+        instance.update();
         assertEquals(previousHealth == instance.getHealth(), true);
-
+        
         instance.computeNextTurn(tooManyUnits);
+        assertEquals(true, instance.getHealth() == previousHealth);
+        instance.update();
         assertEquals(instance.getHealth() < previousHealth, true);
 
         previousHealth = instance.getHealth();
         instance.computeNextTurn(notEnoughUnits);
+        instance.update();
         assertEquals(instance.getHealth() < previousHealth, true);
     }
 
@@ -129,13 +133,17 @@ public class LifeUnitTest {
         instance.update();
         int previousHealth = instance.getHealth();
         instance.computeNextTurn(enoughUnits);
+        instance.update();
         assertEquals(previousHealth == instance.getHealth(), true);
 
         instance.computeNextTurn(tooManyUnits);
+        assertEquals(true, instance.getHealth() == previousHealth);
+        instance.update();
         assertEquals(instance.getHealth() < previousHealth, true);
 
         previousHealth = instance.getHealth();
         instance.computeNextTurn(notEnoughUnits);
+        instance.update();
         assertEquals(instance.getHealth() < previousHealth, true);
     }
 
@@ -188,16 +196,35 @@ public class LifeUnitTest {
 
         assertEquals(false, cell.isAlive());
         assertEquals(true, snake.isAlive());
-
     }
 
     @Test
     public void testIncrementHealth() {
         System.out.println("incrementHealth");
-        int increment = 2;
+        Unit[] enoughUnits = {
+            loader.getNewUnit(0),
+            loader.getNewUnit(0),
+            loader.getNewUnit(1),
+            loader.getNewUnit(1),
+            dead,
+            dead,
+            dead,
+            dead
+        };
+        for(Unit unit: enoughUnits){
+            unit.update();
+        }
+        
         Unit instance = loader.getNewUnit(1);
+        instance.update();
+        
+        int increment = 2;
         int previous = instance.getHealth();
         instance.incrementHealth(increment);
+        
+        instance.computeNextTurn(enoughUnits);
+        instance.update();
+        
         assertEquals(true, previous + increment == instance.getHealth());
     }
 }

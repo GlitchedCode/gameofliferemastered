@@ -15,6 +15,7 @@ import com.giuseppelamalfa.gameofliferemastered.simulation.request.UpdatePlayerD
 import com.giuseppelamalfa.gameofliferemastered.simulation.request.SyncGridRequest;
 import com.giuseppelamalfa.gameofliferemastered.simulation.request.DisconnectRequest;
 import com.giuseppelamalfa.gameofliferemastered.ApplicationFrame;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.GameLogicException;
 import com.giuseppelamalfa.gameofliferemastered.ui.GridPanel;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.Grid;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
@@ -197,7 +198,11 @@ public class SimulationRemoteClient extends SimulationInterface {
             Logger.getLogger(SimulationRemoteClient.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        currentGrid.setUnit(row, col, unit);
+        try {
+            currentGrid.setUnit(row, col, unit);
+        } catch (GameLogicException ex) {
+            Logger.getLogger(SimulationRemoteClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @Override
@@ -300,7 +305,7 @@ public class SimulationRemoteClient extends SimulationInterface {
         currentGrid.setRunning(req.running);
     }
 
-    void handleSetUnitRequest(Request r, Integer ID) {
+    void handleSetUnitRequest(Request r, Integer ID) throws GameLogicException {
         SetUnitRequest setUnit = (SetUnitRequest) r;
         if (setUnit.unit != null) {
             currentGrid.setUnit(setUnit.row, setUnit.col, setUnit.unit);

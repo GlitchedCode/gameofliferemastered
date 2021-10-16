@@ -338,6 +338,14 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
         }
     }
 
+    BufferedImageOp getUnitFilter(Unit unit){
+        return speciesLoader.getSpeciesFilter(unit.getActualSpeciesID());
+    }
+    
+    String getUnitTextureCode(Unit unit){
+        return speciesLoader.getSpeciesTextureCode(unit.getSpeciesID());
+    }
+    
     public void drawUnit(Graphics2D g, AffineTransform xform, ImageObserver obs, Unit unit) {
         g.setColor(simulation.getPlayerColor(unit.getPlayerID()).getMainAWTColor());
         g.fillRect((int) xform.getTranslateX(), (int) xform.getTranslateY(),
@@ -346,8 +354,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
         AffineTransform oldXForm = g.getTransform();
 
         g.setTransform(xform);
-        BufferedImageOp filter = speciesLoader.getSpeciesFilter(unit.getActualSpeciesID());
-        g.drawImage(tileManager.getImage(unit.getTextureCode()), filter, 0, 0);
+        g.drawImage(tileManager.getImage(getUnitTextureCode(unit)), getUnitFilter(unit), 0, 0);
 
         g.setTransform(oldXForm);
     }
