@@ -60,7 +60,7 @@ public class Mimic extends LifeUnit {
     @Override
     protected void boardStep(Unit[] adjacentUnits) {
         super.boardStep(adjacentUnits);
-        for (int i = 0; i < 8; i++) // conto le unità ostili ed amichevoli
+        for (int i = 0; i < 8; i++)
         {
             Unit current = adjacentUnits[i];
             if(replicationTarget != null) {
@@ -76,7 +76,7 @@ public class Mimic extends LifeUnit {
     public boolean attack(int adjacencyPosition, Unit unit) {
         boolean ret = getCurrentState().attackModifier(isAlive(), adjacencyPosition);
         ret &= (isCompetitive() & unit.getPlayerID() != getPlayerID())
-                | (hostileSpecies.contains(unit.getSpeciesID())
+                | (getHostileSpecies().contains(unit.getSpeciesID())
                 ^ (!replicated & unit.getSpeciesID() != speciesID));
         if (ret) {
             unit.incrementHealth(-1);
@@ -109,12 +109,9 @@ public class Mimic extends LifeUnit {
         reproductionSelector = unit.getReproductionSelector();
         setCurrentState(unit.getCurrentState());
 
-        int inc = otherData.health - speciesData.health;
-        if (getHealth() + inc < 1) {
-            setHealth(1);
-        } else {
-            incrementHealth(inc);
-        }
+        int newHealth = Math.max(getHealth() + (otherData.health - speciesData.health), 1);
+        setHealth(newHealth);
+        replicated = true;
     }
 
     @Override
