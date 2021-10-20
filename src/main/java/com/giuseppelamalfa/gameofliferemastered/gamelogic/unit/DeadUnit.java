@@ -251,12 +251,7 @@ public class DeadUnit extends Unit implements Serializable, Cloneable {
 
     @Override
     public Object clone() {
-        try {
-            return (DeadUnit) super.clone();
-        } catch (CloneNotSupportedException e) {
-            System.out.println("com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.DeadUnit.clone() failed idk");
-            return this;
-        }
+        return (DeadUnit) super.clone();
     }
 
     @Override

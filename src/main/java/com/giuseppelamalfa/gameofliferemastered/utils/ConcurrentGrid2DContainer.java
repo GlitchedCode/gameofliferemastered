@@ -32,7 +32,7 @@ public class ConcurrentGrid2DContainer<T> implements Cloneable, Serializable {
         this.cols = cols;
         this.defaultValue = sparseDefault;
         
-        map = new ConcurrentHashMap<>(rows*cols, 0.5f, 1);
+        map = new ConcurrentHashMap<>(rows*cols, 0.9f, 1);
 
         resize(rows, cols);
     }

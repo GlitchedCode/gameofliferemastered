@@ -16,6 +16,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -39,10 +40,10 @@ public class Grid implements Serializable, Cloneable {
     private ConcurrentGrid2DContainer<Unit> board;
     private ConcurrentGrid2DContainer<Boolean> sectorFlags;
 
-    private Integer rowCount;
-    private Integer columnCount;
-    private Integer sectorRowCount;
-    private Integer sectorColumnCount;
+    private int rowCount;
+    private int columnCount;
+    private int sectorRowCount;
+    private int sectorColumnCount;
 
     private Point topLeftActive;
     private Point bottomRightActive;
@@ -63,7 +64,7 @@ public class Grid implements Serializable, Cloneable {
     private int syncTurnCount = 40;
 
     protected static final DeadUnit deadUnit = new DeadUnit();
-    private transient ExecutorService executor = Executors.newFixedThreadPool(PROCESSOR_COUNT);
+    private transient ExecutorService executor = Executors.newFixedThreadPool(PROCESSOR_COUNT * 2);
 
     protected boolean isRunning = false;
     protected boolean isLocked = false;
@@ -246,6 +247,7 @@ public class Grid implements Serializable, Cloneable {
             columnCount = cols;
             sectorRowCount = _sectorRowCount;
             sectorColumnCount = _sectorColumnCount;
+
         } finally {
             gridLock.unlock();
         }
@@ -829,16 +831,33 @@ public class Grid implements Serializable, Cloneable {
             gridLock.unlock();
         }
     }
-    
-    static void loadBigGrid(Grid grid, SpeciesLoader loader, int sideLen) throws Exception {
+
+    static void fillRandomGrid(Random rng, Grid grid, SpeciesLoader loader, int sideLen) throws Exception {
         grid.resize(sideLen, sideLen);
         grid.clearBoard();
 
         for (int r = 0; r < sideLen; r++) {
             for (int c = 0; c < sideLen; c++) {
-                int val = (int) (Math.random() * 3);
+                int val = (int) (rng.nextFloat() * 3);
                 if (val < 2) {
                     grid.setUnit(r, c, loader.getNewUnit(val, 0));
+                }
+            }
+        }
+    }
+
+    static void copyToGrid(Grid src, Grid dst) throws GameLogicException {
+        int rows = Math.min(src.getRowCount(), dst.getRowCount());
+        int cols = Math.min(src.getColumnCount(), dst.getColumnCount());
+
+        dst.clearBoard();
+
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                Unit srcUnit = src.getUnit(r, c);
+                if (srcUnit.isAlive()) {
+                    Unit dstUnit = (Unit) srcUnit.clone();
+                    dst.setUnit(r, c, dstUnit);
                 }
             }
         }
@@ -848,30 +867,35 @@ public class Grid implements Serializable, Cloneable {
         int starting = 128;
         int max = 256;
         int rounds = 10;
-        
+        Random rng = new Random(0xdeadbeef);
+
         System.out.println("Measuring turn computation time with grid side length from "
                 + starting + " to " + max);
         System.out.println("Core count: " + Grid.PROCESSOR_COUNT + ".\n");
 
         int diff = max - starting + 1;
         List<Double> totals = new ArrayList<>(diff);
-        for(int i = 0; i < diff; i++){
+        for (int i = 0; i < diff; i++) {
             totals.add(0d);
         }
-        
+
         SpeciesLoader loader = new SpeciesLoader();
         loader.loadSpeciesFromLocalJSON();
+        Grid randGrid = new Grid(1, 1);
         Grid grid = new Grid(1, 1);
         PlayerData data = new PlayerData();
         data.ID = 0;
+        randGrid.addPlayer(data);
         grid.addPlayer(data);
-        
-        
+
         for (int round = 0; round < rounds; round++) {
-            System.out.println("Round " + (round+1) + "\n");
+            System.out.println("Round " + (round + 1) + "\n");
+            fillRandomGrid(rng, randGrid, loader, max);
+
             for (int i = 0; i < diff; i++) {
                 int sideLen = starting + i;
-                loadBigGrid(grid, loader, sideLen);
+                grid.resize(sideLen, sideLen);
+                copyToGrid(randGrid, grid);
 
                 long startTime = System.nanoTime();
                 grid.computeNextTurn(loader);
@@ -879,21 +903,20 @@ public class Grid implements Serializable, Cloneable {
                 double millisDuration = (endTime - startTime) / 1_000_000.0;
 
                 totals.set(i, totals.get(i) + millisDuration);
-                
+
                 System.out.print(sideLen);
                 System.out.print(" ");
                 System.out.println(millisDuration);
             }
             System.out.println("\n");
         }
-        
+
         System.out.println("Averages\n");
-        for(int i = 0; i < diff; i++){
+        for (int i = 0; i < diff; i++) {
             System.out.print(starting + i);
             System.out.print(" ");
-            System.out.println(totals.get(i) / (double)rounds);
+            System.out.println(totals.get(i) / (double) rounds);
         }
-
 
         System.exit(0);
     }

@@ -15,7 +15,7 @@ import java.util.Objects;
  *
  * @author glitchedcode
  */
-public class LifeUnit extends Unit implements Serializable, Cloneable {
+public class LifeUnit extends Unit {
 
     public final int speciesID;
 
@@ -337,12 +337,7 @@ public class LifeUnit extends Unit implements Serializable, Cloneable {
 
     @Override
     public Object clone() {
-        try {
-            return (LifeUnit) super.clone();
-        } catch (CloneNotSupportedException e) {
-            System.out.println("com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit.clone()");
-            return this;
-        }
+        return (LifeUnit) super.clone();
     }
 
     @Override
