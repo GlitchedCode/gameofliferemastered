@@ -63,7 +63,7 @@ public class Grid implements Serializable, Cloneable {
     private int syncTurnCount = 40;
 
     protected static final DeadUnit deadUnit = new DeadUnit();
-    private ExecutorService executor = Executors.newFixedThreadPool(PROCESSOR_COUNT);
+    private transient ExecutorService executor = Executors.newFixedThreadPool(PROCESSOR_COUNT);
 
     protected boolean isRunning = false;
     protected boolean isLocked = false;
@@ -337,8 +337,7 @@ public class Grid implements Serializable, Cloneable {
     }
 
     public void afterSync() {
-        //board.setDefaultValue(deadUnit);
-        //sectorFlags.setDefaultValue(false);
+        executor = Executors.newFixedThreadPool(PROCESSOR_COUNT);
         gridLock = new ReentrantLock();
         turnLock = new ReentrantLock();
     }
