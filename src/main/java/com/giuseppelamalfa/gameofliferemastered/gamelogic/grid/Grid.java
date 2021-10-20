@@ -5,7 +5,6 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.grid;
 
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.State;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.GameLogicException;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
 import com.giuseppelamalfa.gameofliferemastered.simulation.SimulationInterface;
@@ -13,13 +12,15 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.*;
 import com.giuseppelamalfa.gameofliferemastered.utils.*;
 import java.awt.Point;
 import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
@@ -32,7 +33,8 @@ import java.util.logging.Logger;
  */
 public class Grid implements Serializable, Cloneable {
 
-    public final Integer SECTOR_SIDE_LENGTH = 16;
+    public final static int PROCESSOR_COUNT = Runtime.getRuntime().availableProcessors();
+    public final Integer SECTOR_SIDE_LENGTH = 64;
 
     private ConcurrentGrid2DContainer<Unit> board;
     private ConcurrentGrid2DContainer<Boolean> sectorFlags;
@@ -61,7 +63,7 @@ public class Grid implements Serializable, Cloneable {
     private int syncTurnCount = 40;
 
     protected static final DeadUnit deadUnit = new DeadUnit();
-    protected static final int PROCESSOR_COUNT = Runtime.getRuntime().availableProcessors();
+    private ExecutorService executor = Executors.newFixedThreadPool(PROCESSOR_COUNT);
 
     protected boolean isRunning = false;
     protected boolean isLocked = false;
@@ -165,26 +167,12 @@ public class Grid implements Serializable, Cloneable {
         new ObjectOutputStream(new FileOutputStream(fileName + ".ser")).writeObject(board);
     }
 
-    @SuppressWarnings("unchecked")
-    boolean loadBoardFromResources(String path) throws Exception {
-        InputStream istream = getClass().getClassLoader().getResourceAsStream(path);
-        ObjectInputStream objstream = new ObjectInputStream(istream);
-        ConcurrentGrid2DContainer<Unit> board = (ConcurrentGrid2DContainer<Unit>) objstream.readObject();
-        if (board == null) {
-            return false;
-        }
-        if (board.getColumnCount() != getColumnCount() | board.getRowCount() != getRowCount()) {
-            return false;
-        }
-
+    void setAllSectorFlags(boolean arg) {
         for (int r = 0; r < sectorFlags.getRowCount(); r++) {
             for (int c = 0; c < sectorFlags.getColumnCount(); c++) {
-                sectorFlags.put(r, c, true);
+                sectorFlags.put(r, c, arg);
             }
         }
-
-        this.board = board;
-        return true;
     }
 
     /*
@@ -271,13 +259,8 @@ public class Grid implements Serializable, Cloneable {
      * if location is out of bounds.
      */
     public final Unit getUnit(int row, int col) {
-        turnLock.lock();
         Unit ret;
-        try {
-            ret = board.get(row, col);
-        } finally {
-            turnLock.unlock();
-        }
+        ret = board.get(row, col);
         return ret;
     }
 
@@ -288,18 +271,13 @@ public class Grid implements Serializable, Cloneable {
      * @param col
      */
     public final void removeUnit(int row, int col) {
-        turnLock.lock();
-        try {
-            Unit found = board.get(row, col);
-            if (found.isAlive()) {
-                incrementPlayerScore(found.getPlayerID(), -getUnitScoreIncrement(found));
-                board.remove(row, col);
-                moveProcessBoundaryToInclude(row, col);
-                touchSector(row / SECTOR_SIDE_LENGTH, col / SECTOR_SIDE_LENGTH);
-                orderPlayersByScore();
-            }
-        } finally {
-            turnLock.unlock();
+        Unit found = board.get(row, col);
+        if (found.isAlive()) {
+            incrementPlayerScore(found.getPlayerID(), -getUnitScoreIncrement(found));
+            board.remove(row, col);
+            moveProcessBoundaryToInclude(row, col);
+            touchSector(row / SECTOR_SIDE_LENGTH, col / SECTOR_SIDE_LENGTH);
+            orderPlayersByScore();
         }
     }
 
@@ -397,15 +375,14 @@ public class Grid implements Serializable, Cloneable {
     }
 
     private void startBatchSurviveReproduce(ConcurrentLinkedQueue<SectorCoords> processedSectors, SpeciesLoader speciesLoader) throws GameLogicException, InterruptedException {
-        ArrayList<Thread> threads = new ArrayList<>();
-
         // Divide the sectors we need to process into batches
         // that can be passed to each thread, then start each of them.
         // Additional threads are not started if additional processors are
         // not available.
         int spawnedThreads = Integer.min(PROCESSOR_COUNT, processedSectors.size());
-        for (int i = 1; i < spawnedThreads; i++) {
-            Thread thread = new Thread(() -> {
+        List<Callable<Object>> tasks = new ArrayList<>();
+        for (int i = 0; i < spawnedThreads; i++) {
+            tasks.add(() -> {
                 while (!processedSectors.isEmpty()) {
                     SectorCoords coords = processedSectors.poll();
                     try {
@@ -416,26 +393,11 @@ public class Grid implements Serializable, Cloneable {
                         Logger.getLogger(Grid.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
+                return null;
             });
-            thread.start();
-
-            threads.add(thread);
         }
 
-        // One batch may be executed in the current thread
-        while (!processedSectors.isEmpty()) {
-            SectorCoords coords = processedSectors.poll();
-            if (coords != null) {
-                sectorSurviveReproduce(coords.row, coords.col, speciesLoader);
-            }
-        }
-
-        // Join them all because survival and reproduction phases
-        // need to be completed on the entire board before moving on.
-        for (int i = 0; i < threads.size(); i++) {
-            Thread thread = threads.get(i);
-            thread.join();
-        }
+        executor.invokeAll(tasks);
     }
 
     /**
@@ -476,7 +438,7 @@ public class Grid implements Serializable, Cloneable {
         }
     }
 
-    public synchronized void computeNextTurn(SpeciesLoader speciesLoader) throws Exception {
+    public void computeNextTurn(SpeciesLoader speciesLoader) throws Exception {
         advance(speciesLoader);
     }
 
@@ -616,7 +578,7 @@ public class Grid implements Serializable, Cloneable {
      * @param col row
      * @param unit unit to be set
      */
-    protected final void setToPosition(Integer row, Integer col, Unit unit) throws GameLogicException{
+    protected final void setToPosition(Integer row, Integer col, Unit unit) throws GameLogicException {
         Unit previous = board.get(row, col);
         if (previous.isAlive() | previous.getPlayerID() != -1) {
             throw new GameLogicException(unit, "setToPosition should only be called on non-empty cells");
@@ -627,13 +589,9 @@ public class Grid implements Serializable, Cloneable {
         if (unit != null) {
             unit.setCompetitive(competitive);
 
-            gridLock.lock();
-            try {
-                incrementPlayerScore(unit.getPlayerID(), getUnitScoreIncrement(unit));
-                board.put(row, col, unit);
-            } finally {
-                gridLock.unlock();
-            }
+            incrementPlayerScore(unit.getPlayerID(), getUnitScoreIncrement(unit));
+            board.put(row, col, unit);
+
             moveProcessBoundaryToInclude(row, col);
             touchSector(row / SECTOR_SIDE_LENGTH, col / SECTOR_SIDE_LENGTH);
             orderPlayersByScore();
@@ -840,31 +798,26 @@ public class Grid implements Serializable, Cloneable {
                 data.score = 0;
             });
 
-            ArrayList<Thread> threads = new ArrayList<>();
             int rows = bottomRightActive.y - topLeftActive.y;
             int threadCount = Integer.min(rows, PROCESSOR_COUNT);
             int rowsPerBatch = rows / threadCount;
             rowsPerBatch++;
 
-            for (int i = 1; i < threadCount; i++) {
+            List<Callable<Object>> tasks = new ArrayList<>();
+            for (int i = 0; i < threadCount; i++) {
                 int offset = topLeftActive.y + i * rowsPerBatch;
                 int lastRow = offset + rowsPerBatch;
-                Thread thread = new Thread(() -> {
+                tasks.add(() -> {
                     cleanupRows(offset, lastRow);
+                    return null;
                 });
-                thread.start();
-                threads.add(thread);
             }
 
-            int lastRow = topLeftActive.y + rowsPerBatch;
-            cleanupRows(topLeftActive.y, lastRow);
-            threads.forEach(thread -> {
-                try {
-                    thread.join();
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(Grid.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            });
+            try {
+                executor.invokeAll(tasks);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Grid.class.getName()).log(Level.SEVERE, null, ex);
+            }
 
             for (int r = 0; r < sectorFlags.getRowCount(); r++) {
                 for (int c = 0; c < sectorFlags.getColumnCount(); c++) {

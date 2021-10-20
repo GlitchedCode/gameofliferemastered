@@ -40,7 +40,7 @@ public class GridIT {
     @After
     public void tearDown() {
     }
-
+    
     /**
      * Test of setUnit, getUnit and removeUnit methods, of class Grid.
      */

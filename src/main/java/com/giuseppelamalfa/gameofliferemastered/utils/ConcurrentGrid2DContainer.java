@@ -15,12 +15,11 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ConcurrentGrid2DContainer<T> implements Cloneable, Serializable {
 
-    private ConcurrentHashMap<Integer, T> map = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer, T> map;
     private int rows;
     private int cols;
 
-    private boolean hasDefault = false;
-    private T defaultValue = null;
+    private final T defaultValue;
 
     // Initializes the ArrayList objects 
     public ConcurrentGrid2DContainer(int rows, int cols, T sparseDefault) throws IllegalArgumentException {
@@ -31,9 +30,13 @@ public class ConcurrentGrid2DContainer<T> implements Cloneable, Serializable {
         }
         this.rows = rows;
         this.cols = cols;
-        resize(rows, cols);
         this.defaultValue = sparseDefault;
-        hasDefault = sparseDefault != null;
+        
+        // Uncomment for profiling
+        map = new ConcurrentHashMap<>(256*256, 0.5f, 1);
+        //map = new ConcurrentHashMap<>(rows*cols, 0.5f, 1);
+
+        resize(rows, cols);
     }
 
     // Initializes the ArrayList objects 
@@ -41,13 +44,8 @@ public class ConcurrentGrid2DContainer<T> implements Cloneable, Serializable {
         this(rows, cols, null);
     }
 
-    public synchronized boolean hasDefaultValue() {
-        return hasDefault;
-    }
-
-    public synchronized void setDefaultValue(T val) {
-        defaultValue = val;
-        hasDefault = val != null;
+    public T getDefaultValue() {
+        return defaultValue;
     }
 
     // Resets the minimum capacity for all the ArrayList objects
@@ -57,51 +55,44 @@ public class ConcurrentGrid2DContainer<T> implements Cloneable, Serializable {
             throw new IllegalArgumentException("Invalid size values for TwoDimensionalArrayList");
         }
         ArrayList<Integer> keys = new ArrayList<>();
-        for (Integer key : map.keySet()) {
+        map.keySet().forEach(key -> {
             int row = getRow(key);
             int col = getColumn(key);
             if (row >= rows | col >= cols) {
                 keys.add(key);
             }
-        }
+        });
 
-        for (Integer key : keys) {
+        keys.forEach(key -> {
             map.remove(key);
-        }
+        });
 
         this.rows = rows;
         this.cols = cols;
     }
 
     // Gets element at (row, col) coordinates
-    public synchronized final T get(int row, int col) {
-        int key = getKeyFromCoords(row, col);
-        if (map.containsKey(key)) {
-            return map.get(key);
-        }
-
-        if (hasDefault) {
+    public T get(int row, int col) {
+        int key = row << 16 | col;
+        T ret;
+        ret = map.get(key);
+        if (ret == null) {
             return defaultValue;
         }
-
-        return null;
+        return ret;
     }
 
     // Puts element at (row, col) coordinates
-    public synchronized void put(Integer row, Integer col, T element) {
+    public void put(Integer row, Integer col, T element) {
         if (row >= rows | col >= cols | row < 0 | col < 0) {
             return;
         }
 
-        if (element == null || element == defaultValue) {
-            remove(row, col);
-        } else {
-            map.put(getKeyFromCoords(row, col), element);
-        }
+        map.put(row << 16 | col, element);
     }
 
-    public synchronized void remove(Integer row, Integer col) {
-        map.remove(getKeyFromCoords(row, col));
+    public void remove(Integer row, Integer col) {
+        map.remove(row << 16 | col);
     }
 
     public synchronized void clear() {

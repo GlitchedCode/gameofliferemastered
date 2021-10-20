@@ -30,11 +30,15 @@ ext.headlessExcludes = [
     'com/giuseppelamalfa/gameofliferemastered/gamelogic/simulation/SimulationRemoteClient**',
     'com/giuseppelamalfa/gameofliferemastered/gamelogic/simulation/SimulationServer**',
     'Tiles/**',
-    'tiles.json'
+    'tiles.json',
+    //'com/giuseppelamalfa/gameofliferemastered/test/**',
+    //'test/**'
 ]
 
 ext.frontendExcludes = [
-    'com/giuseppelamalfa/gameofliferemastered/gamelogic/simulation/SimulationCLIServer**'
+    'com/giuseppelamalfa/gameofliferemastered/gamelogic/simulation/SimulationCLIServer**',
+    'com/giuseppelamalfa/gameofliferemastered/test/**',
+    'test/**'
 ]
 
 tasks.withType(JavaCompile) {

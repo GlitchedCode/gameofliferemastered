@@ -41,32 +41,8 @@
             }
         },
         {
-            "name" : "Snake",
-            "id" : 1,
-            "implementingType" : "LifeUnit",
-            "textureCode" : "snake",
-            "friendlySpecies" : [
-                "Snake"
-            ],
-            "hostileSpecies" : [],
-            "health" : 2,
-            "initialState" : "ALIVE_AGING",
-            "friendlyCountSelector" : {
-                "ruleClassName" : "IntegerRangeRule",
-                "args" : [2, 3]
-            },
-            "hostileCountSelector" : {
-                "ruleClassName" : "IntegerRangeRule",
-                "args" : [0]
-            },
-            "reproductionSelector" : {
-                "ruleClassName" : "IntegerSetRule",
-                "args" : [3, 7]
-            }
-        },
-        {
             "name" : "Mimic",
-            "id" : 2,
+            "id" : 1,
             "implementingType" : "Mimic",
             "textureCode" : "mimic",
             "filterColor" : "0x4d8fc1",
@@ -88,6 +64,30 @@
                 "ruleClassName" : "IntegerSetRule",
                 "args" : [3]
             }
-        }
+        },
+        {
+            "name" : "Snake",
+            "id" : 2,
+            "implementingType" : "LifeUnit",
+            "textureCode" : "snake",
+            "friendlySpecies" : [
+                "Snake"
+            ],
+            "hostileSpecies" : [],
+            "health" : 2,
+            "initialState" : "ALIVE_AGING",
+            "friendlyCountSelector" : {
+                "ruleClassName" : "IntegerRangeRule",
+                "args" : [2, 3]
+            },
+            "hostileCountSelector" : {
+                "ruleClassName" : "IntegerRangeRule",
+                "args" : [0]
+            },
+            "reproductionSelector" : {
+                "ruleClassName" : "IntegerSetRule",
+                "args" : [3, 7]
+            }
+        }        
     ]
 }
