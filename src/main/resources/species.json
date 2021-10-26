@@ -74,7 +74,7 @@
                 "Snake"
             ],
             "hostileSpecies" : [],
-            "health" : 2,
+            "health" : 7,
             "initialState" : "ALIVE_AGING",
             "friendlyCountSelector" : {
                 "ruleClassName" : "IntegerRangeRule",
@@ -86,7 +86,7 @@
             },
             "reproductionSelector" : {
                 "ruleClassName" : "IntegerSetRule",
-                "args" : [3, 7]
+                "args" : [2]
             }
         }        
     ]
