@@ -5,12 +5,11 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.ui;
 
+import com.giuseppelamalfa.gameofliferemastered.ui.renderers.TextureGridRenderer;
 import com.giuseppelamalfa.gameofliferemastered.ApplicationFrame;
 import com.giuseppelamalfa.gameofliferemastered.utils.ImageManager;
-import java.awt.BasicStroke;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -19,8 +18,6 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
-import java.awt.geom.AffineTransform;
-import java.awt.image.ImageObserver;
 import javax.swing.JPanel;
 import javax.swing.ToolTipManager;
 import com.giuseppelamalfa.gameofliferemastered.simulation.SimulationInterface;
@@ -29,44 +26,38 @@ import com.giuseppelamalfa.gameofliferemastered.utils.TimerWrapper;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
-import java.awt.image.BufferedImageOp;
+import com.giuseppelamalfa.gameofliferemastered.ui.renderers.GridRenderer;
+import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import javax.imageio.ImageIO;
 
 /**
  *
  * @author glitchedcode
  */
-public final class GridPanel extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener, KeyListener {
+public class GridPanel extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener, KeyListener {
 
     final int TOOLTIP_INITIAL_DELAY_MS = 150;
 
-    protected int sideLength;
-    protected SimulationInterface simulation;
-    protected SpeciesLoader speciesLoader;
-    protected ImageManager tileManager;
+    private SimulationInterface simulation;
 
-    protected Point screenOrigin = new Point();
+    private Point screenOrigin = new Point();
+    private Point lastDragLocation = new Point();
 
-    protected Point lastDragLocation = new Point();
-
-    protected int lineSpacing;
-    protected float tileScale;
-    protected int yoffset;
-    protected int xoffset;
-    protected int startRow;
-    protected int startColumn;
-
-    protected final TimerWrapper timer = new TimerWrapper();
+    private final TimerWrapper timer = new TimerWrapper();
     private boolean initialized = false;
+    private GameStatusPanel gameStatusPanel = new GameStatusPanel();
+    private UnitPalette palette = new UnitPalette();
 
-    protected GameStatusPanel gameStatusPanel = new GameStatusPanel();
-    protected UnitPalette palette = new UnitPalette();
+    GridRenderer renderer;
 
     public GridPanel() {
-        setSideLength(32);
     }
 
     public GridPanel(ImageManager tileManager) {
-        this.tileManager = tileManager;
+        renderer = new TextureGridRenderer(tileManager);
         setSideLength(32);
     }
 
@@ -102,17 +93,20 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
         }
         synchronized (simulation) {
             Point point = me.getPoint();
+
+            int lineSpacing = renderer.getLineSpacing();
+            int yoffset = screenOrigin.y % (lineSpacing);
+            int xoffset = screenOrigin.x % (lineSpacing);
+            int startRow = screenOrigin.y / lineSpacing;
+            int startColumn = screenOrigin.x / lineSpacing;
+
             point.x += xoffset;
             point.y += yoffset;
 
             int row = point.y / lineSpacing + startRow;
             int col = point.x / lineSpacing + startColumn;
 
-            int sectorRow = row / simulation.getSectorSideLength();
-            int sectorCol = col / simulation.getSectorSideLength();
-
-            String text = "<html>Position: (" + col + ", " + row
-                    + ")<br>Sector: (" + sectorCol + ", " + sectorRow + ")";
+            String text = "<html>Position: (" + col + ", " + row + ")";
 
             Unit unit = simulation.getUnit(row, col);
 
@@ -122,7 +116,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
 
             text += "</html>";
 
-            setToolTipText(text);
+            //setToolTipText(text);
         }
     }
 
@@ -151,7 +145,7 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
     @Override
     public void mouseWheelMoved(MouseWheelEvent me) {
         int rotation = me.getWheelRotation();
-        setSideLength(sideLength - (rotation * 4));
+        setSideLength(renderer.getSideLength() - (rotation * 4));
     }
 
     // don't need these
@@ -194,7 +188,13 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
         }
     }
 
-    private void setUnit(Point point) {
+    protected void setUnit(Point point) {
+        int lineSpacing = renderer.getLineSpacing();
+        int yoffset = screenOrigin.y % (lineSpacing);
+        int xoffset = screenOrigin.x % (lineSpacing);
+        int startRow = screenOrigin.y / lineSpacing;
+        int startColumn = screenOrigin.x / lineSpacing;
+
         point.x += xoffset;
         point.y += yoffset;
 
@@ -220,11 +220,15 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
 
     public void setSimulation(SimulationInterface simulation, boolean resetOrigin) {
         this.simulation = simulation;
-        speciesLoader = simulation.getSpeciesLoader();
-        setSideLength(sideLength);
+        if (simulation == null) {
+            return;
+        }
+
+        setScreenOrigin(screenOrigin);
 
         palette.setSimulation(simulation);
-        
+
+        gameStatusPanel.setVisible(true);
         gameStatusPanel.setTurnCount(simulation.getCurrentTurn());
         gameStatusPanel.setPlayerPanels(simulation.getPlayerRankings());
         gameStatusPanel.setGameModeName(simulation.getGameModeName());
@@ -241,6 +245,10 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
         setSimulation(grid, false);
     }
 
+    public SimulationInterface getSimulation() {
+        return simulation;
+    }
+
     public void setScreenOrigin(Point newOrigin) {
         screenOrigin = newOrigin;
         Dimension size = getSize();
@@ -249,11 +257,6 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
         int maxY = Integer.max(gridSize.height - size.height, 0);
         screenOrigin.x = Integer.min(maxX, Integer.max(screenOrigin.x, 0));
         screenOrigin.y = Integer.min(maxY, Integer.max(screenOrigin.y, 0));
-
-        yoffset = screenOrigin.y % (lineSpacing);
-        xoffset = screenOrigin.x % (lineSpacing);
-        startRow = screenOrigin.y / lineSpacing;
-        startColumn = screenOrigin.x / lineSpacing;
     }
 
     public void resetScreenOrigin() {
@@ -265,105 +268,19 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
         super.repaint();
     }
 
+    public void saveScreenshot(String path) throws IOException {
+        BufferedImage ret = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
+        paint(ret.getGraphics());
+        ImageIO.write(ret, "png", new File(path));
+    }
+
     @Override
     public void paintComponent(Graphics g) {
-
-        Graphics2D g2 = (Graphics2D) g;
-        Dimension size = getSize();
-        g2.setColor(getBackground());
-        g2.fillRect(0, 0, size.width, size.height);
-
-        if (simulation == null) {
-            return;
-        }
-
-        gameStatusPanel.setTurnCount(simulation.getCurrentTurn());
-        gameStatusPanel.setStatus(simulation.getStatusString());
-
-        int rows, cols;
-        int gridRows = simulation.getRowCount(), gridCols = simulation.getColumnCount();
-        Dimension gridSize = size;
-        int height = Integer.min(size.height, gridSize.height);
-        int width = Integer.min(size.width, gridSize.width);
-
-        rows = Integer.min(height / sideLength + 1, gridRows);
-        cols = Integer.min(width / sideLength + 1, gridCols);
-
-        // Draw the simulation
-        g2.setStroke(new BasicStroke(1));
-        g2.setColor(getForeground());
-        // rows
-        for (int c = 0; c <= rows; c++) {
-            int ypos = c * (lineSpacing) - yoffset;
-            g2.drawLine(0, ypos, width - 1, ypos);
-        }
-
-        // columns
-        for (int c = 0; c <= cols; c++) {
-            int xpos = c * (lineSpacing) - xoffset;
-            g2.drawLine(xpos, 0, xpos, height - 1);
-        }
-
-        // Draw the units
-        int endRow = startRow + rows;
-        int endColumn = startColumn + cols;
-        int drawnRows = endRow - startRow;
-        int drawnColumns = endColumn - startColumn;
-
-        g2.setStroke(new BasicStroke(2));
-
-        for (int r = 0; r < drawnRows; r++) // rows
-        {
-            for (int c = 0; c < drawnColumns; c++) // columns
-            {
-                int row = r + startRow;
-                int col = c + startColumn;
-
-                int xpos = c * (lineSpacing) - xoffset + 1;
-                int ypos = r * (lineSpacing) - yoffset + 1;
-
-                Unit unit = simulation.getUnit(row, col);
-                if (unit == null) {
-                    continue;
-                }
-
-                AffineTransform xform = new AffineTransform();
-                xform.translate(xpos, ypos);
-                xform.scale(tileScale, tileScale);
-
-                if (unit.isAlive()) {
-                    drawUnit(g2, xform, this, unit);
-                }
-            }
-        }
+        renderer.render(g, this, screenOrigin);
     }
 
-    BufferedImageOp getUnitFilter(Unit unit){
-        return speciesLoader.getSpeciesFilter(unit.getActualSpeciesID());
-    }
-    
-    String getUnitTextureCode(Unit unit){
-        return speciesLoader.getSpeciesTextureCode(unit.getSpeciesID());
-    }
-    
-    public void drawUnit(Graphics2D g, AffineTransform xform, ImageObserver obs, Unit unit) {
-        g.setColor(simulation.getPlayerColor(unit.getPlayerID()).getMainAWTColor());
-        g.fillRect((int) xform.getTranslateX(), (int) xform.getTranslateY(),
-                (int) (xform.getScaleX() * 8), (int) (xform.getScaleY() * 8));
-
-        AffineTransform oldXForm = g.getTransform();
-
-        g.setTransform(xform);
-        g.drawImage(tileManager.getImage(getUnitTextureCode(unit)), getUnitFilter(unit), 0, 0);
-
-        g.setTransform(oldXForm);
-    }
-
-    /**
-     * @return side length for units
-     */
-    public Integer getSideLength() {
-        return sideLength;
+    Color getUnitColor(Unit unit) {
+        return unit.getColor();
     }
 
     /**
@@ -371,17 +288,13 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
      *
      * @param value
      */
-    public void setSideLength(Integer value) {
-        sideLength = Integer.min(64, Integer.max(8, value));
-        lineSpacing = sideLength + 1;
-        if (simulation != null) {
-            setScreenOrigin(screenOrigin);
-        }
-        tileScale = sideLength / 8.0f;
+    public final void setSideLength(Integer value) {
+        renderer.setSideLength(value);
     }
 
     public Dimension getGridSize() {
         Dimension gridSize = new Dimension();
+        int sideLength = renderer.getSideLength();
         gridSize.width = (sideLength + 1) * simulation.getColumnCount() + 1;
         gridSize.height = (sideLength + 1) * simulation.getRowCount() + 1;
         return gridSize;
@@ -399,8 +312,11 @@ public final class GridPanel extends JPanel implements MouseListener, MouseMotio
         if (initialized) {
             return;
         }
-
-        gameStatusPanel = (GameStatusPanel) getComponent(0);
+        try {
+            gameStatusPanel = (GameStatusPanel) getComponent(0);
+        } catch (Exception e) {
+            gameStatusPanel = new GameStatusPanel();
+        }
         this.palette = palette;
         initialized = true;
         addMouseListener(this);

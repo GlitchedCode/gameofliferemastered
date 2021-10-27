@@ -115,6 +115,9 @@ public class ImageManager {
         return true;
     }
 
+    public ImageManager(){
+    }
+    
     public ImageManager(String path) {
 
         initialized = loadImageData(path);

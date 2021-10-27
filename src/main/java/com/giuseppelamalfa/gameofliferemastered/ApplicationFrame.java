@@ -13,6 +13,7 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.*;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.GameMode;
 import com.giuseppelamalfa.gameofliferemastered.simulation.DisconnectEventListener;
 import com.giuseppelamalfa.gameofliferemastered.utils.DeferredImageManager;
+import java.awt.BorderLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.ImageIcon;
@@ -43,13 +44,14 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener,
 
     private final SimulationInterface localGrid;
     private final ImageManager tileManager;
-
+    
     SimulationRemoteClient client;
     SimulationGUIServer server;
 
     static ImageIcon icon;
     static JTextArea mainStatusLog = new JTextArea();
     boolean isInMenu = true;
+    
 
     String localPlayerName = "Player";
     PlayerData localPlayerData = new PlayerData("Player", PlayerData.TeamColor.NONE);
@@ -84,7 +86,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener,
                     server.close();
             }
         });
-
+        
         if ( !tileManager.isInitialized() ) {
             throw new Exception("Failed to initialize tile manager.");
         }
@@ -130,7 +132,6 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener,
         setTitle("The game of Life: Remastered");
         setBackground(java.awt.Color.black);
         setIconImage(icon.getImage());
-        setMaximumSize(new java.awt.Dimension(4000, 4000));
         setMinimumSize(new java.awt.Dimension(800, 600));
         setSize(new java.awt.Dimension(800, 600));
 

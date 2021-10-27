@@ -25,10 +25,11 @@ import org.json.JSONObject;
  *
  * @author glitchedcode
  */
-public class SpeciesData implements Serializable{
-    
+public class SpeciesData implements Serializable {
+
     public final int speciesID;
     public final String name;
+    public final Color color;
     public final String textureCode;
     public final State initialState;
     public final Integer health;
@@ -37,7 +38,7 @@ public class SpeciesData implements Serializable{
     public final RuleInterface<Integer> friendlyCountSelector;
     public final RuleInterface<Integer> hostileCountSelector;
     public final RuleInterface<Integer> reproductionSelector;
-    
+
     // WARNING: THE FOLLOWING TRANSIENT FIELDS SHOULD ONLY
     // BE ACCESSED FROM SPECIESLOADER!
     protected final transient Constructor<?> constructor;
@@ -59,6 +60,14 @@ public class SpeciesData implements Serializable{
         initialState = State.valueOf(obj.getString("initialState"));
         health = obj.getInt("health");
 
+        Color _color;
+        try {
+            _color = new Color(Integer.decode(obj.getString("color")));
+        } catch (Exception e) {
+            _color = Color.BLACK;
+        }
+        color = _color;
+        
         // Calculate friendly and hostile species sets
         HashSet<Integer> _friendlySpecies = new HashSet<>();
         HashSet<Integer> _hostileSpecies = new HashSet<>();

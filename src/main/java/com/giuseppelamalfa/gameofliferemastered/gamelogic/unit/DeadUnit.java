@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.StubRule;
+import java.awt.Color;
 import java.io.Serializable;
 
 class ReproductionCounter {
@@ -197,6 +198,13 @@ public class DeadUnit extends Unit implements Serializable, Cloneable {
     @Override
     public int getActualSpeciesID() {
         return -1;
+    }
+    
+    static Color color = new Color(0,0,0,0);
+    
+    @Override
+    public Color getColor(){
+        return color;
     }
 
     @Override

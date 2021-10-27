@@ -8,6 +8,7 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.GameLogicException;
 import java.util.Set;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
+import java.awt.Color;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -255,6 +256,11 @@ public class LifeUnit extends Unit {
         return speciesData;
     }
 
+    @Override
+    public Color getColor(){
+        return speciesData.color;
+    }
+    
     @Override
     public int getBornSpeciesID() {
         return speciesID;

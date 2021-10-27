@@ -21,6 +21,7 @@
             "id" : 0,
             "implementingType" : "LifeUnit",
             "textureCode" : "cell",
+            "color" : "0xa07d2b",
             "friendlySpecies" : [
                 "Cell"
             ],

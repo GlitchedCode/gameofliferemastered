@@ -6,6 +6,7 @@
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
+import java.awt.Color;
 import java.util.Objects;
 import java.util.Set;
 
@@ -23,23 +24,24 @@ public class Mimic extends LifeUnit {
     private boolean replicated = false;
     
     private int replicatedID;
-    private Set<Integer> friendlySpecies;
-    private Set<Integer> hostileSpecies;
+    private Color replicatedColor;
+    private Set<Integer> replicatedFriendlySpecies;
+    private Set<Integer> replicatedHostileSpecies;
     
-    private RuleInterface<Integer> friendlyCountSelector;
-    private RuleInterface<Integer> hostileCountSelector;
-    private RuleInterface<Integer> reproductionSelector;
+    private RuleInterface<Integer> replicatedFriendlyCountSelector;
+    private RuleInterface<Integer> replicatedHostileCountSelector;
+    private RuleInterface<Integer> replicatedReproductionSelector;
 
     @Override
     protected void initSpeciesData(SpeciesData data){
         super.initSpeciesData(data);
         
-        friendlySpecies =  data.friendlySpecies;
-        hostileSpecies = data.hostileSpecies;
+        replicatedFriendlySpecies =  data.friendlySpecies;
+        replicatedHostileSpecies = data.hostileSpecies;
         
-        friendlyCountSelector = data.friendlyCountSelector;
-        hostileCountSelector = data.hostileCountSelector;
-        reproductionSelector = data.friendlyCountSelector;
+        replicatedFriendlyCountSelector = data.friendlyCountSelector;
+        replicatedHostileCountSelector = data.hostileCountSelector;
+        replicatedReproductionSelector = data.friendlyCountSelector;
     }
     
     public Mimic(SpeciesData data) {
@@ -102,11 +104,12 @@ public class Mimic extends LifeUnit {
         SpeciesData otherData = unit.getSpeciesData();
 
         replicatedID = otherData.speciesID;
-        friendlySpecies = unit.getFriendlySpecies();
-        hostileSpecies = unit.getHostileSpecies();
-        friendlyCountSelector = unit.getFriendlyCountSelector();
-        hostileCountSelector = unit.getHostileCountSelector();
-        reproductionSelector = unit.getReproductionSelector();
+        replicatedColor = otherData.color;
+        replicatedFriendlySpecies = unit.getFriendlySpecies();
+        replicatedHostileSpecies = unit.getHostileSpecies();
+        replicatedFriendlyCountSelector = unit.getFriendlyCountSelector();
+        replicatedHostileCountSelector = unit.getHostileCountSelector();
+        replicatedReproductionSelector = unit.getReproductionSelector();
         setCurrentState(unit.getCurrentState());
 
         int newHealth = Math.max(getHealth() + (otherData.health - speciesData.health), 1);
@@ -114,6 +117,13 @@ public class Mimic extends LifeUnit {
         replicated = true;
     }
 
+    @Override
+    public Color getColor(){
+        if(!replicated)
+            return speciesData.color;
+        return replicatedColor;
+    }
+    
     @Override
     public int getSpeciesID() {
         if (!replicated) {
@@ -130,7 +140,7 @@ public class Mimic extends LifeUnit {
         if(!replicated) {
             return super.getFriendlySpecies();
         }
-        return friendlySpecies;
+        return replicatedFriendlySpecies;
     }
 
     @Override
@@ -138,7 +148,7 @@ public class Mimic extends LifeUnit {
         if(!replicated) {
             return super.getHostileSpecies();
         }
-        return hostileSpecies;
+        return replicatedHostileSpecies;
     }
 
     @Override
@@ -146,7 +156,7 @@ public class Mimic extends LifeUnit {
         if(!replicated) {
             return super.getFriendlyCountSelector();
         }
-        return friendlyCountSelector;
+        return replicatedFriendlyCountSelector;
     }
 
     @Override
@@ -154,7 +164,7 @@ public class Mimic extends LifeUnit {
         if(!replicated) {
             return super.getHostileCountSelector();
         }
-        return hostileCountSelector;
+        return replicatedHostileCountSelector;
     }
 
     @Override
@@ -162,7 +172,7 @@ public class Mimic extends LifeUnit {
         if(!replicated) {
             return super.getReproductionSelector();
         }
-        return reproductionSelector;
+        return replicatedReproductionSelector;
     }
     
     @Override
@@ -186,19 +196,19 @@ public class Mimic extends LifeUnit {
         if (this.replicatedID != other.replicatedID) {
             return false;
         }
-        if (!Objects.equals(this.friendlySpecies, other.friendlySpecies)) {
+        if (!Objects.equals(this.replicatedFriendlySpecies, other.replicatedFriendlySpecies)) {
             return false;
         }
-        if (!Objects.equals(this.hostileSpecies, other.hostileSpecies)) {
+        if (!Objects.equals(this.replicatedHostileSpecies, other.replicatedHostileSpecies)) {
             return false;
         }
-        if (!Objects.equals(this.friendlyCountSelector, other.friendlyCountSelector)) {
+        if (!Objects.equals(this.replicatedFriendlyCountSelector, other.replicatedFriendlyCountSelector)) {
             return false;
         }
-        if (!Objects.equals(this.hostileCountSelector, other.hostileCountSelector)) {
+        if (!Objects.equals(this.replicatedHostileCountSelector, other.replicatedHostileCountSelector)) {
             return false;
         }
-        if (!Objects.equals(this.reproductionSelector, other.reproductionSelector)) {
+        if (!Objects.equals(this.replicatedReproductionSelector, other.replicatedReproductionSelector)) {
             return false;
         }
         return true;
@@ -210,11 +220,11 @@ public class Mimic extends LifeUnit {
         hash = 29 * hash + this.turnsTillReplication;
         hash = 29 * hash + (this.replicated ? 1 : 0);
         hash = 29 * hash + this.replicatedID;
-        hash = 29 * hash + Objects.hashCode(this.friendlySpecies);
-        hash = 29 * hash + Objects.hashCode(this.hostileSpecies);
-        hash = 29 * hash + Objects.hashCode(this.friendlyCountSelector);
-        hash = 29 * hash + Objects.hashCode(this.hostileCountSelector);
-        hash = 29 * hash + Objects.hashCode(this.reproductionSelector);
+        hash = 29 * hash + Objects.hashCode(this.replicatedFriendlySpecies);
+        hash = 29 * hash + Objects.hashCode(this.replicatedHostileSpecies);
+        hash = 29 * hash + Objects.hashCode(this.replicatedFriendlyCountSelector);
+        hash = 29 * hash + Objects.hashCode(this.replicatedHostileCountSelector);
+        hash = 29 * hash + Objects.hashCode(this.replicatedReproductionSelector);
         return hash;
     }
 
