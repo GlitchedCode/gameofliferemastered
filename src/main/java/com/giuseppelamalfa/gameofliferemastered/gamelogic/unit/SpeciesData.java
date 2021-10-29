@@ -44,18 +44,44 @@ public class SpeciesData implements Serializable {
     protected final transient Constructor<?> constructor;
     protected final transient BufferedImageOp filter;
 
+    private HashSet<Integer> getSpeciesFromJSONArray(JSONArray array, HashMap<String, Integer> speciesIDs) {
+        HashSet<Integer> ret = new HashSet<>();
+        for (int i = 0; i < array.length(); i++) {
+            Object obj = array.get(i);
+            if (obj instanceof String) {
+                String name = (String) obj;
+                if (speciesIDs.containsKey(name)) {
+                    int id = speciesIDs.get(name);
+                    ret.add(id);
+                }
+            } else if (obj instanceof Integer) {
+                int id = (Integer) obj;
+                if(speciesIDs.values().contains(id))
+                    ret.add(id);
+            }
+        }
+        return ret;
+    }
+    
     @SuppressWarnings(value = {"unchecked", "unchecked", "unchecked"})
-    protected SpeciesData(JSONObject obj, HashMap<String, Integer> speciesIDs) throws ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
+    protected SpeciesData(JSONObject obj, HashMap<String, Integer> speciesIDs) throws ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, Exception {
         String implementingTypeName;
         try {
             implementingTypeName = obj.getString("implementingType");
         } catch (Exception e) {
             implementingTypeName = "Unit";
         }
-        Class<?> implementingClass = Class.forName(SpeciesLoader.UNIT_CLASS_PATH + implementingTypeName);
-        constructor = implementingClass.getConstructor(SpeciesData.class, Integer.class);
+        
         speciesID = obj.getInt("id");
         name = obj.getString("name");
+        
+        try{
+            Class<?> implementingClass = Class.forName(SpeciesLoader.UNIT_CLASS_PATH + implementingTypeName);
+            constructor = implementingClass.getConstructor(SpeciesData.class, Integer.class);
+        } catch (Exception e) {
+            throw new Exception("Invalid or missing implementing type for species" + speciesID + ":" + name);
+        }        
+        
         textureCode = obj.getString("textureCode");
         initialState = State.valueOf(obj.getString("initialState"));
         health = obj.getInt("health");
@@ -67,27 +93,21 @@ public class SpeciesData implements Serializable {
             _color = Color.BLACK;
         }
         color = _color;
-        
+
         // Calculate friendly and hostile species sets
-        HashSet<Integer> _friendlySpecies = new HashSet<>();
-        HashSet<Integer> _hostileSpecies = new HashSet<>();
+        HashSet<Integer> _friendlySpecies;
+        HashSet<Integer> _hostileSpecies;
         try {
-            JSONArray friendlies = obj.getJSONArray("friendlySpecies");
-            for (int i = 0; i < friendlies.length(); i++) {
-                _friendlySpecies.add(speciesIDs.get(friendlies.getString(i)));
-            }
+            _friendlySpecies = getSpeciesFromJSONArray(obj.getJSONArray("friendlySpecies"), speciesIDs);
         } catch (JSONException e) {
-            // ignore if missing or malformed
-            _friendlySpecies.clear();
+            // ignore if missing 
+            _friendlySpecies = new HashSet<>();
         }
         try {
-            JSONArray hostiles = obj.getJSONArray("hostileSpecies");
-            for (int i = 0; i < hostiles.length(); i++) {
-                _hostileSpecies.add(speciesIDs.get(hostiles.getString(i)));
-            }
+            _hostileSpecies = getSpeciesFromJSONArray(obj.getJSONArray("hostileSpecies"), speciesIDs);
         } catch (JSONException e) {
-            // ignore if missing or malformed
-            _hostileSpecies.clear();
+            // ignore if missing
+            _hostileSpecies = new HashSet<>();
         }
         this.friendlySpecies = (HashSet<Integer>) _friendlySpecies.clone();
         this.hostileSpecies = (HashSet<Integer>) _hostileSpecies.clone();
@@ -101,14 +121,14 @@ public class SpeciesData implements Serializable {
             Class<?> friendlyRuleClass = Class.forName(SpeciesLoader.RULE_CLASS_PATH + friendlyCountJSON.getString("ruleClassName"));
             _friendlyCountSelector = (RuleInterface<Integer>) friendlyRuleClass.getConstructor(Collection.class).newInstance(friendlyCountJSON.getJSONArray("args").toList());
         } catch (ClassNotFoundException | IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException | JSONException e) {
-            _friendlyCountSelector = new StubRule<>();
+            _friendlyCountSelector = new StubRule<>(true);
         }
         try {
             JSONObject hostileCountJSON = obj.getJSONObject("hostileCountSelector");
             Class<?> hostileRuleClass = Class.forName(SpeciesLoader.RULE_CLASS_PATH + hostileCountJSON.getString("ruleClassName"));
             _hostileCountSelector = (RuleInterface<Integer>) hostileRuleClass.getConstructor(Collection.class).newInstance(hostileCountJSON.getJSONArray("args").toList());
         } catch (ClassNotFoundException | IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException | JSONException e) {
-            _hostileCountSelector = new StubRule<>();
+            _hostileCountSelector = new StubRule<>(true);
         }
         try {
             JSONObject reproductionCountJSON = obj.getJSONObject("reproductionSelector");

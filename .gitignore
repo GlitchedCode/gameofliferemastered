@@ -47,6 +47,8 @@ grid-*.ser
 # Private files
 *private*
 
-
 # Lock files
 *.lck
+
+# python cache
+__pycache__

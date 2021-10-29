@@ -5,11 +5,14 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
+import java.awt.Color;
 import java.awt.image.BufferedImageOp;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Set;
@@ -75,7 +78,7 @@ public class SpeciesLoader {
                 }
                 speciesData.put(id, new SpeciesData(current, speciesIDs));
             } catch (Exception e) {
-                System.out.println(e);
+                e.printStackTrace();
             }
         }
     }
@@ -106,8 +109,16 @@ public class SpeciesLoader {
         }
     }
     
+    public synchronized Color getSpeciesColor(int index) {
+        SpeciesData data = getSpeciesData(index);
+        if (data != null) {
+            return data.color;
+        } else {
+            return null;
+        }
+ 
+    }
     
-
     public synchronized Set<Integer> getSpeciesIDs() {
         return speciesData.keySet();
     }
@@ -126,9 +137,12 @@ public class SpeciesLoader {
         return getNewUnit(speciesID, 0);
     }
 
-    public synchronized void tearDown() {
-        loadedJSON = "";
-        speciesData = null;
+    public void writePalette(OutputStream stream) {
+        PrintStream output = new PrintStream(stream);
+        
+        output.println("0,0,0");
+        getSpeciesIDs().stream().map(id -> getSpeciesColor(id)).forEachOrdered(c -> {
+            output.printf("%d,%d,%d\n", c.getRed(), c.getGreen(), c.getBlue());
+        });        
     }
-
 }

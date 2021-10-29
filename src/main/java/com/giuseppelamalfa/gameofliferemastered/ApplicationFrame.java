@@ -507,6 +507,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener,
         }
     }//GEN-LAST:event_JoinGameHandler
 
+    @Override
     public void onDisconnect(){
         JoinGameHandler(null);
         if(!isInMenu)

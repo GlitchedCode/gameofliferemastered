@@ -21,16 +21,23 @@ import java.awt.event.MouseWheelListener;
 import javax.swing.JPanel;
 import javax.swing.ToolTipManager;
 import com.giuseppelamalfa.gameofliferemastered.simulation.SimulationInterface;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
 import com.giuseppelamalfa.gameofliferemastered.utils.TimerWrapper;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
 import com.giuseppelamalfa.gameofliferemastered.ui.renderers.GridRenderer;
+import com.giuseppelamalfa.gameofliferemastered.ui.renderers.PixelGridRenderer;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.FileAttribute;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import javax.imageio.ImageIO;
 
 /**
@@ -51,14 +58,25 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
     private GameStatusPanel gameStatusPanel = new GameStatusPanel();
     private UnitPalette palette = new UnitPalette();
 
-    GridRenderer renderer;
+    private boolean isPixelRenderer;
+    private final TextureGridRenderer textureRenderer;
+    private final PixelGridRenderer pixelRenderer = new PixelGridRenderer();
+    private Path screenshotSaveDir = null;
+
+    private GridRenderer currentRenderer;
 
     public GridPanel() {
+        textureRenderer = null;
+        currentRenderer = pixelRenderer;
+        isPixelRenderer = true;
+        setSideLengthPower(5);
     }
 
     public GridPanel(ImageManager tileManager) {
-        renderer = new TextureGridRenderer(tileManager);
-        setSideLength(32);
+        textureRenderer = new TextureGridRenderer(tileManager);
+        currentRenderer = textureRenderer;
+        isPixelRenderer = false;
+        setSideLengthPower(5);
     }
 
     /*
@@ -88,36 +106,33 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
 
     @Override
     public void mouseMoved(MouseEvent me) {
+        /*
         if (simulation == null) {
             return;
         }
-        synchronized (simulation) {
-            Point point = me.getPoint();
 
-            int lineSpacing = renderer.getLineSpacing();
-            int yoffset = screenOrigin.y % (lineSpacing);
-            int xoffset = screenOrigin.x % (lineSpacing);
-            int startRow = screenOrigin.y / lineSpacing;
-            int startColumn = screenOrigin.x / lineSpacing;
+        Point point = me.getPoint();
 
-            point.x += xoffset;
-            point.y += yoffset;
+        int lineSpacing = currentRenderer.getLineSpacing();
+        int yoffset = screenOrigin.y % (lineSpacing);
+        int xoffset = screenOrigin.x % (lineSpacing);
+        int startRow = screenOrigin.y / lineSpacing;
+        int startColumn = screenOrigin.x / lineSpacing;
 
-            int row = point.y / lineSpacing + startRow;
-            int col = point.x / lineSpacing + startColumn;
+        point.x += xoffset;
+        point.y += yoffset;
 
-            String text = "<html>Position: (" + col + ", " + row + ")";
+        int row = point.y / lineSpacing + startRow;
+        int col = point.x / lineSpacing + startColumn;
 
-            Unit unit = simulation.getUnit(row, col);
-
-            if (unit != null) {
-                text += "<br>" + unit.toString();
-            }
-
-            text += "</html>";
-
-            //setToolTipText(text);
+        Unit unit = simulation.getUnit(row, col);
+        String text = "<html>Position: (" + col + ", " + row + ")";
+        if (unit != null) {
+            text += "<br>" + unit.toString();
         }
+        text += "</html>";
+        setToolTipText(text);
+         */
     }
 
     @Override
@@ -145,7 +160,12 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
     @Override
     public void mouseWheelMoved(MouseWheelEvent me) {
         int rotation = me.getWheelRotation();
-        setSideLength(renderer.getSideLength() - (rotation * 4));
+        if (rotation < 0) {
+            incrementSideLengthPower();
+        } else {
+            decrementSideLengthPower();
+        }
+        setSideLengthPower(currentRenderer.getSideLength() - (rotation * 4));
     }
 
     // don't need these
@@ -177,19 +197,72 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
         if (simulation == null) {
             return;
         }
-        if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-            simulation.setRunning(!simulation.isRunning());
-        } else if (e.getKeyCode() == KeyEvent.VK_HOME) {
-            try {
-                simulation.saveGrid();
-            } catch (Exception ex) {
-                Logger.getLogger(GridPanel.class.getName()).log(Level.SEVERE, null, ex);
+        switch (e.getKeyCode()) {
+            case KeyEvent.VK_SPACE:
+                simulation.setRunning(!simulation.isRunning());
+                break;
+            case KeyEvent.VK_HOME: {
+                try {
+                    simulation.saveGrid();
+                } catch (Exception ex) {
+                    Logger.getLogger(GridPanel.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
+            break;
+            case KeyEvent.VK_INSERT:
+                swapRenderers();
+                break;
+            case KeyEvent.VK_F12: {
+                try {
+                    toggleSaveScreenshot();
+                } catch (IOException ex) {
+                    Logger.getLogger(GridPanel.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            break;
+            default:
+        }
+    }
+
+    private void swapRenderers() {
+        if (isPixelRenderer) {
+            currentRenderer = textureRenderer;
+            gameStatusPanel.setVisible(true);
+        } else {
+            currentRenderer = pixelRenderer;
+            gameStatusPanel.setVisible(false);
+        }
+        isPixelRenderer = !isPixelRenderer;
+    }
+
+    protected void toggleSaveScreenshot() throws IOException {
+        if (simulation == null) {
+            return;
+        }
+
+        if (screenshotSaveDir == null) {
+            LocalDateTime now = LocalDateTime.now();
+            screenshotSaveDir = Path.of("grid-" + DateTimeFormatter.ISO_INSTANT.format(now.toInstant(ZoneOffset.UTC)) + "\\");
+            File file = screenshotSaveDir.toFile();
+            if (!file.mkdir()) {
+                System.out.println("Failed to create screenshot directory.");
+                screenshotSaveDir = null;
+                return;
+            }
+            System.out.println("Saving screenshots to " + screenshotSaveDir);
+            Path palettePath = Path.of(screenshotSaveDir.toString(), "palette.txt");
+            File paletteFile = Files.createFile(palettePath).toFile();
+            simulation.getSpeciesLoader().writePalette(new FileOutputStream(paletteFile));
+
+            Path screenshotPath = Path.of(screenshotSaveDir.toString(), (Integer.toString(simulation.getCurrentTurn()) + ".gif"));
+            saveScreenshot(screenshotPath.toFile());
+        } else {
+            screenshotSaveDir = null;
         }
     }
 
     protected void setUnit(Point point) {
-        int lineSpacing = renderer.getLineSpacing();
+        int lineSpacing = currentRenderer.getLineSpacing();
         int yoffset = screenOrigin.y % (lineSpacing);
         int xoffset = screenOrigin.x % (lineSpacing);
         int startRow = screenOrigin.y / lineSpacing;
@@ -268,33 +341,56 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
         super.repaint();
     }
 
-    public void saveScreenshot(String path) throws IOException {
-        BufferedImage ret = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
-        paint(ret.getGraphics());
-        ImageIO.write(ret, "png", new File(path));
+    public void saveScreenshot(File file) {
+        BufferedImage img = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
+        paint(img.getGraphics());
+        new Thread(() -> {
+            try {
+                ImageIO.write(img, "gif", file);
+            } catch (IOException ex) {
+                Logger.getLogger(GridPanel.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        }).start();
     }
 
     @Override
     public void paintComponent(Graphics g) {
-        renderer.render(g, this, screenOrigin);
+        currentRenderer.render(g, this, screenOrigin);
     }
 
     Color getUnitColor(Unit unit) {
         return unit.getColor();
     }
 
+    private int sideLengthPower = 5;
+
+    public final void incrementSideLengthPower() {
+        setSideLengthPower(sideLengthPower + 1);
+    }
+
+    public final void decrementSideLengthPower() {
+        setSideLengthPower(sideLengthPower - 1);
+    }
+
     /**
      * Set side length for units
      *
-     * @param value
+     * @param power
      */
-    public final void setSideLength(Integer value) {
-        renderer.setSideLength(value);
+    public final void setSideLengthPower(int power) {
+        sideLengthPower = Math.max(power, 0);
+        int len = 1 << sideLengthPower;
+        System.out.println(len);
+        pixelRenderer.setSideLength(len);
+        if (textureRenderer != null) {
+            textureRenderer.setSideLength(len);
+        }
     }
 
     public Dimension getGridSize() {
         Dimension gridSize = new Dimension();
-        int sideLength = renderer.getSideLength();
+        int sideLength = currentRenderer.getSideLength();
         gridSize.width = (sideLength + 1) * simulation.getColumnCount() + 1;
         gridSize.height = (sideLength + 1) * simulation.getRowCount() + 1;
         return gridSize;
@@ -338,6 +434,10 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
             }
             try {
                 simulation.computeNextTurn();
+                if (screenshotSaveDir != null) {
+                    Path screenshotPath = Path.of(screenshotSaveDir.toString(), (Integer.toString(simulation.getCurrentTurn()) + ".gif"));
+                    saveScreenshot(screenshotPath.toFile());
+                }
                 gameStatusPanel.setPlayerPanels(simulation.getPlayerRankings());
             } catch (Exception e) {
                 e.printStackTrace();

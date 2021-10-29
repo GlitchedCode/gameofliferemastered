@@ -4,6 +4,7 @@
         "name": "the species' name",
         "id" : "the species' numeric ID, must be unique",
         "textureCode": "the species' texture code",
+        "color": "the species' color for pixel rendering",
         "filterColor": "texture filter color",
         "friendlySpecies": "a set of species the unit considers friendly",
         "hostileSpecies": "a set of species the unit considers friendly",
@@ -17,13 +18,14 @@
     },
     "speciesData" : [
         {
-            "name" : "Cell",
+            "name" : "Life",
             "id" : 0,
             "implementingType" : "LifeUnit",
             "textureCode" : "cell",
             "color" : "0xa07d2b",
             "friendlySpecies" : [
-                "Cell"
+                "Life",
+                4
             ],
             "hostileSpecies" : [],
             "health" : 1,
@@ -42,10 +44,58 @@
             }
         },
         {
-            "name" : "Mimic",
+            "name" : "Live Free or Die",
             "id" : 1,
+            "implementingType" : "LifeUnit",
+            "textureCode" : "cell",
+            "color" : "0x44e18a",
+            "filterColor" : "0x44e18a",
+            "friendlySpecies" : [
+                3
+            ],
+            "hostileSpecies" : [
+                "Life",
+                4
+            ],
+            "health" : 1,
+            "initialState" : "ALIVE",
+            "friendlyCountSelector" : {
+                "ruleClassName" : "IntegerSetRule",
+                "args" : [0]
+            },
+            "reproductionSelector" : {
+                "ruleClassName": "IntegerSetRule",
+                "args": [2]
+            }
+        },
+        {
+            "name" : "Pedestrian Life",
+            "id" : 2,
+            "implementingType" : "LifeUnit",
+            "textureCode" : "cell",
+            "color" : "0x4b169b",
+            "filterColor" : "0x4b169b",
+            "friendlySpecies" : [
+                4,
+                0
+            ],
+            "health" : 1,
+            "initialState" : "ALIVE",
+            "friendlyCountSelector" : {
+                "ruleClassName" : "IntegerRangeRule",
+                "args" : [2, 3]
+            },
+            "reproductionSelector" : {
+                "ruleClassName" : "IntegerSetRule",
+                "args" : [3,8]
+            }
+        },
+        {
+            "name" : "Mimic",
+            "id" : 3,
             "implementingType" : "Mimic",
             "textureCode" : "mimic",
+            "color" : "0x4d8fc1",
             "filterColor" : "0x4d8fc1",
             "friendlySpecies" : [
                 "Mimic"
@@ -68,9 +118,10 @@
         },
         {
             "name" : "Snake",
-            "id" : 2,
+            "id" : 4,
             "implementingType" : "LifeUnit",
             "textureCode" : "snake",
+            "color" : "0xaddc94",
             "friendlySpecies" : [
                 "Snake"
             ],
