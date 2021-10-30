@@ -22,28 +22,28 @@ public class Mimic extends LifeUnit {
 
     private transient Unit replicationTarget;
     private boolean replicated = false;
-    
+
     private int replicatedID;
     private Color replicatedColor;
     private Set<Integer> replicatedFriendlySpecies;
     private Set<Integer> replicatedHostileSpecies;
-    
+
     private RuleInterface<Integer> replicatedFriendlyCountSelector;
     private RuleInterface<Integer> replicatedHostileCountSelector;
     private RuleInterface<Integer> replicatedReproductionSelector;
 
     @Override
-    protected void initSpeciesData(SpeciesData data){
+    protected void initSpeciesData(SpeciesData data) {
         super.initSpeciesData(data);
-        
-        replicatedFriendlySpecies =  data.friendlySpecies;
+
+        replicatedFriendlySpecies = data.friendlySpecies;
         replicatedHostileSpecies = data.hostileSpecies;
-        
+
         replicatedFriendlyCountSelector = data.friendlyCountSelector;
         replicatedHostileCountSelector = data.hostileCountSelector;
         replicatedReproductionSelector = data.friendlyCountSelector;
     }
-    
+
     public Mimic(SpeciesData data) {
         super(data);
         initSpeciesData(data);
@@ -62,12 +62,11 @@ public class Mimic extends LifeUnit {
     @Override
     protected void boardStep(Unit[] adjacentUnits) {
         super.boardStep(adjacentUnits);
-        for (int i = 0; i < 8; i++)
-        {
-            Unit current = adjacentUnits[i];
-            if(replicationTarget != null) {
+        for (int i = 0; i < 8; i++) {
+            if (replicationTarget != null) {
                 break;
             }
+            Unit current = adjacentUnits[i];
             if (current.getSpeciesID() != speciesID & current.isAlive()) {
                 replicationTarget = current;
             }
@@ -104,7 +103,9 @@ public class Mimic extends LifeUnit {
         SpeciesData otherData = unit.getSpeciesData();
 
         replicatedID = otherData.speciesID;
-        replicatedColor = otherData.color;
+        replicatedColor = new Color(
+                otherData.color.getRGB() ^ speciesData.color.getRGB()
+        );
         replicatedFriendlySpecies = unit.getFriendlySpecies();
         replicatedHostileSpecies = unit.getHostileSpecies();
         replicatedFriendlyCountSelector = unit.getFriendlyCountSelector();
@@ -118,12 +119,13 @@ public class Mimic extends LifeUnit {
     }
 
     @Override
-    public Color getColor(){
-        if(!replicated)
+    public Color getColor() {
+        if (!replicated) {
             return speciesData.color;
+        }
         return replicatedColor;
     }
-    
+
     @Override
     public int getSpeciesID() {
         if (!replicated) {
@@ -131,13 +133,17 @@ public class Mimic extends LifeUnit {
         }
         return replicatedID;
     }
-    
+
+    public boolean hasReplicated() {
+        return replicated;
+    }
+
     /**
      * @return set with friendly species
      */
     @Override
     public final Set<Integer> getFriendlySpecies() {
-        if(!replicated) {
+        if (!replicated) {
             return super.getFriendlySpecies();
         }
         return replicatedFriendlySpecies;
@@ -145,7 +151,7 @@ public class Mimic extends LifeUnit {
 
     @Override
     public final Set<Integer> getHostileSpecies() {
-        if(!replicated) {
+        if (!replicated) {
             return super.getHostileSpecies();
         }
         return replicatedHostileSpecies;
@@ -153,7 +159,7 @@ public class Mimic extends LifeUnit {
 
     @Override
     public RuleInterface<Integer> getFriendlyCountSelector() {
-        if(!replicated) {
+        if (!replicated) {
             return super.getFriendlyCountSelector();
         }
         return replicatedFriendlyCountSelector;
@@ -161,7 +167,7 @@ public class Mimic extends LifeUnit {
 
     @Override
     public RuleInterface<Integer> getHostileCountSelector() {
-        if(!replicated) {
+        if (!replicated) {
             return super.getHostileCountSelector();
         }
         return replicatedHostileCountSelector;
@@ -169,12 +175,12 @@ public class Mimic extends LifeUnit {
 
     @Override
     public RuleInterface<Integer> getReproductionSelector() {
-        if(!replicated) {
+        if (!replicated) {
             return super.getReproductionSelector();
         }
         return replicatedReproductionSelector;
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {

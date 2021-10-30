@@ -9,7 +9,6 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.GameLogicException;
 import java.util.Set;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
 import java.awt.Color;
-import java.io.Serializable;
 import java.util.Objects;
 
 /**
@@ -175,6 +174,8 @@ public class LifeUnit extends Unit {
         return state != State.DEAD & state != null;
     }
 
+   
+    
     /**
      * Returns true if the unit can reproduce based on the unit's position
      * relative to the caller

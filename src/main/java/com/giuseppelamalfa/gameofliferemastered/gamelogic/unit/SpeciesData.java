@@ -65,17 +65,13 @@ public class SpeciesData implements Serializable {
     
     @SuppressWarnings(value = {"unchecked", "unchecked", "unchecked"})
     protected SpeciesData(JSONObject obj, HashMap<String, Integer> speciesIDs) throws ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, Exception {
-        String implementingTypeName;
-        try {
-            implementingTypeName = obj.getString("implementingType");
-        } catch (Exception e) {
-            implementingTypeName = "Unit";
-        }
         
         speciesID = obj.getInt("id");
         name = obj.getString("name");
         
+        String implementingTypeName;
         try{
+            implementingTypeName = obj.getString("implementingType");
             Class<?> implementingClass = Class.forName(SpeciesLoader.UNIT_CLASS_PATH + implementingTypeName);
             constructor = implementingClass.getConstructor(SpeciesData.class, Integer.class);
         } catch (Exception e) {

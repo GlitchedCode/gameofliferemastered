@@ -53,7 +53,7 @@ def trim_frames(frames):
 def make_gif(palette, frames, output):
     frame_one = frames[0]
     frame_one.save(f"{output}.gif", format="GIF", append_images=frames,
-                   save_all=True, duration=100, loop=0, palette=frame_one.palette)
+                   save_all=True, duration=75, loop=0, palette=frame_one.palette)
 
 
 if __name__ == "__main__":

@@ -25,7 +25,7 @@
             "color" : "0xa07d2b",
             "friendlySpecies" : [
                 "Life",
-                4
+                2
             ],
             "hostileSpecies" : [],
             "health" : 1,
@@ -44,31 +44,6 @@
             }
         },
         {
-            "name" : "Live Free or Die",
-            "id" : 1,
-            "implementingType" : "LifeUnit",
-            "textureCode" : "cell",
-            "color" : "0x44e18a",
-            "filterColor" : "0x44e18a",
-            "friendlySpecies" : [
-                3
-            ],
-            "hostileSpecies" : [
-                "Life",
-                4
-            ],
-            "health" : 1,
-            "initialState" : "ALIVE",
-            "friendlyCountSelector" : {
-                "ruleClassName" : "IntegerSetRule",
-                "args" : [0]
-            },
-            "reproductionSelector" : {
-                "ruleClassName": "IntegerSetRule",
-                "args": [2]
-            }
-        },
-        {
             "name" : "Pedestrian Life",
             "id" : 2,
             "implementingType" : "LifeUnit",
@@ -76,7 +51,7 @@
             "color" : "0x4b169b",
             "filterColor" : "0x4b169b",
             "friendlySpecies" : [
-                4,
+                2,
                 0
             ],
             "health" : 1,
@@ -90,6 +65,32 @@
                 "args" : [3,8]
             }
         },
+        {
+            "name" : "Live Free or Die",
+            "id" : 1,
+            "implementingType" : "LifeUnit",
+            "textureCode" : "cell",
+            "color" : "0x44e18a",
+            "filterColor" : "0x44e18a",
+            "friendlySpecies" : [
+                1
+            ],
+            "hostileSpecies" : [
+                "Life",
+                2
+            ],
+            "health" : 1,
+            "initialState" : "ALIVE",
+            "friendlyCountSelector" : {
+                "ruleClassName" : "IntegerSetRule",
+                "args" : [0]
+            },
+            "reproductionSelector" : {
+                "ruleClassName": "IntegerSetRule",
+                "args": [2]
+            }
+        },
+        
         {
             "name" : "Mimic",
             "id" : 3,

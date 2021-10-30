@@ -64,7 +64,7 @@ public class SpeciesDataTest {
     }
 
     @Test
-    public void testMissingColorTintFilter() {
+    public void testMissingColorTintFilter() throws Exception {
         System.out.println("testMissingColorTintFilter");
 
         try {
@@ -78,7 +78,7 @@ public class SpeciesDataTest {
     }
     
     @Test
-    public void testMissingTextureCode() {
+    public void testMissingTextureCode() throws Exception {
         System.out.println("testMissingTextureCode");
         boolean failed = false;
         
@@ -91,7 +91,7 @@ public class SpeciesDataTest {
     }
     
     @Test
-    public void testMissingName() {
+    public void testMissingName() throws Exception {
         System.out.println("testMissingName");
         boolean failed = false;
         
@@ -104,7 +104,7 @@ public class SpeciesDataTest {
     }
     
     @Test
-    public void testMissingID() {
+    public void testMissingID() throws Exception {
         System.out.println("testMissingID");
         boolean failed = false;
         
@@ -117,33 +117,33 @@ public class SpeciesDataTest {
     }
     
     @Test
-    public void testMissingImplementingType() {
+    public void testMissingImplementingType() throws Exception {
         System.out.println("testMissingImplementingType");
         boolean failed = false;
         
         try {
             SpeciesData data = new SpeciesData(unitDataArray.getJSONObject(5), speciesIDs);
-        } catch (ClassNotFoundException | IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | InvocationTargetException | JSONException e) {
+        } catch (Exception e) {
             failed = true;
         }
         assertEquals(failed, true);
     }
     
     @Test
-    public void testInvalidImplementingType() {
+    public void testInvalidImplementingType() throws Exception {
         System.out.println("testInvalidImplementingType");
         boolean failed = false;
         
         try {
             SpeciesData data = new SpeciesData(unitDataArray.getJSONObject(6), speciesIDs);
-        } catch (ClassNotFoundException | IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | InvocationTargetException | JSONException e) {
+        } catch (Exception e) {
             failed = true;
         }
         assertEquals(failed, true);
     }
     
     @Test
-    public void testMissingInitialState() {
+    public void testMissingInitialState() throws Exception {
         System.out.println("testMissingInitialState");
         boolean failed = false;
         
@@ -156,7 +156,7 @@ public class SpeciesDataTest {
     }
     
     @Test
-    public void testInvalidInitialState() {
+    public void testInvalidInitialState() throws Exception {
         System.out.println("testInvalidInitialState");
         boolean failed = false;
         
@@ -169,7 +169,7 @@ public class SpeciesDataTest {
     }
     
     @Test
-    public void testMissingHealth() {
+    public void testMissingHealth() throws Exception {
         System.out.println("testMissingID");
         boolean failed = false;
         
@@ -182,7 +182,7 @@ public class SpeciesDataTest {
     }
     
     @Test
-    public void testMissingFriendlySpecies() {
+    public void testMissingFriendlySpecies() throws Exception {
         System.out.println("testMissingID");
         boolean failed = false;
         
@@ -195,7 +195,7 @@ public class SpeciesDataTest {
     }
     
     @Test
-    public void testMissingHostileSpecies() {
+    public void testMissingHostileSpecies() throws Exception {
         System.out.println("testMissingID");
         boolean failed = false;
         
@@ -208,7 +208,7 @@ public class SpeciesDataTest {
     }
     
     @Test
-    public void testMissingFriendlyCountSelector() {
+    public void testMissingFriendlyCountSelector() throws Exception {
         System.out.println("testMissingFriendlyCountSelector");
         boolean failed = false;
         
@@ -221,7 +221,7 @@ public class SpeciesDataTest {
     }
     
     @Test
-    public void testInvalidFriendlyCountSelector() {
+    public void testInvalidFriendlyCountSelector() throws Exception {
         System.out.println("testInvalidFriendlyCountSelector");
         boolean failed = false;
         
@@ -234,7 +234,7 @@ public class SpeciesDataTest {
     }
     
     @Test
-    public void testInitializedFilter() {
+    public void testInitializedFilter() throws Exception {
         System.out.println("testInitializedFilter");
         boolean failed = false;
         

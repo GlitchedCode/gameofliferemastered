@@ -25,6 +25,6 @@ public class StubRule<T> implements RuleInterface<T>, Serializable {
     
     @Override
     public boolean test(T value) {
-        return false;
+        return this.value;
     }
 }
