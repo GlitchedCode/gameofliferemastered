@@ -201,6 +201,11 @@ public class SimulationCLIServer extends SimulationInterface {
         speciesLoader.loadSpeciesFromLocalJSON();
         currentGrid = new Grid(rowCount, columnCount);
         currentGrid.setSimulation(this);
+        for (PlayerData.TeamColor color : PlayerData.TeamColor.values()) {
+            if (color != PlayerData.TeamColor.NONE) {
+                availableColors.add(color);
+            }
+        }
     }
 
     public void reloadSpeciesConf(String path) throws Exception{
@@ -322,10 +327,10 @@ public class SimulationCLIServer extends SimulationInterface {
     }
 
     protected final int getNextClientID() {
-        return ++nextClientID;
+        return nextClientID++;
     }
 
-    public final PlayerData.TeamColor extractRandomColor() {
+    protected final PlayerData.TeamColor extractRandomColor() {
         if (availableColors.isEmpty()) {
             return PlayerData.TeamColor.NONE;
         }

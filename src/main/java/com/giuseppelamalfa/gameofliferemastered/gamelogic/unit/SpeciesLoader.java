@@ -123,7 +123,7 @@ public class SpeciesLoader {
         return speciesData.keySet();
     }
 
-    public synchronized Unit getNewUnit(int speciesID, int playerID) throws IllegalArgumentException {
+    public Unit getNewUnit(int speciesID, int playerID) throws IllegalArgumentException {
         try {
             SpeciesData data = speciesData.get(speciesID);
             return (Unit) data.constructor.newInstance(data, playerID);
@@ -133,7 +133,7 @@ public class SpeciesLoader {
         }
     }
 
-    public synchronized Unit getNewUnit(int speciesID) throws IllegalArgumentException {
+    public Unit getNewUnit(int speciesID) throws IllegalArgumentException {
         return getNewUnit(speciesID, 0);
     }
 
