@@ -41,4 +41,12 @@ public class IntegerSetRule implements RuleInterface<Integer>, Serializable {
     public void add(int value) {
         acceptedValues.add(value);
     }
+    
+    @Override
+    public String getConstructionArgs() {
+        String ret = "";
+        ret = acceptedValues.stream().map(value -> String.format("%d,", value)).reduce(ret, String::concat);
+        return ret;
+    }
+
 }

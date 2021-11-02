@@ -13,4 +13,6 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic.rule;
 public interface RuleInterface<T> {
 
     public boolean test(T value);
+    
+    public String getConstructionArgs();
 }

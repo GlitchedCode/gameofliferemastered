@@ -56,28 +56,61 @@ public class SpeciesData implements Serializable {
                 }
             } else if (obj instanceof Integer) {
                 int id = (Integer) obj;
-                if(speciesIDs.values().contains(id))
+                if (speciesIDs.values().contains(id)) {
                     ret.add(id);
+                }
             }
         }
         return ret;
     }
-    
+
+    public SpeciesData(
+            int speciesID,
+            String name,
+            Color color,
+            String textureCode,
+            State initialState,
+            Integer health,
+            Set<Integer> friendlySpecies,
+            Set<Integer> hostileSpecies,
+            RuleInterface<Integer> friendlyCountSelector,
+            RuleInterface<Integer> hostileCountSelector,
+            RuleInterface<Integer> reproductionSelector,
+            String implementingTypeName,
+            int filterColor
+    ) throws Exception {
+        this.speciesID = speciesID;
+        this.name = name;
+        this.color = color;
+        this.textureCode = textureCode;
+        this.initialState = initialState;
+        this.health = health;
+        this.friendlySpecies = friendlySpecies;
+        this.hostileSpecies = hostileSpecies;
+        this.friendlyCountSelector = friendlyCountSelector;
+        this.hostileCountSelector = hostileCountSelector;
+        this.reproductionSelector = reproductionSelector;
+
+        filter = new ColorTintFilter(new Color(filterColor), 0.75f);
+        Class<?> implementingClass = Class.forName(SpeciesLoader.UNIT_CLASS_PATH + implementingTypeName);
+        constructor = implementingClass.getConstructor(SpeciesData.class, Integer.class);
+    }
+
     @SuppressWarnings(value = {"unchecked", "unchecked", "unchecked"})
     protected SpeciesData(JSONObject obj, HashMap<String, Integer> speciesIDs) throws ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, Exception {
-        
+
         speciesID = obj.getInt("id");
         name = obj.getString("name");
-        
+
         String implementingTypeName;
-        try{
+        try {
             implementingTypeName = obj.getString("implementingType");
             Class<?> implementingClass = Class.forName(SpeciesLoader.UNIT_CLASS_PATH + implementingTypeName);
             constructor = implementingClass.getConstructor(SpeciesData.class, Integer.class);
         } catch (Exception e) {
             throw new Exception("Invalid or missing implementing type for species" + speciesID + ":" + name);
-        }        
-        
+        }
+
         textureCode = obj.getString("textureCode");
         initialState = State.valueOf(obj.getString("initialState"));
         health = obj.getInt("health");

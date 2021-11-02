@@ -27,4 +27,9 @@ public class StubRule<T> implements RuleInterface<T>, Serializable {
     public boolean test(T value) {
         return this.value;
     }
+    
+    @Override
+    public String getConstructionArgs(){
+        return Boolean.toString(value);
+    }
 }

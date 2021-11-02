@@ -5,17 +5,70 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.speciesmaker;
 
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesData;
+import java.util.ArrayList;
+import java.util.HashMap;
+
 /**
  *
  * @author glitchedcode
  */
+class SpeciesMetadata {
+
+    SpeciesData data;
+    int filterColor;
+    String implementingType;
+}
+
 public class SpeciesMakerFrame extends javax.swing.JFrame {
+
+    HashMap<String, SpeciesMetadata> speciesMetadata = new HashMap<>();
+    ArrayList<String> loadedSpeciesNames = new ArrayList<>();
 
     /**
      * Creates new form SpeciesMaker
      */
     public SpeciesMakerFrame() {
         initComponents();
+    }
+
+    void setSpeciesControlsEnabled(boolean arg) {
+        speciesName.setEnabled(arg);
+        textureCode.setEnabled(arg);
+        lifeCellTypeButton.setEnabled(arg);
+        mimicTypeButton.setEnabled(arg);
+        pixelColor.setEnabled(arg);
+        filterColor.setEnabled(arg);
+        healthPoints.setEnabled(arg);
+        stateAliveAging.setEnabled(arg);
+        stateAlive.setEnabled(arg);
+        jLabel7 = new javax.swing.JLabel();
+        jRadioButton3.setEnabled(arg);
+        jRadioButton4.setEnabled(arg);
+        jRadioButton5.setEnabled(arg);
+        jRadioButton6.setEnabled(arg);
+        jRadioButton7.setEnabled(arg);
+        jRadioButton8.setEnabled(arg);
+        friendlyArgs.setEnabled(arg);
+        hostileArgs.setEnabled(arg);
+        reproductionArgs.setEnabled(arg);
+        saveSpecies.setEnabled(arg);
+    }
+    
+    void saveCurrentSpecies(){
+        
+    }
+    
+    void removeCurrentSpecies(){
+        
+    }
+    
+    void createNewSpecies(){
+        
+    }
+    
+    void loadSpecies(String speciesName){
+        
     }
 
     /**
@@ -35,23 +88,24 @@ public class SpeciesMakerFrame extends javax.swing.JFrame {
         speciesPanel = new javax.swing.JPanel();
         newSpecies = new javax.swing.JButton();
         removeSpecies = new javax.swing.JButton();
-        jScrollPane2 = new javax.swing.JScrollPane();
+        scrollPane = new javax.swing.JScrollPane();
+        speciesList = new javax.swing.JList<>();
         editorPanel = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
-        jTextField2 = new javax.swing.JTextField();
+        speciesName = new javax.swing.JTextField();
+        textureCode = new javax.swing.JTextField();
         lifeCellTypeButton = new javax.swing.JRadioButton();
         mimicTypeButton = new javax.swing.JRadioButton();
         jLabel1 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
-        jTextField3 = new javax.swing.JTextField();
-        jTextField4 = new javax.swing.JTextField();
+        pixelColor = new javax.swing.JTextField();
+        filterColor = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
-        jTextField5 = new javax.swing.JTextField();
+        healthPoints = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
-        jRadioButton1 = new javax.swing.JRadioButton();
-        jRadioButton2 = new javax.swing.JRadioButton();
+        stateAliveAging = new javax.swing.JRadioButton();
+        stateAlive = new javax.swing.JRadioButton();
         jLabel7 = new javax.swing.JLabel();
         jRadioButton3 = new javax.swing.JRadioButton();
         jRadioButton4 = new javax.swing.JRadioButton();
@@ -59,15 +113,16 @@ public class SpeciesMakerFrame extends javax.swing.JFrame {
         jRadioButton6 = new javax.swing.JRadioButton();
         jRadioButton7 = new javax.swing.JRadioButton();
         jRadioButton8 = new javax.swing.JRadioButton();
-        jTextField6 = new javax.swing.JTextField();
-        jTextField7 = new javax.swing.JTextField();
-        jTextField8 = new javax.swing.JTextField();
+        friendlyArgs = new javax.swing.JTextField();
+        hostileArgs = new javax.swing.JTextField();
+        reproductionArgs = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
         jLabel10 = new javax.swing.JLabel();
         jLabel11 = new javax.swing.JLabel();
         jLabel12 = new javax.swing.JLabel();
         jLabel13 = new javax.swing.JLabel();
+        saveSpecies = new javax.swing.JButton();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         openItem = new javax.swing.JMenuItem();
@@ -84,6 +139,13 @@ public class SpeciesMakerFrame extends javax.swing.JFrame {
 
         removeSpecies.setText("Remove Species");
 
+        speciesList.setModel(new javax.swing.AbstractListModel<String>() {
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            public int getSize() { return strings.length; }
+            public String getElementAt(int i) { return strings[i]; }
+        });
+        scrollPane.setViewportView(speciesList);
+
         javax.swing.GroupLayout speciesPanelLayout = new javax.swing.GroupLayout(speciesPanel);
         speciesPanel.setLayout(speciesPanelLayout);
         speciesPanelLayout.setHorizontalGroup(
@@ -94,12 +156,12 @@ public class SpeciesMakerFrame extends javax.swing.JFrame {
                     .addComponent(removeSpecies, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 176, Short.MAX_VALUE)
                     .addComponent(newSpecies, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
-            .addComponent(jScrollPane2)
+            .addComponent(scrollPane)
         );
         speciesPanelLayout.setVerticalGroup(
             speciesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(speciesPanelLayout.createSequentialGroup()
-                .addComponent(jScrollPane2)
+                .addComponent(scrollPane)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(newSpecies)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -109,21 +171,25 @@ public class SpeciesMakerFrame extends javax.swing.JFrame {
 
         jLabel2.setText("Name");
 
-        jTextField1.setText("Species");
+        speciesName.setText("Species");
+        speciesName.setEnabled(false);
 
-        jTextField2.setText("cell");
-        jTextField2.addActionListener(new java.awt.event.ActionListener() {
+        textureCode.setText("cell");
+        textureCode.setEnabled(false);
+        textureCode.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField2ActionPerformed(evt);
+                textureCodeActionPerformed(evt);
             }
         });
 
         speciesGroup.add(lifeCellTypeButton);
         lifeCellTypeButton.setSelected(true);
         lifeCellTypeButton.setText("LifeCell");
+        lifeCellTypeButton.setEnabled(false);
 
         speciesGroup.add(mimicTypeButton);
         mimicTypeButton.setText("Mimic");
+        mimicTypeButton.setEnabled(false);
         mimicTypeButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 mimicTypeButtonActionPerformed(evt);
@@ -134,53 +200,67 @@ public class SpeciesMakerFrame extends javax.swing.JFrame {
 
         jLabel3.setText("Texture code");
 
-        jTextField3.setText("0x000000");
+        pixelColor.setText("0x000000");
+        pixelColor.setEnabled(false);
 
-        jTextField4.setText("0x000000");
+        filterColor.setText("0x000000");
+        filterColor.setEnabled(false);
 
         jLabel4.setText("Pixel color");
 
         jLabel5.setText("Filter color");
 
-        jTextField5.setText("1");
+        healthPoints.setText("1");
+        healthPoints.setEnabled(false);
 
         jLabel6.setText("Health Points");
 
-        initialStateGroup.add(jRadioButton1);
-        jRadioButton1.setText("ALIVE_AGING");
+        initialStateGroup.add(stateAliveAging);
+        stateAliveAging.setText("ALIVE_AGING");
+        stateAliveAging.setEnabled(false);
 
-        initialStateGroup.add(jRadioButton2);
-        jRadioButton2.setSelected(true);
-        jRadioButton2.setText("ALIVE");
+        initialStateGroup.add(stateAlive);
+        stateAlive.setSelected(true);
+        stateAlive.setText("ALIVE");
+        stateAlive.setEnabled(false);
 
         jLabel7.setText("Initial state");
 
         friendlyCountGroup.add(jRadioButton3);
         jRadioButton3.setText("IntegerSetRule");
+        jRadioButton3.setEnabled(false);
 
         friendlyCountGroup.add(jRadioButton4);
         jRadioButton4.setSelected(true);
         jRadioButton4.setText("IntegerRangeRule");
+        jRadioButton4.setEnabled(false);
 
         reproductionGroup.add(jRadioButton5);
         jRadioButton5.setText("IntegerSetRule");
+        jRadioButton5.setEnabled(false);
 
         hostileCountGroup.add(jRadioButton6);
         jRadioButton6.setSelected(true);
         jRadioButton6.setText("IntegerRangeRule");
+        jRadioButton6.setEnabled(false);
 
         reproductionGroup.add(jRadioButton7);
         jRadioButton7.setSelected(true);
         jRadioButton7.setText("IntegerRangeRule");
+        jRadioButton7.setEnabled(false);
 
         hostileCountGroup.add(jRadioButton8);
         jRadioButton8.setText("IntegerSetRule");
+        jRadioButton8.setEnabled(false);
 
-        jTextField6.setText("1,2");
+        friendlyArgs.setText("1,2");
+        friendlyArgs.setEnabled(false);
 
-        jTextField7.setText("1,2");
+        hostileArgs.setText("1,2");
+        hostileArgs.setEnabled(false);
 
-        jTextField8.setText("1,2");
+        reproductionArgs.setText("1,2");
+        reproductionArgs.setEnabled(false);
 
         jLabel8.setText("Friendly count selector");
 
@@ -194,72 +274,78 @@ public class SpeciesMakerFrame extends javax.swing.JFrame {
 
         jLabel13.setText("Selector args");
 
+        saveSpecies.setText("Save Species");
+        saveSpecies.setEnabled(false);
+
         javax.swing.GroupLayout editorPanelLayout = new javax.swing.GroupLayout(editorPanel);
         editorPanel.setLayout(editorPanelLayout);
         editorPanelLayout.setHorizontalGroup(
             editorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(editorPanelLayout.createSequentialGroup()
-                .addContainerGap()
                 .addGroup(editorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(editorPanelLayout.createSequentialGroup()
-                        .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(lifeCellTypeButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(mimicTypeButton))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, editorPanelLayout.createSequentialGroup()
-                        .addComponent(jLabel7)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jRadioButton2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jRadioButton1))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, editorPanelLayout.createSequentialGroup()
+                        .addContainerGap()
                         .addGroup(editorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel8)
-                            .addComponent(jLabel9))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 58, Short.MAX_VALUE)
-                        .addGroup(editorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jTextField6, javax.swing.GroupLayout.PREFERRED_SIZE, 257, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(editorPanelLayout.createSequentialGroup()
-                                .addComponent(jRadioButton4)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jRadioButton3))))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, editorPanelLayout.createSequentialGroup()
-                        .addGroup(editorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel3)
-                            .addComponent(jLabel4)
-                            .addComponent(jLabel5)
-                            .addComponent(jLabel6)
-                            .addComponent(jLabel2))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(editorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jTextField1)
-                            .addComponent(jTextField4, javax.swing.GroupLayout.DEFAULT_SIZE, 257, Short.MAX_VALUE)
-                            .addComponent(jTextField3)
-                            .addComponent(jTextField2)
-                            .addComponent(jTextField5, javax.swing.GroupLayout.Alignment.TRAILING)))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, editorPanelLayout.createSequentialGroup()
-                        .addGroup(editorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel12)
-                            .addComponent(jLabel13))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(editorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jTextField8)
+                                .addComponent(jLabel1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(lifeCellTypeButton)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(mimicTypeButton))
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, editorPanelLayout.createSequentialGroup()
-                                .addComponent(jRadioButton7)
+                                .addComponent(jLabel7)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(stateAlive)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jRadioButton5))))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, editorPanelLayout.createSequentialGroup()
-                        .addGroup(editorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel10)
-                            .addComponent(jLabel11))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(editorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jTextField7, javax.swing.GroupLayout.PREFERRED_SIZE, 257, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(editorPanelLayout.createSequentialGroup()
-                                .addComponent(jRadioButton6)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jRadioButton8)))))
+                                .addComponent(stateAliveAging))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, editorPanelLayout.createSequentialGroup()
+                                .addGroup(editorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel8)
+                                    .addComponent(jLabel9))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 125, Short.MAX_VALUE)
+                                .addGroup(editorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(friendlyArgs, javax.swing.GroupLayout.PREFERRED_SIZE, 257, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(editorPanelLayout.createSequentialGroup()
+                                        .addComponent(jRadioButton4)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jRadioButton3))))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, editorPanelLayout.createSequentialGroup()
+                                .addGroup(editorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel3)
+                                    .addComponent(jLabel4)
+                                    .addComponent(jLabel5)
+                                    .addComponent(jLabel6)
+                                    .addComponent(jLabel2))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGroup(editorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(speciesName)
+                                    .addComponent(filterColor, javax.swing.GroupLayout.DEFAULT_SIZE, 257, Short.MAX_VALUE)
+                                    .addComponent(pixelColor)
+                                    .addComponent(textureCode)
+                                    .addComponent(healthPoints, javax.swing.GroupLayout.Alignment.TRAILING)))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, editorPanelLayout.createSequentialGroup()
+                                .addGroup(editorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel12)
+                                    .addComponent(jLabel13))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGroup(editorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(reproductionArgs)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, editorPanelLayout.createSequentialGroup()
+                                        .addComponent(jRadioButton7)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jRadioButton5))))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, editorPanelLayout.createSequentialGroup()
+                                .addGroup(editorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel10)
+                                    .addComponent(jLabel11))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGroup(editorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(hostileArgs, javax.swing.GroupLayout.PREFERRED_SIZE, 257, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(editorPanelLayout.createSequentialGroup()
+                                        .addComponent(jRadioButton6)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jRadioButton8))))))
+                    .addComponent(saveSpecies, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         editorPanelLayout.setVerticalGroup(
@@ -267,7 +353,7 @@ public class SpeciesMakerFrame extends javax.swing.JFrame {
             .addGroup(editorPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(editorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(speciesName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel2))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(editorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -276,24 +362,24 @@ public class SpeciesMakerFrame extends javax.swing.JFrame {
                     .addComponent(jLabel1))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(editorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(textureCode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel3))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(editorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(pixelColor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel4))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(editorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(filterColor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel5))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(editorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(healthPoints, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel6))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(editorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jRadioButton1)
-                    .addComponent(jRadioButton2)
+                    .addComponent(stateAliveAging)
+                    .addComponent(stateAlive)
                     .addComponent(jLabel7))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(editorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -302,7 +388,7 @@ public class SpeciesMakerFrame extends javax.swing.JFrame {
                     .addComponent(jLabel8))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(editorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(friendlyArgs, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel9))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(editorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -311,7 +397,7 @@ public class SpeciesMakerFrame extends javax.swing.JFrame {
                     .addComponent(jLabel10))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(editorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(hostileArgs, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel11))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(editorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -320,9 +406,10 @@ public class SpeciesMakerFrame extends javax.swing.JFrame {
                     .addComponent(jLabel12))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(editorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(reproductionArgs, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel13))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 12, Short.MAX_VALUE)
+                .addComponent(saveSpecies))
         );
 
         fileMenu.setText("File");
@@ -394,9 +481,9 @@ public class SpeciesMakerFrame extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_mimicTypeButtonActionPerformed
 
-    private void jTextField2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField2ActionPerformed
+    private void textureCodeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textureCodeActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField2ActionPerformed
+    }//GEN-LAST:event_textureCodeActionPerformed
 
     /**
      * @param args the command line arguments
@@ -438,7 +525,11 @@ public class SpeciesMakerFrame extends javax.swing.JFrame {
     private javax.swing.JPanel editorPanel;
     private javax.swing.JMenuItem exitItem;
     private javax.swing.JMenu fileMenu;
+    private javax.swing.JTextField filterColor;
+    private javax.swing.JTextField friendlyArgs;
     private javax.swing.ButtonGroup friendlyCountGroup;
+    private javax.swing.JTextField healthPoints;
+    private javax.swing.JTextField hostileArgs;
     private javax.swing.ButtonGroup hostileCountGroup;
     private javax.swing.ButtonGroup initialStateGroup;
     private javax.swing.JLabel jLabel1;
@@ -454,34 +545,32 @@ public class SpeciesMakerFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
-    private javax.swing.JRadioButton jRadioButton1;
-    private javax.swing.JRadioButton jRadioButton2;
     private javax.swing.JRadioButton jRadioButton3;
     private javax.swing.JRadioButton jRadioButton4;
     private javax.swing.JRadioButton jRadioButton5;
     private javax.swing.JRadioButton jRadioButton6;
     private javax.swing.JRadioButton jRadioButton7;
     private javax.swing.JRadioButton jRadioButton8;
-    private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
-    private javax.swing.JTextField jTextField3;
-    private javax.swing.JTextField jTextField4;
-    private javax.swing.JTextField jTextField5;
-    private javax.swing.JTextField jTextField6;
-    private javax.swing.JTextField jTextField7;
-    private javax.swing.JTextField jTextField8;
     private javax.swing.JRadioButton lifeCellTypeButton;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JRadioButton mimicTypeButton;
     private javax.swing.JButton newSpecies;
     private javax.swing.JMenuItem openItem;
+    private javax.swing.JTextField pixelColor;
     private javax.swing.JButton removeSpecies;
+    private javax.swing.JTextField reproductionArgs;
     private javax.swing.ButtonGroup reproductionGroup;
     private javax.swing.JMenuItem saveAsItem;
     private javax.swing.JMenuItem saveItem;
+    private javax.swing.JButton saveSpecies;
+    private javax.swing.JScrollPane scrollPane;
     private javax.swing.JPopupMenu.Separator sep1;
     private javax.swing.ButtonGroup speciesGroup;
+    private javax.swing.JList<String> speciesList;
+    private javax.swing.JTextField speciesName;
     private javax.swing.JPanel speciesPanel;
+    private javax.swing.JRadioButton stateAlive;
+    private javax.swing.JRadioButton stateAliveAging;
+    private javax.swing.JTextField textureCode;
     // End of variables declaration//GEN-END:variables
 }
