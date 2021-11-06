@@ -6,6 +6,7 @@
 package com.giuseppelamalfa.gameofliferemastered.speciesmaker;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesData;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -22,6 +23,7 @@ class SpeciesMetadata {
 
 public class SpeciesMakerFrame extends javax.swing.JFrame {
 
+    File openedSpeciesConfig; 
     HashMap<String, SpeciesMetadata> speciesMetadata = new HashMap<>();
     ArrayList<String> loadedSpeciesNames = new ArrayList<>();
 

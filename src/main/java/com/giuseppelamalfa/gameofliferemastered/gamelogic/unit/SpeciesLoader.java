@@ -123,17 +123,16 @@ public class SpeciesLoader {
         return speciesData.keySet();
     }
 
-    public Unit getNewUnit(int speciesID, int playerID) throws IllegalArgumentException {
+    public Unit getNewUnit(int speciesID, int playerID) {
         try {
             SpeciesData data = speciesData.get(speciesID);
             return (Unit) data.constructor.newInstance(data, playerID);
-        } catch (IllegalAccessException | IllegalArgumentException | InstantiationException
-                | SecurityException | InvocationTargetException e) {
+        } catch (Exception e) {
             return null;
         }
     }
 
-    public Unit getNewUnit(int speciesID) throws IllegalArgumentException {
+    public Unit getNewUnit(int speciesID) {
         return getNewUnit(speciesID, 0);
     }
 

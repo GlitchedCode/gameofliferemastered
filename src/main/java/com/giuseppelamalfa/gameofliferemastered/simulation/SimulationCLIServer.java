@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
+import java.io.File;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -208,10 +209,10 @@ public class SimulationCLIServer extends SimulationInterface {
         }
     }
 
-    public void reloadSpeciesConf(String path) throws Exception{
+    public void reloadSpeciesConf(String path) throws Exception {
         speciesLoader.loadSpeciesFromLocalJSON(path);
     }
-    
+
     protected void initializeRemoteServer(int portNumber, int playerCount,
             int rowCount, int columnCount) throws IOException, Exception {
         if (playerCount < 2 | playerCount > MAX_PLAYER_COUNT) {
@@ -228,13 +229,13 @@ public class SimulationCLIServer extends SimulationInterface {
 
         serverSocket = new ServerSocket(portNumber);
 
-        try{
+        try {
             URL whatismyip = new URL("http://checkip.amazonaws.com");
             BufferedReader in = new BufferedReader(new InputStreamReader(
                     whatismyip.openStream()));
             serverIP = in.readLine(); //you get the IP as a String
 
-        } catch (Exception e){
+        } catch (Exception e) {
             serverIP = "localhost";
         }
         this.portNumber = portNumber;
@@ -289,7 +290,7 @@ public class SimulationCLIServer extends SimulationInterface {
                                 }
                             } // These exceptions are caught when the client disconnects
                             catch (IOException e) {
-                            } catch (InvalidRequestException  | ClassNotFoundException e) {
+                            } catch (InvalidRequestException | ClassNotFoundException e) {
                                 writeToStatusLog(e.toString());
                             }
 
@@ -374,9 +375,9 @@ public class SimulationCLIServer extends SimulationInterface {
     public ArrayList<PlayerData> getPlayerRankings() {
         return currentGrid.getPlayerRankings();
     }
-    
+
     @Override
-    public SpeciesLoader getSpeciesLoader(){
+    public SpeciesLoader getSpeciesLoader() {
         return speciesLoader;
     }
 
@@ -584,18 +585,23 @@ public class SimulationCLIServer extends SimulationInterface {
         }
 
         clientsRequestingPauseFlip.add(clientID);
-        float diff = ((float)clientsRequestingPauseFlip.size() / (float)connectedClients.size()) - 0.5f;
+        float diff = ((float) clientsRequestingPauseFlip.size() / (float) connectedClients.size()) - 0.5f;
         if (diff >= 0f) {
             setRunning(gameStatus.running);
         }
 
     }
-    
+
     @Override
-    public void saveGrid() throws Exception{
+    public void loadGrid(File file) throws Exception {
+        currentGrid.readBoardFromFile(file, speciesLoader);
+    }
+
+    @Override
+    public void saveGrid() throws Exception {
         LocalDateTime now = LocalDateTime.now();
         String isoFormat = DateTimeFormatter.ISO_INSTANT.format(now.toInstant(ZoneOffset.UTC));
-        currentGrid.writeBoardToFile("grid-"+isoFormat);
+        currentGrid.writeBoardToFile("grid-" + isoFormat);
     }
 
     @Override

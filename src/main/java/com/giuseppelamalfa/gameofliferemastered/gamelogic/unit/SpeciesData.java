@@ -79,6 +79,10 @@ public class SpeciesData implements Serializable {
             String implementingTypeName,
             int filterColor
     ) throws Exception {
+        if(speciesID < 0){
+            throw new Exception("Invalid species ID!");
+        }
+        
         this.speciesID = speciesID;
         this.name = name;
         this.color = color;
@@ -100,6 +104,9 @@ public class SpeciesData implements Serializable {
     protected SpeciesData(JSONObject obj, HashMap<String, Integer> speciesIDs) throws ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, Exception {
 
         speciesID = obj.getInt("id");
+        if(speciesID < 0){
+            throw new Exception("Invalid species ID!");
+        }
         name = obj.getString("name");
 
         String implementingTypeName;

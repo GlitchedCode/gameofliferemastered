@@ -11,12 +11,22 @@ import com.giuseppelamalfa.gameofliferemastered.simulation.SimulationInterface;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.*;
 import com.giuseppelamalfa.gameofliferemastered.utils.*;
 import java.awt.Point;
+import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.InputStream;
 import java.io.ObjectOutputStream;
+import java.io.PrintStream;
 import java.io.Serializable;
+import java.io.Writer;
+import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Scanner;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -164,8 +174,49 @@ public class Grid implements Serializable, Cloneable {
         return true;
     }
 
-    public synchronized void writeBoardToFile(String fileName) throws Exception {
-        new ObjectOutputStream(new FileOutputStream(fileName + ".ser")).writeObject(board);
+    public synchronized final void writeBoardToFile(String fileNameStem) throws Exception {
+        PrintStream stream = new PrintStream(new File(fileNameStem + ".grid"));
+        int rows = getRowCount();
+        int cols = getColumnCount();
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                Unit unit = getUnit(r, c);
+                stream.printf("%d ", unit.getActualSpeciesID());
+            }
+            stream.println("");
+        }
+    }
+
+    public synchronized final void readBoardFromFile(File file, SpeciesLoader loader) throws Exception {
+        Scanner scanner = new Scanner(file);
+        int rows = getRowCount();
+        int cols = getColumnCount();
+        List<String> lines = new ArrayList<>();
+        while (scanner.hasNextLine() & lines.size() < rows) {
+            lines.add(scanner.nextLine().trim());
+        }
+        
+        clearBoard();
+        rows = Math.min(rows, lines.size());
+        for (int r = 0; r < rows; r++) {
+            Scanner strScanner = new Scanner(new ByteArrayInputStream(lines.get(r).getBytes()));
+            for (int c = 0; c < cols; c++) {
+                try {
+                    if (!strScanner.hasNextInt()) {
+                        break;
+                    }
+                    String next = strScanner.next();
+                    int speciesID = Integer.decode(next);
+                    Unit newUnit = loader.getNewUnit(speciesID);
+                    if (newUnit != null) {
+                        setUnit(r, c, newUnit);
+                    }
+                    strScanner.skip(" ");
+                } catch (Exception e) {
+                    break;
+                }
+            }
+        }
     }
 
     void setAllSectorFlags(boolean arg) {

@@ -38,6 +38,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import javax.imageio.ImageIO;
+import javax.swing.JFileChooser;
 
 /**
  *
@@ -164,7 +165,6 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
         } else {
             decrementSideLengthPower();
         }
-        setSideLengthPower(currentRenderer.getSideLength() - (rotation * 4));
     }
 
     // don't need these
@@ -203,6 +203,17 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
             case KeyEvent.VK_HOME: {
                 try {
                     simulation.saveGrid();
+                } catch (Exception ex) {
+                    Logger.getLogger(GridPanel.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            break;
+            case KeyEvent.VK_END: {
+                try {
+                    JFileChooser fileChooser = new JFileChooser();
+                    if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                        simulation.loadGrid(fileChooser.getSelectedFile());
+                    }
                 } catch (Exception ex) {
                     Logger.getLogger(GridPanel.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -380,7 +391,6 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
     public final void setSideLengthPower(int power) {
         sideLengthPower = Math.max(power, 0);
         int len = 1 << sideLengthPower;
-        System.out.println(len);
         pixelRenderer.setSideLength(len);
         if (textureRenderer != null) {
             textureRenderer.setSideLength(len);

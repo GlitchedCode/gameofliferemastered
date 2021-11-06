@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
+import java.io.File;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -322,6 +323,11 @@ public class SimulationRemoteClient extends SimulationInterface {
 
     public void initializeGridPanel(GridPanel panel) {
         this.panel = panel;
+    }
+    
+    @Override
+    public void loadGrid(File file) throws Exception {
+        currentGrid.readBoardFromFile(file, speciesLoader);
     }
 
     @Override

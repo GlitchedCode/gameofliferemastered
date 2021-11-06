@@ -23,6 +23,7 @@ public class PixelGridRenderer implements GridRenderer {
 
     private int lineSpacing;
     private int sideLength;
+    private Color bg = new Color(0.0f, 0.0f, 0.0f, 0.1f);
 
     @Override
     public int getLineSpacing() {
@@ -44,7 +45,7 @@ public class PixelGridRenderer implements GridRenderer {
     public void render(Graphics g, GridPanel panel, Point screenOrigin) {
         Graphics2D g2 = (Graphics2D) g;
         Dimension size = panel.getSize();
-        g2.setColor(Color.BLACK);
+        g2.setColor(bg);
         g2.fillRect(0, 0, size.width, size.height);
 
         SimulationInterface simulation = panel.getSimulation();

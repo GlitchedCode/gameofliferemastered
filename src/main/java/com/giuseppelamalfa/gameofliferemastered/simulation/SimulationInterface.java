@@ -12,6 +12,7 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
 import java.io.IOException;
 import java.util.ArrayList;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -73,6 +74,8 @@ public abstract class SimulationInterface {
 
     public abstract void synchronize();
 
+    public abstract void loadGrid(File file) throws Exception;
+    
     public abstract void saveGrid() throws Exception;
     
     public abstract void close();
