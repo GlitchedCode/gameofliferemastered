@@ -22,8 +22,8 @@ import java.awt.image.WritableRaster;
  */
 public class ColorTintFilter implements BufferedImageOp {
 
-    private final Color mixColor;
-    private final float mixValue;
+    public final Color mixColor;
+    public final float mixValue;
 
     public ColorTintFilter(Color mixColor, float mixValue) {
         if (mixColor == null) {

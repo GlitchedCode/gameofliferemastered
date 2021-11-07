@@ -7,6 +7,8 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic.rule;
 
 import java.io.Serializable;
 import java.util.Collection;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  *
@@ -49,8 +51,14 @@ public class IntegerRangeRule implements RuleInterface<Integer>, Serializable {
     }
 
     @Override
-    public String getConstructionArgs() {
-        return String.format("%d,%d", min, max);
+    public JSONObject toJSONObject() {
+        JSONObject ret = new JSONObject();
+        ret.put("ruleClassName", "IntegerSetRule");
+        JSONArray args = new JSONArray();
+        args.put(min);
+        args.put(max);
+        ret.put("args", args);
+        return ret;
     }
 
 }

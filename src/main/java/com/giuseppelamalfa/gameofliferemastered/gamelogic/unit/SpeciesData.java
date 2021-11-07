@@ -5,6 +5,8 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.IntegerRangeRule;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.IntegerSetRule;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.StubRule;
 import com.giuseppelamalfa.gameofliferemastered.utils.ColorTintFilter;
@@ -13,6 +15,7 @@ import java.awt.image.BufferedImageOp;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -44,6 +47,12 @@ public class SpeciesData implements Serializable {
     protected final transient Constructor<?> constructor;
     protected final transient BufferedImageOp filter;
 
+    public static final SpeciesData lifeSpecies = new SpeciesData(0, "Life", 0xa07d2b, "cell", State.ALIVE, 1,
+            new HashSet<Integer>(Arrays.asList(new Integer[]{0})),
+            new HashSet<Integer>(),
+            new IntegerRangeRule(2, 3), new StubRule<Integer>(true), new IntegerSetRule(Arrays.asList(new Integer[]{3})),
+            "LifeUnit", 0);
+
     private HashSet<Integer> getSpeciesFromJSONArray(JSONArray array, HashMap<String, Integer> speciesIDs) {
         HashSet<Integer> ret = new HashSet<>();
         for (int i = 0; i < array.length(); i++) {
@@ -67,7 +76,7 @@ public class SpeciesData implements Serializable {
     public SpeciesData(
             int speciesID,
             String name,
-            Color color,
+            int color,
             String textureCode,
             State initialState,
             Integer health,
@@ -78,14 +87,11 @@ public class SpeciesData implements Serializable {
             RuleInterface<Integer> reproductionSelector,
             String implementingTypeName,
             int filterColor
-    ) throws Exception {
-        if(speciesID < 0){
-            throw new Exception("Invalid species ID!");
-        }
-        
-        this.speciesID = speciesID;
+    ) {
+
+        this.speciesID = Math.max(speciesID, 0);
         this.name = name;
-        this.color = color;
+        this.color = new Color(color);
         this.textureCode = textureCode;
         this.initialState = initialState;
         this.health = health;
@@ -95,16 +101,60 @@ public class SpeciesData implements Serializable {
         this.hostileCountSelector = hostileCountSelector;
         this.reproductionSelector = reproductionSelector;
 
-        filter = new ColorTintFilter(new Color(filterColor), 0.75f);
-        Class<?> implementingClass = Class.forName(SpeciesLoader.UNIT_CLASS_PATH + implementingTypeName);
-        constructor = implementingClass.getConstructor(SpeciesData.class, Integer.class);
+        if (filterColor == 0) {
+            filter = new ColorTintFilter(new Color(filterColor), 0.75f);
+        } else {
+            filter = null;
+        }
+        
+        Constructor<?> _con;
+        try {
+            Class<?> implementingClass;
+            implementingClass = Class.forName(SpeciesLoader.UNIT_CLASS_PATH + implementingTypeName);
+            _con = implementingClass.getConstructor(SpeciesData.class, Integer.class);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            _con = null;
+        }
+        constructor = _con;
+    }
+
+    public JSONObject toJSONObject() {
+        JSONObject ret = new JSONObject();
+        
+        ret.put("name", name);
+        ret.put("implementingType", constructor.getDeclaringClass().getSimpleName());
+        ret.put("id", speciesID);
+        ret.put("textureCode", textureCode);
+        ret.put("color", Integer.toUnsignedString(color.getRGB()));
+        ret.put("filterColor", Integer.toUnsignedString(((ColorTintFilter) filter).mixColor.getRGB()));
+        ret.put("health", health);
+        ret.put("initialState", initialState.toString());
+        
+        ret.put("friendlySpecies", new JSONArray(friendlySpecies));
+        ret.put("hostileSpecies", new JSONArray(hostileSpecies));
+
+        JSONObject friendlyCount = friendlyCountSelector.toJSONObject();
+        JSONObject hostileCount = hostileCountSelector.toJSONObject();
+        JSONObject reproductionCount = reproductionSelector.toJSONObject();
+        if (friendlyCount != null) {
+            ret.put("friendlyCountSelector", friendlyCount);
+        }
+        if (hostileCount != null) {
+            ret.put("hostileCountSelector", hostileCount);
+        }
+        if (reproductionCount != null) {
+            ret.put("reproductionSelector", reproductionCount);
+        }
+
+        return ret;
     }
 
     @SuppressWarnings(value = {"unchecked", "unchecked", "unchecked"})
     protected SpeciesData(JSONObject obj, HashMap<String, Integer> speciesIDs) throws ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, Exception {
 
         speciesID = obj.getInt("id");
-        if(speciesID < 0){
+        if (speciesID < 0) {
             throw new Exception("Invalid species ID!");
         }
         name = obj.getString("name");

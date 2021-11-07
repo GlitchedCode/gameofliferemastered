@@ -9,6 +9,8 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  *
@@ -43,9 +45,10 @@ public class IntegerSetRule implements RuleInterface<Integer>, Serializable {
     }
     
     @Override
-    public String getConstructionArgs() {
-        String ret = "";
-        ret = acceptedValues.stream().map(value -> String.format("%d,", value)).reduce(ret, String::concat);
+    public JSONObject toJSONObject() {
+        JSONObject ret = new JSONObject();
+        ret.put("ruleClassName", "IntegerSetRule");
+        ret.put("args", new JSONArray(acceptedValues));
         return ret;
     }
 

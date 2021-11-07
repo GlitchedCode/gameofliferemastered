@@ -10,6 +10,8 @@ import java.awt.image.BufferedImageOp;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -39,17 +41,66 @@ public class SpeciesLoader {
 
     HashMap<Integer, SpeciesData> speciesData = new HashMap<>();
 
+    public static void generateTemplateSpeciesConfig(File outFile) throws FileNotFoundException {
+        JSONObject root = new JSONObject();
+        JSONObject readme = new JSONObject();
+
+        readme.put("__general_info", "each object in the speciesData array represents a species, defined by the following fields."
+                + "for more info on implementing types, selectors and initial states check the source code."
+                + "a species configuration example has been included to represent conway's life cell.");
+        
+        readme.put("name", "the species' name");
+        readme.put("implementingType", "unit class name that provides the implementation for this species, must implement com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit");
+        readme.put("id", "the species' numeric ID, which must be unique");
+        readme.put("textureCode", "the species' texture code");
+        readme.put("color", "the species' color for pixel rendering");
+        readme.put("filterColor", "the species' texture filter color");
+        readme.put("friendlySpecies", "a set of species the unit considers friendly, you can use names or species IDs");
+        readme.put("hostileSpecies", "a set of species the unit considers friendly, you can use names or species IDs");
+        String statesText = "the unit's initial state, available states are: ";
+        for (State state : State.values()) {
+            if (state != State.DEAD) {
+                statesText += state.toString() + " ";
+            }
+        }
+        readme.put("initialState", statesText);
+
+        JSONObject selectorsReadme = new JSONObject();
+        selectorsReadme.put("__help", "rules for HP reduction and reproduction based on how many friendly or hostile units are adjacent");
+        selectorsReadme.put("ruleClassName", "rule's class name, derived from com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface");
+        selectorsReadme.put("args", "constructor arguments for rule class");
+        readme.put("friendlyCountSelector, hostileCountSelector, reproductionSelector", selectorsReadme);
+
+        readme.put("color", "the species' color for pixel rendering");
+
+        root.put("README", readme);
+
+        JSONArray speciesArray = new JSONArray();
+        speciesArray.put(SpeciesData.lifeSpecies.toJSONObject());
+        root.put("speciesData", speciesArray);
+
+        PrintStream stream = new PrintStream(outFile);
+        stream.print(root.toString(4));
+    }
+
     public static void setCustomSpeciesConfigPath(String filename) throws Exception {
         if (customSpeciesConfigPath != null) {
             throw new Exception("Custom species config path was already set!");
         }
-
-        Path path = Paths.get(filename);
-        File file = path.toFile();
-        if (file.exists() && file.canRead() && file.isFile()) {
+        try {
+            Path path = Paths.get(filename);
+            File file = path.toFile();
             customSpeciesConfigPath = filename;
-        } else {
-            throw new InvalidPathException(filename, "Could not read from file.");
+            if (!file.exists()) {
+                System.out.println("Attempting to create an example species configuration template.");
+                file.createNewFile();
+                generateTemplateSpeciesConfig(file);
+            } else if (!file.canRead()) {
+                customSpeciesConfigPath = null;
+            }
+        } catch (Exception e) {
+            System.err.println("Could not read custom species config.");
+            customSpeciesConfigPath = null;
         }
     }
 

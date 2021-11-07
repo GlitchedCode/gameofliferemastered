@@ -5,6 +5,8 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.rule;
 
+import org.json.JSONObject;
+
 /**
  *
  * @author glitchedcode
@@ -14,5 +16,5 @@ public interface RuleInterface<T> {
 
     public boolean test(T value);
     
-    public String getConstructionArgs();
+    public JSONObject toJSONObject();
 }

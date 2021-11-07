@@ -6,6 +6,7 @@
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.rule;
 
 import java.io.Serializable;
+import org.json.JSONObject;
 
 /**
  *
@@ -29,7 +30,7 @@ public class StubRule<T> implements RuleInterface<T>, Serializable {
     }
     
     @Override
-    public String getConstructionArgs(){
-        return Boolean.toString(value);
+    public JSONObject toJSONObject(){
+        return null;
     }
 }

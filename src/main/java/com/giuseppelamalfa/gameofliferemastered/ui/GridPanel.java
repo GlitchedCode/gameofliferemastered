@@ -468,7 +468,7 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
                 + "-g <filename.grid> : input grid filename\n"
                 + "-d <rowCount> <columnCount>: grid row and column count (default: auto)\n"
                 + "-n <turns>: how many turns the simulation should run (default: 40)\n"
-                + "-o <filename.gif>: output GIF filename (default: grid_animation.gif)\n"
+                + "-o <filename.gif>: output directory (default: anim_out)\n"
                 + "-S <filename.json>: set species.json file to read species from (default: read from jar)\n"
                 + "-h: print this message and quit."
         );
@@ -486,7 +486,7 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
         int cols = 0;
         int turns = 40;
         File gridInput = null;
-        String animOutput = "test.gif";
+        String animOutput = "anim_out";
         boolean usage = true;
 
         // Read command line arguments
@@ -530,19 +530,6 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
                 break;
                 case "-o":
                     animOutput = args[++i];
-                    try {
-                        File tmp = new File(animOutput);
-                        if (!tmp.canWrite()) {
-                            animOutput = null;
-                        }
-                        tmp.delete();
-                    } catch (Exception e) {
-                        animOutput = null;
-                    } finally {
-                        if (animOutput == null) {
-                            System.out.println("Error opening " + animOutput + ", defaulting to 'grid_animation.gif'.");
-                        }
-                    }
                     break;
                 case "-S":
                     SpeciesLoader.setCustomSpeciesConfigPath(args[++i]);
@@ -583,7 +570,7 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
         graphics.setColor(Color.black);
         graphics.fillRect(0, 0, size.width, size.height);
 
-        Path tmpPath = Paths.get("tmp").toAbsolutePath();
+        Path tmpPath = Paths.get(animOutput).toAbsolutePath();
         File tmpDir = tmpPath.toFile();
         tmpDir.mkdir();
         //tmpDir.deleteOnExit();
