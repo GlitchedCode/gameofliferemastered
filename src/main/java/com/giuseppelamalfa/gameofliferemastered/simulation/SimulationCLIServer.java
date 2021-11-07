@@ -101,7 +101,7 @@ public class SimulationCLIServer extends SimulationInterface {
 
     public static void printUsage() {
         System.out.println(
-                "usage: java -jar liferemastered-headless.jar <args>\n"
+                "usage: java -jar liferemastered-headless.jar [args]\n"
                 + "-m <sandbox|competitive>: sets the game mode (default: sandbox)\n"
                 + "-r <rowCount>: grid row count (default: 50)\n"
                 + "-c <columnCount>: grid column count (default: 70)\n"
@@ -109,7 +109,11 @@ public class SimulationCLIServer extends SimulationInterface {
                 + "-P <maxPlayers>: set max player count (default: 4, max: 8)\n"
                 + "-h: print this message and quit."
         );
-        System.exit(-1);
+    }
+
+    public static void printUsage(int returnCode) {
+        printUsage();
+        System.exit(returnCode);
     }
 
     public static GameMode getSimulationMode(String modeString) {
@@ -165,11 +169,15 @@ public class SimulationCLIServer extends SimulationInterface {
             server = new SimulationCLIServer(port, playerCount, rows, cols, mode);
         } catch (Exception e) {
             System.err.println(e);
-            printUsage();
+            printUsage(-1);
             server = null;
-        }
-        if (server == null | usage) {
-            printUsage();
+        } finally {
+            if (usage) {
+                printUsage(0);
+            }
+            if (server == null) {
+                printUsage(-1);
+            }
         }
 
         System.out.println("To show help, pass -h as argument.");
@@ -197,11 +205,14 @@ public class SimulationCLIServer extends SimulationInterface {
         initializeRemoteServer(portNumber, playerCount, rowCount, columnCount);
     }
 
-    protected SimulationCLIServer(int rowCount, int columnCount) throws Exception {
+    public SimulationCLIServer(int rowCount, int columnCount) throws Exception {
         mode = GameMode.SANDBOX;
         speciesLoader.loadSpeciesFromLocalJSON();
         currentGrid = new Grid(rowCount, columnCount);
         currentGrid.setSimulation(this);
+        PlayerData player = new PlayerData();
+        player.ID = 0;
+        currentGrid.addPlayer(player);
         for (PlayerData.TeamColor color : PlayerData.TeamColor.values()) {
             if (color != PlayerData.TeamColor.NONE) {
                 availableColors.add(color);
@@ -593,12 +604,17 @@ public class SimulationCLIServer extends SimulationInterface {
     }
 
     @Override
-    public void loadGrid(File file) throws Exception {
-        currentGrid.readBoardFromFile(file, speciesLoader);
+    public void readGrid(File file, boolean resize) throws Exception {
+        currentGrid.readBoardFromFile(file, speciesLoader, resize);
     }
 
     @Override
-    public void saveGrid() throws Exception {
+    public final void readGrid(File file) throws Exception {
+        readGrid(file, false);
+    }
+
+    @Override
+    public void writeGrid() throws Exception {
         LocalDateTime now = LocalDateTime.now();
         String isoFormat = DateTimeFormatter.ISO_INSTANT.format(now.toInstant(ZoneOffset.UTC));
         currentGrid.writeBoardToFile("grid-" + isoFormat);
@@ -615,6 +631,7 @@ public class SimulationCLIServer extends SimulationInterface {
         } catch (Exception e) {
         }
         try {
+
             serverSocket.close();
         } catch (Exception e) {
         }

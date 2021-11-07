@@ -86,7 +86,7 @@ public class PixelGridRenderer implements GridRenderer {
                 int ypos = r * (lineSpacing) - yoffset + 1;
 
                 Unit unit = simulation.getUnit(row, col);
-                if (unit == null) {
+                if (!unit.isAlive()) {
                     continue;
                 }
 

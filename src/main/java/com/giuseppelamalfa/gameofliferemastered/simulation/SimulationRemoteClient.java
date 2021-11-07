@@ -326,12 +326,15 @@ public class SimulationRemoteClient extends SimulationInterface {
     }
     
     @Override
-    public void loadGrid(File file) throws Exception {
-        currentGrid.readBoardFromFile(file, speciesLoader);
+    public final void readGrid(File file) throws Exception {
+    }
+    
+    @Override
+    public final void readGrid(File file, boolean r) throws Exception {
     }
 
     @Override
-    public void saveGrid() throws Exception{
+    public final void writeGrid() throws Exception{
         LocalDateTime now = LocalDateTime.now();
         String isoFormat = DateTimeFormatter.ISO_INSTANT.format(now.toInstant(ZoneOffset.UTC));
         currentGrid.writeBoardToFile("grid-"+isoFormat);

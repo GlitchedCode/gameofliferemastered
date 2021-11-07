@@ -7,6 +7,7 @@ package com.giuseppelamalfa.gameofliferemastered.ui;
 
 import com.giuseppelamalfa.gameofliferemastered.ui.renderers.TextureGridRenderer;
 import com.giuseppelamalfa.gameofliferemastered.ApplicationFrame;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
 import com.giuseppelamalfa.gameofliferemastered.utils.ImageManager;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -25,6 +26,7 @@ import com.giuseppelamalfa.gameofliferemastered.utils.TimerWrapper;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
+import com.giuseppelamalfa.gameofliferemastered.simulation.SimulationCLIServer;
 import com.giuseppelamalfa.gameofliferemastered.ui.renderers.GridRenderer;
 import com.giuseppelamalfa.gameofliferemastered.ui.renderers.PixelGridRenderer;
 import java.awt.Color;
@@ -34,11 +36,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 /**
  *
@@ -202,7 +208,7 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
                 break;
             case KeyEvent.VK_HOME: {
                 try {
-                    simulation.saveGrid();
+                    simulation.writeGrid();
                 } catch (Exception ex) {
                     Logger.getLogger(GridPanel.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -212,7 +218,7 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
                 try {
                     JFileChooser fileChooser = new JFileChooser();
                     if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                        simulation.loadGrid(fileChooser.getSelectedFile());
+                        simulation.readGrid(fileChooser.getSelectedFile());
                     }
                 } catch (Exception ex) {
                     Logger.getLogger(GridPanel.class.getName()).log(Level.SEVERE, null, ex);
@@ -351,17 +357,19 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
         super.repaint();
     }
 
-    public void saveScreenshot(File file) {
+    public Thread saveScreenshot(File file) {
         BufferedImage img = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
         paint(img.getGraphics());
-        new Thread(() -> {
+        Thread ret = new Thread(() -> {
             try {
                 ImageIO.write(img, "gif", file);
             } catch (IOException ex) {
                 Logger.getLogger(GridPanel.class.getName()).log(Level.SEVERE, null, ex);
             }
 
-        }).start();
+        });
+        ret.start();
+        return ret;
     }
 
     @Override
@@ -413,7 +421,7 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
         return gameStatusPanel;
     }
 
-    public void init(UnitPalette palette) {
+    public void swingInit(UnitPalette palette) {
         if (initialized) {
             return;
         }
@@ -454,5 +462,191 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
         }, 0, ApplicationFrame.BOARD_UPDATE_MS);
 
         ToolTipManager.sharedInstance().setInitialDelay(TOOLTIP_INITIAL_DELAY_MS);
+    }
+
+    public static void printUsage() {
+        System.out.println(
+                "usage: java -jar liferemastered-gridanim.jar -g <filename.grid> [args]\n"
+                + "-g <filename.grid> : input grid filename\n"
+                + "-d <rowCount> <columnCount>: grid row and column count (default: auto)\n"
+                + "-n <turns>: how many turns the simulation should run (default: 40)\n"
+                + "-o <filename.gif>: output GIF filename (default: grid_animation.gif)\n"
+                + "-h: print this message and quit."
+        );
+    }
+
+    public static void printUsage(int returnCode) {
+        printUsage();
+        System.exit(returnCode);
+    }
+
+    public static void main(String args[]) throws Exception {
+        // defaults
+        boolean auto_size = true;
+        int rows = 0;
+        int cols = 0;
+        int turns = 40;
+        File gridInput = null;
+        String animOutput = "test.gif";
+        boolean usage = true;
+
+        // Read command line arguments
+        for (int i = 0; i < args.length; i++) {
+            String currentArg = args[i];
+            switch (currentArg) {
+                case "-g":
+                    String inPath = args[++i];
+                    try {
+                        gridInput = new File(inPath);
+                        if (!gridInput.canRead()) {
+                            System.out.println("Error opening " + inPath);
+                            System.exit(-1);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    usage = false;
+                    break;
+                case "-d": try {
+                    rows = Integer.decode(args[++i]);
+                    cols = Integer.decode(args[++i]);
+
+                    if (rows < 1 | cols < 1) {
+                        throw new Exception();
+                    }
+
+                    auto_size = false;
+                } catch (Exception e) {
+                    System.out.println("Error parsing grid size, defaulting to auto.");
+                    auto_size = true;
+                }
+                break;
+                case "-n": try {
+                    turns = Integer.decode(args[++i]);
+                    turns = Integer.max(turns, 1);
+                } catch (Exception e) {
+                    System.out.println("Error parsing turn count, defaulting to 40.");
+                    turns = 40;
+                }
+                break;
+                case "-o":
+                    animOutput = args[++i];
+                    try {
+                        File tmp = new File(animOutput);
+                        if (!tmp.canWrite()) {
+                            animOutput = null;
+                        }
+                        tmp.delete();
+                    } catch (Exception e) {
+                        animOutput = null;
+                    } finally {
+                        if (animOutput == null) {
+                            System.out.println("Error opening " + animOutput + ", defaulting to 'grid_animation.gif'.");
+                        }
+                    }
+                    break;
+                case "-h":
+                    usage = true;
+                    break;
+            }
+        }
+
+        if (usage) {
+            printUsage(-1);
+        }
+
+        if (auto_size) {
+            rows = 1;
+            cols = 1;
+        }
+        final SimulationCLIServer simulation = new SimulationCLIServer(rows, cols);
+
+        simulation.readGrid(gridInput, auto_size);
+
+        GridPanel panel = new GridPanel();
+        panel.setVisible(true);
+
+        Dimension size = new Dimension(simulation.getRowCount(), simulation.getColumnCount());
+        panel.setSideLengthPower(0);
+        panel.setBackground(Color.black);
+        panel.setSize(size);
+        panel.setMinimumSize(size);
+        panel.setMaximumSize(size);
+        panel.setPreferredSize(size);
+        panel.validate();
+        panel.setSimulation(simulation);
+
+        BufferedImage img = new BufferedImage(panel.getWidth(), panel.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        Graphics graphics = img.getGraphics();
+        graphics.setColor(Color.black);
+        graphics.fillRect(0, 0, size.width, size.height);
+
+        Path tmpPath = Paths.get("tmp").toAbsolutePath();
+        File tmpDir = tmpPath.toFile();
+        tmpDir.mkdir();
+        //tmpDir.deleteOnExit();
+
+        Path palettePath = tmpPath.resolve("palette.txt");
+        File paletteFile;
+        try {
+            paletteFile = Files.createFile(palettePath).toFile();
+            //paletteFile.deleteOnExit();
+            simulation.getSpeciesLoader().writePalette(new FileOutputStream(paletteFile));
+        } catch (IOException ex) {
+            Logger.getLogger(GridPanel.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        ArrayList<Thread> threads = new ArrayList<>();
+
+        do {
+            try {
+                File screenshot;
+                screenshot = Files.createFile(tmpPath.resolve(Integer.toString(simulation.getCurrentTurn()) + ".gif")).toFile();
+                //screenshot.deleteOnExit();
+
+                panel.paintComponent(graphics);
+                try {
+                    ImageIO.write(img, "gif", screenshot);
+                } catch (IOException ex) {
+                    Logger.getLogger(GridPanel.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(GridPanel.class.getName()).log(Level.SEVERE, null, ex);
+
+            }
+
+            try {
+                simulation.computeNextTurn();
+            } catch (Exception ex) {
+                Logger.getLogger(GridPanel.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } while (simulation.getCurrentTurn() < turns);
+
+        threads.forEach(thread -> {
+            try {
+                thread.join();
+            } catch (InterruptedException ex) {
+                Logger.getLogger(GridPanel.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+
+        String pyargs[] = {
+            "python",
+            "gif_generator.py",
+            tmpPath.toString(),
+            animOutput
+        };
+
+        for (String arg : pyargs) {
+            System.out.println(arg);
+        }
+        /*
+        try {
+            Runtime.getRuntime().exec(pyargs);
+        } catch (IOException ex) {
+            Logger.getLogger(GridPanel.class.getName()).log(Level.SEVERE, null, ex);
+        }
+         */
+        System.exit(0);
     }
 }

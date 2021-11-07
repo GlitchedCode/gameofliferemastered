@@ -454,13 +454,13 @@ public class SimulationCLIServerTest {
     }
 
     /**
-     * Test of saveGrid method, of class SimulationCLIServer.
+     * Test of writeGrid method, of class SimulationCLIServer.
      */
     @Test
     public void testSaveGrid() throws Exception {
         System.out.println("saveGrid");
         SimulationCLIServer instance = null;
-        instance.saveGrid();
+        instance.writeGrid();
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
