@@ -107,6 +107,7 @@ public class SimulationCLIServer extends SimulationInterface {
                 + "-c <columnCount>: grid column count (default: 70)\n"
                 + "-p <portNumber>: set port number for server socket (default: 7777)\n"
                 + "-P <maxPlayers>: set max player count (default: 4, max: 8)\n"
+                + "-S <filename.json>: set species.json file to read species from (default: read from jar)\n"
                 + "-h: print this message and quit."
         );
     }
@@ -160,6 +161,9 @@ public class SimulationCLIServer extends SimulationInterface {
                     case "-P":
                         playerCount = Integer.decode(args[++i]);
                         break;
+                    case "-S":
+                        SpeciesLoader.setCustomSpeciesConfigPath(args[++i]);
+                        break;
                     case "-h":
                         usage = true;
                         break;
@@ -201,13 +205,13 @@ public class SimulationCLIServer extends SimulationInterface {
     public SimulationCLIServer(int portNumber, int playerCount,
             int rowCount, int columnCount, GameMode mode) throws Exception {
         this.mode = mode;
-        speciesLoader.loadSpeciesFromLocalJSON();
+        speciesLoader.loadSpecies();
         initializeRemoteServer(portNumber, playerCount, rowCount, columnCount);
     }
 
     public SimulationCLIServer(int rowCount, int columnCount) throws Exception {
         mode = GameMode.SANDBOX;
-        speciesLoader.loadSpeciesFromLocalJSON();
+        speciesLoader.loadSpecies();
         currentGrid = new Grid(rowCount, columnCount);
         currentGrid.setSimulation(this);
         PlayerData player = new PlayerData();

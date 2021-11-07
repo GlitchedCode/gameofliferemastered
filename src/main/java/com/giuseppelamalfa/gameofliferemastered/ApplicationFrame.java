@@ -11,7 +11,9 @@ import com.giuseppelamalfa.gameofliferemastered.simulation.SimulationInterface;
 import com.giuseppelamalfa.gameofliferemastered.utils.ImageManager;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.*;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.GameMode;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
 import com.giuseppelamalfa.gameofliferemastered.simulation.DisconnectEventListener;
+import static com.giuseppelamalfa.gameofliferemastered.simulation.SimulationCLIServer.getSimulationMode;
 import com.giuseppelamalfa.gameofliferemastered.utils.DeferredImageManager;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -619,7 +621,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener,
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
+    public static void main(String args[]) throws Exception {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
@@ -637,6 +639,15 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener,
         }
         //</editor-fold>
         //</editor-fold>
+
+        for (int i = 0; i < args.length; i++) {
+            String currentArg = args[i];
+            switch (currentArg) {
+                case "-S":
+                    SpeciesLoader.setCustomSpeciesConfigPath(args[++i]);
+                    break;
+            }
+        }
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(() -> {

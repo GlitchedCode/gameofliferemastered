@@ -8,12 +8,17 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 import java.awt.Color;
 import java.awt.image.BufferedImageOp;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Set;
 import org.json.JSONArray;
@@ -28,9 +33,40 @@ public class SpeciesLoader {
     static public final String RULE_CLASS_PATH = "com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.";
     static public final String UNIT_CLASS_PATH = "com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.";
 
+    static private String customSpeciesConfigPath = null;
+
     String loadedJSON = "";
 
     HashMap<Integer, SpeciesData> speciesData = new HashMap<>();
+
+    public static void setCustomSpeciesConfigPath(String filename) throws Exception {
+        if (customSpeciesConfigPath != null) {
+            throw new Exception("Custom species config path was already set!");
+        }
+
+        Path path = Paths.get(filename);
+        File file = path.toFile();
+        if (file.exists() && file.canRead() && file.isFile()) {
+            customSpeciesConfigPath = filename;
+        } else {
+            throw new InvalidPathException(filename, "Could not read from file.");
+        }
+    }
+
+    public synchronized void loadSpeciesFromCustomConfig() throws Exception {
+        if (customSpeciesConfigPath == null) {
+            throw new Exception("Custom species config path was not set!");
+        }
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(new File(customSpeciesConfigPath))));
+        StringBuilder builder = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            builder.append(line);
+        }
+        loadedJSON = builder.toString();
+        loadJSONString(loadedJSON);
+    }
 
     public synchronized void loadSpeciesFromLocalJSON(String path)
             throws IOException, ClassNotFoundException, InstantiationException,
@@ -51,6 +87,14 @@ public class SpeciesLoader {
 
     public synchronized void loadSpeciesFromLocalJSON() throws Exception {
         loadSpeciesFromLocalJSON("species.json");
+    }
+
+    public synchronized void loadSpecies() throws Exception {
+        if (customSpeciesConfigPath != null) {
+            loadSpeciesFromCustomConfig();
+        } else {
+            loadSpeciesFromLocalJSON();
+        }
     }
 
     public synchronized void loadJSONString(String jsonString) throws Exception {
@@ -99,7 +143,7 @@ public class SpeciesLoader {
             return null;
         }
     }
-    
+
     public synchronized String getSpeciesTextureCode(int index) {
         SpeciesData data = getSpeciesData(index);
         if (data != null) {
@@ -108,7 +152,7 @@ public class SpeciesLoader {
             return null;
         }
     }
-    
+
     public synchronized Color getSpeciesColor(int index) {
         SpeciesData data = getSpeciesData(index);
         if (data != null) {
@@ -116,9 +160,9 @@ public class SpeciesLoader {
         } else {
             return null;
         }
- 
+
     }
-    
+
     public synchronized Set<Integer> getSpeciesIDs() {
         return speciesData.keySet();
     }
@@ -138,10 +182,10 @@ public class SpeciesLoader {
 
     public void writePalette(OutputStream stream) {
         PrintStream output = new PrintStream(stream);
-        
+
         output.println("0,0,0");
         getSpeciesIDs().stream().map(id -> getSpeciesColor(id)).forEachOrdered(c -> {
             output.printf("%d,%d,%d\n", c.getRed(), c.getGreen(), c.getBlue());
-        });        
+        });
     }
 }

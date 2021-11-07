@@ -7,7 +7,7 @@ package com.giuseppelamalfa.gameofliferemastered.ui;
 
 import com.giuseppelamalfa.gameofliferemastered.ui.renderers.TextureGridRenderer;
 import com.giuseppelamalfa.gameofliferemastered.ApplicationFrame;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.PlayerData;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
 import com.giuseppelamalfa.gameofliferemastered.utils.ImageManager;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -43,8 +43,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
 
 /**
  *
@@ -471,6 +469,7 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
                 + "-d <rowCount> <columnCount>: grid row and column count (default: auto)\n"
                 + "-n <turns>: how many turns the simulation should run (default: 40)\n"
                 + "-o <filename.gif>: output GIF filename (default: grid_animation.gif)\n"
+                + "-S <filename.json>: set species.json file to read species from (default: read from jar)\n"
                 + "-h: print this message and quit."
         );
     }
@@ -544,6 +543,9 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
                             System.out.println("Error opening " + animOutput + ", defaulting to 'grid_animation.gif'.");
                         }
                     }
+                    break;
+                case "-S":
+                    SpeciesLoader.setCustomSpeciesConfigPath(args[++i]);
                     break;
                 case "-h":
                     usage = true;
@@ -630,23 +632,7 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
             }
         });
 
-        String pyargs[] = {
-            "python",
-            "gif_generator.py",
-            tmpPath.toString(),
-            animOutput
-        };
-
-        for (String arg : pyargs) {
-            System.out.println(arg);
-        }
-        /*
-        try {
-            Runtime.getRuntime().exec(pyargs);
-        } catch (IOException ex) {
-            Logger.getLogger(GridPanel.class.getName()).log(Level.SEVERE, null, ex);
-        }
-         */
+        
         System.exit(0);
     }
 }

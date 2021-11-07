@@ -27,8 +27,8 @@ compileTestJava {
 
 ext.headlessExcludes = [
     'com/giuseppelamalfa/gameofliferemastered/ui/**',
-    'com/giuseppelamalfa/gameofliferemastered/gamelogic/simulation/SimulationRemoteClient**',
-    'com/giuseppelamalfa/gameofliferemastered/gamelogic/simulation/SimulationServer**',
+    'com/giuseppelamalfa/gameofliferemastered/simulation/SimulationRemoteClient**',
+    'com/giuseppelamalfa/gameofliferemastered/simulation/SimulationGUIServer**',
     'Tiles/**',
     'tiles.json',
     //'com/giuseppelamalfa/gameofliferemastered/test/**',
@@ -52,7 +52,7 @@ tasks.withType(Jar) {
 
 task headless(type: Jar) {
     manifest {
-        attributes 'Main-Class': 'com.giuseppelamalfa.gameofliferemastered.gamelogic.simulation.SimulationCLIServer'
+        attributes 'Main-Class': 'com.giuseppelamalfa.gameofliferemastered.simulation.SimulationCLIServer'
     }
     archiveBaseName = "liferemastered_server"
     exclude project.ext.headlessExcludes

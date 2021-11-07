@@ -227,9 +227,9 @@ public class UnitPalette extends JPanel implements MouseListener {
 
         g2.setStroke(new BasicStroke(1));
 
-        for (int index : speciesLoader.getSpeciesIDs()) {
-            PaletteItem item = items.get(index);
-            offset = index * (1 + ICON_SIDE_LENGTH);
+        int count = 0;
+        for (PaletteItem item : items) {
+            offset = count * (1 + ICON_SIDE_LENGTH);
             // icon
             AffineTransform xform = new AffineTransform();
             xform.translate(offset, 1);
@@ -239,7 +239,7 @@ public class UnitPalette extends JPanel implements MouseListener {
 
             g2.setColor(getForeground());
             g2.setFont(new Font("SansSerif", Font.PLAIN, 12));
-            offset = index * (1 + ICON_SIDE_LENGTH);
+            offset = count * (1 + ICON_SIDE_LENGTH);
 
             // count
             if ( item.count >= 0 ) {
@@ -251,6 +251,8 @@ public class UnitPalette extends JPanel implements MouseListener {
                 g2.setColor(INACTIVE_OVERLAY_COLOR);
                 g2.fillRect(offset, 1, offset, size.height - 1);
             }
+            
+            count++;
         }
     }
 
