@@ -66,7 +66,7 @@ public class Grid implements Serializable, Cloneable {
     private int syncTurnCount = 40;
 
     protected static final DeadUnit deadUnit = new DeadUnit();
-    private transient ExecutorService executor = Executors.newFixedThreadPool(PROCESSOR_COUNT * 2);
+    private transient ExecutorService executor = Executors.newWorkStealingPool(PROCESSOR_COUNT);
 
     protected boolean isRunning = false;
     protected boolean isLocked = false;

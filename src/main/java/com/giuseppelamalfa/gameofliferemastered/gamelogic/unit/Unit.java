@@ -7,6 +7,7 @@ package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.GameLogicException;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
+import com.giuseppelamalfa.gameofliferemastered.ui.colors.ColorProvider;
 import java.awt.Color;
 import java.io.Serializable;
 import java.util.Set;
@@ -62,7 +63,7 @@ public abstract class Unit implements Serializable, Cloneable {
     public abstract int getSpeciesID();
 
     // Restituisce il colore dell'unità.
-    public abstract Color getColor();
+    public abstract ColorProvider getColor();
     
     // Restituisce l'ID della specie a cui l'unità può dare vita durante la fase
     // di riproduzione.

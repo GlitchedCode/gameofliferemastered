@@ -5,6 +5,7 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.ui.renderers;
 
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
 import com.giuseppelamalfa.gameofliferemastered.simulation.SimulationInterface;
 import com.giuseppelamalfa.gameofliferemastered.ui.GridPanel;
@@ -42,7 +43,7 @@ public class PixelGridRenderer implements GridRenderer {
     }
 
     @Override
-    public void render(Graphics g, GridPanel panel, Point screenOrigin) {
+    public void render(Graphics g, GridPanel panel, Point screenOrigin, double delta) {
         Graphics2D g2 = (Graphics2D) g;
         Dimension size = panel.getSize();
         g2.setColor(bg);
@@ -73,7 +74,8 @@ public class PixelGridRenderer implements GridRenderer {
         int drawnRows = endRow - startRow;
         int drawnColumns = endColumn - startColumn;
 
-        g2.setStroke(new BasicStroke(2));
+        SpeciesLoader loader = simulation.getSpeciesLoader();
+        loader.updateColors(delta);
 
         for (int r = 0; r < drawnRows; r++) // rows
         {
@@ -90,7 +92,7 @@ public class PixelGridRenderer implements GridRenderer {
                     continue;
                 }
 
-                g.setColor(unit.getColor());
+                g.setColor(unit.getColor().currentColor());
                 g.fillRect(xpos, ypos, lineSpacing, lineSpacing);
             }
         }

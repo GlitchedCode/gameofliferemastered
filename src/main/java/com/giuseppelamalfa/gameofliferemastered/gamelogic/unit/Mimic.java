@@ -6,6 +6,7 @@
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
+import com.giuseppelamalfa.gameofliferemastered.ui.colors.ColorProvider;
 import java.awt.Color;
 import java.util.Objects;
 import java.util.Set;
@@ -24,7 +25,7 @@ public class Mimic extends LifeUnit {
     private boolean replicated = false;
 
     private int replicatedID;
-    private Color replicatedColor;
+    private ColorProvider replicatedColor;
     private Set<Integer> replicatedFriendlySpecies;
     private Set<Integer> replicatedHostileSpecies;
 
@@ -103,9 +104,7 @@ public class Mimic extends LifeUnit {
         SpeciesData otherData = unit.getSpeciesData();
 
         replicatedID = otherData.speciesID;
-        replicatedColor = new Color(
-                otherData.color.getRGB() ^ speciesData.color.getRGB()
-        );
+        replicatedColor = otherData.color;
         replicatedFriendlySpecies = unit.getFriendlySpecies();
         replicatedHostileSpecies = unit.getHostileSpecies();
         replicatedFriendlyCountSelector = unit.getFriendlyCountSelector();
@@ -119,7 +118,7 @@ public class Mimic extends LifeUnit {
     }
 
     @Override
-    public Color getColor() {
+    public ColorProvider getColor() {
         if (!replicated) {
             return speciesData.color;
         }

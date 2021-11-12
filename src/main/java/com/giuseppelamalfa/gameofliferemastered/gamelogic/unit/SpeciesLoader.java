@@ -5,24 +5,24 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.gamelogic.unit;
 
-import java.awt.Color;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.Grid;
+import com.giuseppelamalfa.gameofliferemastered.ui.colors.ColorProvider;
 import java.awt.image.BufferedImageOp;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -34,12 +34,11 @@ public class SpeciesLoader {
 
     static public final String RULE_CLASS_PATH = "com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.";
     static public final String UNIT_CLASS_PATH = "com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.";
-
     static private String customSpeciesConfigPath = null;
 
     String loadedJSON = "";
 
-    HashMap<Integer, SpeciesData> speciesData = new HashMap<>();
+    ConcurrentHashMap<Integer, SpeciesData> speciesData = new ConcurrentHashMap<Integer, SpeciesData>(32, 0.9f, Grid.PROCESSOR_COUNT);
 
     public static void generateTemplateSpeciesConfig(File outFile) throws FileNotFoundException {
         JSONObject root = new JSONObject();
@@ -104,7 +103,7 @@ public class SpeciesLoader {
         }
     }
 
-    public synchronized void loadSpeciesFromCustomConfig() throws Exception {
+    public void loadSpeciesFromCustomConfig() throws Exception {
         if (customSpeciesConfigPath == null) {
             throw new Exception("Custom species config path was not set!");
         }
@@ -119,7 +118,7 @@ public class SpeciesLoader {
         loadJSONString(loadedJSON);
     }
 
-    public synchronized void loadSpeciesFromLocalJSON(String path)
+    public void loadSpeciesFromLocalJSON(String path)
             throws IOException, ClassNotFoundException, InstantiationException,
             IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, Exception {
 
@@ -136,11 +135,11 @@ public class SpeciesLoader {
         loadJSONString(loadedJSON);
     }
 
-    public synchronized void loadSpeciesFromLocalJSON() throws Exception {
+    public void loadSpeciesFromLocalJSON() throws Exception {
         loadSpeciesFromLocalJSON("species.json");
     }
 
-    public synchronized void loadSpecies() throws Exception {
+    public void loadSpecies() throws Exception {
         if (customSpeciesConfigPath != null) {
             loadSpeciesFromCustomConfig();
         } else {
@@ -148,9 +147,9 @@ public class SpeciesLoader {
         }
     }
 
-    public synchronized void loadJSONString(String jsonString) throws Exception {
+    public void loadJSONString(String jsonString) throws Exception {
 
-        speciesData = new HashMap<>();
+        speciesData = new ConcurrentHashMap<>(32, 0.75f, Grid.PROCESSOR_COUNT);
         HashMap<String, Integer> speciesIDs = new HashMap<>();
         JSONArray unitDataArray = new JSONObject(jsonString).getJSONArray("speciesData");
 
@@ -182,11 +181,11 @@ public class SpeciesLoader {
         return loadedJSON;
     }
 
-    public synchronized SpeciesData getSpeciesData(int index) {
+    public SpeciesData getSpeciesData(int index) {
         return speciesData.get(index);
     }
 
-    public synchronized BufferedImageOp getSpeciesFilter(int index) {
+    public BufferedImageOp getSpeciesFilter(int index) {
         SpeciesData data = getSpeciesData(index);
         if (data != null) {
             return data.filter;
@@ -195,7 +194,7 @@ public class SpeciesLoader {
         }
     }
 
-    public synchronized String getSpeciesTextureCode(int index) {
+    public String getSpeciesTextureCode(int index) {
         SpeciesData data = getSpeciesData(index);
         if (data != null) {
             return data.textureCode;
@@ -204,7 +203,7 @@ public class SpeciesLoader {
         }
     }
 
-    public synchronized Color getSpeciesColor(int index) {
+    public ColorProvider getSpeciesColor(int index) {
         SpeciesData data = getSpeciesData(index);
         if (data != null) {
             return data.color;
@@ -213,8 +212,14 @@ public class SpeciesLoader {
         }
 
     }
+    
+    public void updateColors(double delta) {
+        for (SpeciesData species : speciesData.values()){
+            species.color.update(delta);
+        }
+    }
 
-    public synchronized Set<Integer> getSpeciesIDs() {
+    public Set<Integer> getSpeciesIDs() {
         return speciesData.keySet();
     }
 
@@ -235,7 +240,7 @@ public class SpeciesLoader {
         PrintStream output = new PrintStream(stream);
 
         output.println("0,0,0");
-        getSpeciesIDs().stream().map(id -> getSpeciesColor(id)).forEachOrdered(c -> {
+        getSpeciesIDs().stream().map(id -> getSpeciesColor(id).mainColor()).forEachOrdered(c -> {
             output.printf("%d,%d,%d\n", c.getRed(), c.getGreen(), c.getBlue());
         });
     }

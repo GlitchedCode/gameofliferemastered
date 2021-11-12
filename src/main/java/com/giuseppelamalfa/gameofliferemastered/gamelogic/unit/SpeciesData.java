@@ -9,6 +9,8 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.IntegerRangeRule;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.IntegerSetRule;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.StubRule;
+import com.giuseppelamalfa.gameofliferemastered.ui.colors.ColorProvider;
+import com.giuseppelamalfa.gameofliferemastered.ui.colors.FlatColorProvider;
 import com.giuseppelamalfa.gameofliferemastered.utils.ColorTintFilter;
 import java.awt.Color;
 import java.awt.image.BufferedImageOp;
@@ -32,7 +34,6 @@ public class SpeciesData implements Serializable {
 
     public final int speciesID;
     public final String name;
-    public final Color color;
     public final String textureCode;
     public final State initialState;
     public final Integer health;
@@ -46,12 +47,13 @@ public class SpeciesData implements Serializable {
     // BE ACCESSED FROM SPECIESLOADER!
     protected final transient Constructor<?> constructor;
     protected final transient BufferedImageOp filter;
+    protected final transient ColorProvider color;
 
-    public static final SpeciesData lifeSpecies = new SpeciesData(0, "Life", 0xa07d2b, "cell", State.ALIVE, 1,
+    public static final SpeciesData lifeSpecies = new SpeciesData(0, "Life", new FlatColorProvider(new Color(0xa07d2b)), "cell", State.ALIVE, 1,
             new HashSet<Integer>(Arrays.asList(new Integer[]{0})),
             new HashSet<Integer>(),
             new IntegerRangeRule(2, 3), new StubRule<Integer>(true), new IntegerSetRule(Arrays.asList(new Integer[]{3})),
-            "LifeUnit", 0);
+            LifeUnit.class, 0);
 
     private HashSet<Integer> getSpeciesFromJSONArray(JSONArray array, HashMap<String, Integer> speciesIDs) {
         HashSet<Integer> ret = new HashSet<>();
@@ -76,22 +78,22 @@ public class SpeciesData implements Serializable {
     public SpeciesData(
             int speciesID,
             String name,
-            int color,
+            ColorProvider color,
             String textureCode,
             State initialState,
-            Integer health,
+            int health,
             Set<Integer> friendlySpecies,
             Set<Integer> hostileSpecies,
             RuleInterface<Integer> friendlyCountSelector,
             RuleInterface<Integer> hostileCountSelector,
             RuleInterface<Integer> reproductionSelector,
-            String implementingTypeName,
+            Class<?> clazz,
             int filterColor
     ) {
 
         this.speciesID = Math.max(speciesID, 0);
         this.name = name;
-        this.color = new Color(color);
+        this.color = color;
         this.textureCode = textureCode;
         this.initialState = initialState;
         this.health = health;
@@ -109,9 +111,7 @@ public class SpeciesData implements Serializable {
         
         Constructor<?> _con;
         try {
-            Class<?> implementingClass;
-            implementingClass = Class.forName(SpeciesLoader.UNIT_CLASS_PATH + implementingTypeName);
-            _con = implementingClass.getConstructor(SpeciesData.class, Integer.class);
+            _con = clazz.getConstructor(SpeciesData.class, Integer.class);
         } catch (Exception ex) {
             ex.printStackTrace();
             _con = null;
@@ -126,7 +126,7 @@ public class SpeciesData implements Serializable {
         ret.put("implementingType", constructor.getDeclaringClass().getSimpleName());
         ret.put("id", speciesID);
         ret.put("textureCode", textureCode);
-        ret.put("color", Integer.toUnsignedString(color.getRGB()));
+        ret.put("color", color.toJSONObject());
         ret.put("filterColor", Integer.toUnsignedString(((ColorTintFilter) filter).mixColor.getRGB()));
         ret.put("health", health);
         ret.put("initialState", initialState.toString());
@@ -172,11 +172,12 @@ public class SpeciesData implements Serializable {
         initialState = State.valueOf(obj.getString("initialState"));
         health = obj.getInt("health");
 
-        Color _color;
-        try {
-            _color = new Color(Integer.decode(obj.getString("color")));
+        ColorProvider _color;
+        try{
+            JSONObject colorJSON = obj.getJSONObject("color");
+            _color = (ColorProvider) ColorProvider.Type.valueOf(colorJSON.getString("type")).constructFromJSON(colorJSON);
         } catch (Exception e) {
-            _color = Color.BLACK;
+            _color = new FlatColorProvider(new Color(0));
         }
         color = _color;
 

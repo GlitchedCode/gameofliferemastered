@@ -5,6 +5,7 @@
  */
 package com.giuseppelamalfa.gameofliferemastered.utils;
 
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.grid.Grid;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,7 +33,7 @@ public class ConcurrentGrid2DContainer<T> implements Cloneable, Serializable {
         this.cols = cols;
         this.defaultValue = sparseDefault;
         
-        map = new ConcurrentHashMap<>(rows*cols, 0.9f, 1);
+        map = new ConcurrentHashMap<>(rows*cols, 0.9f, Grid.PROCESSOR_COUNT);
 
         resize(rows, cols);
     }
@@ -47,7 +48,7 @@ public class ConcurrentGrid2DContainer<T> implements Cloneable, Serializable {
     }
 
     // Resets the minimum capacity for all the ArrayList objects
-    public synchronized final void resize(int rows, int cols) throws IllegalArgumentException {
+    public final void resize(int rows, int cols) throws IllegalArgumentException {
         if (rows < 0 | cols < 0) // sanity check
         {
             throw new IllegalArgumentException("Invalid size values for TwoDimensionalArrayList");

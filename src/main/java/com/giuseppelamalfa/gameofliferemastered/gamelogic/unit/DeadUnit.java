@@ -10,6 +10,8 @@ import java.util.HashSet;
 import java.util.Set;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.RuleInterface;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.rule.StubRule;
+import com.giuseppelamalfa.gameofliferemastered.ui.colors.ColorProvider;
+import com.giuseppelamalfa.gameofliferemastered.ui.colors.FlatColorProvider;
 import java.awt.Color;
 import java.io.Serializable;
 
@@ -57,6 +59,8 @@ class ReproductionCounter {
  */
 public class DeadUnit extends Unit implements Serializable, Cloneable {
 
+    public static final FlatColorProvider color = new FlatColorProvider(new Color(0));
+    
     // This function implements rule #3: reproduction
     @SuppressWarnings("unchecked")
     public final Unit getBornUnit(Unit[] adjacentUnits, SpeciesLoader speciesLoader) {
@@ -200,10 +204,8 @@ public class DeadUnit extends Unit implements Serializable, Cloneable {
         return -1;
     }
     
-    static Color color = new Color(0,0,0,0);
-    
     @Override
-    public Color getColor(){
+    public ColorProvider getColor(){
         return color;
     }
 

@@ -27,6 +27,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
 import com.giuseppelamalfa.gameofliferemastered.simulation.SimulationCLIServer;
+import com.giuseppelamalfa.gameofliferemastered.ui.colors.ColorProvider;
 import com.giuseppelamalfa.gameofliferemastered.ui.renderers.GridRenderer;
 import com.giuseppelamalfa.gameofliferemastered.ui.renderers.PixelGridRenderer;
 import java.awt.Color;
@@ -41,6 +42,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 
@@ -66,6 +69,10 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
     private final TextureGridRenderer textureRenderer;
     private final PixelGridRenderer pixelRenderer = new PixelGridRenderer();
     private Path screenshotSaveDir = null;
+
+    private ExecutorService renderExecutor = Executors.newFixedThreadPool(1);
+    private ExecutorService computeExecutor = Executors.newFixedThreadPool(1);
+    private final double render_delta = 1d / 30d;
 
     private GridRenderer currentRenderer;
 
@@ -372,10 +379,10 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
 
     @Override
     public void paintComponent(Graphics g) {
-        currentRenderer.render(g, this, screenOrigin);
+        currentRenderer.render(g, this, screenOrigin, render_delta);
     }
 
-    Color getUnitColor(Unit unit) {
+    ColorProvider getUnitColor(Unit unit) {
         return unit.getColor();
     }
 
@@ -435,10 +442,12 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
         addMouseWheelListener(this);
         addKeyListener(this);
 
-        // repaint 60 times a secound
+        // repaint 30 times a secound
         timer.scheduleAtFixedRate(() -> {
-            repaint();
-        }, 0, 18);
+            renderExecutor.execute(() -> {
+                repaint();
+            });
+        }, 0, 33);
         // board update task
         timer.scheduleAtFixedRate(() -> {
             if (simulation == null) {
@@ -447,16 +456,18 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
             if (!simulation.isRunning()) {
                 return;
             }
-            try {
-                simulation.computeNextTurn();
-                if (screenshotSaveDir != null) {
-                    Path screenshotPath = Path.of(screenshotSaveDir.toString(), (Integer.toString(simulation.getCurrentTurn()) + ".gif"));
-                    saveScreenshot(screenshotPath.toFile());
+            computeExecutor.execute(() -> {
+                try {
+                    simulation.computeNextTurn();
+                    if (screenshotSaveDir != null) {
+                        Path screenshotPath = Path.of(screenshotSaveDir.toString(), (Integer.toString(simulation.getCurrentTurn()) + ".gif"));
+                        saveScreenshot(screenshotPath.toFile());
+                    }
+                    gameStatusPanel.setPlayerPanels(simulation.getPlayerRankings());
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-                gameStatusPanel.setPlayerPanels(simulation.getPlayerRankings());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            });
         }, 0, ApplicationFrame.BOARD_UPDATE_MS);
 
         ToolTipManager.sharedInstance().setInitialDelay(TOOLTIP_INITIAL_DELAY_MS);
@@ -619,7 +630,6 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
             }
         });
 
-        
         System.exit(0);
     }
 }
