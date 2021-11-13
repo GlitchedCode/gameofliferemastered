@@ -7,6 +7,7 @@ package com.giuseppelamalfa.gameofliferemastered.ui;
 
 import com.giuseppelamalfa.gameofliferemastered.ui.renderers.TextureGridRenderer;
 import com.giuseppelamalfa.gameofliferemastered.ApplicationFrame;
+import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesData;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
 import com.giuseppelamalfa.gameofliferemastered.utils.ImageManager;
 import java.awt.Dimension;
@@ -27,6 +28,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
 import com.giuseppelamalfa.gameofliferemastered.simulation.SimulationCLIServer;
+import com.giuseppelamalfa.gameofliferemastered.simulation.SimulationGUIServer;
 import com.giuseppelamalfa.gameofliferemastered.ui.colors.ColorProvider;
 import com.giuseppelamalfa.gameofliferemastered.ui.renderers.GridRenderer;
 import com.giuseppelamalfa.gameofliferemastered.ui.renderers.PixelGridRenderer;
@@ -42,6 +44,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import javax.imageio.ImageIO;
@@ -477,6 +480,7 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
         System.out.println(
                 "usage: java -jar liferemastered-gridanim.jar -g <filename.grid> [args]\n"
                 + "-g <filename.grid> : input grid filename\n"
+                + "-r [seed]: fills grid with random species, overrides -g\n"
                 + "-d <rowCount> <columnCount>: grid row and column count (default: auto)\n"
                 + "-n <turns>: how many turns the simulation should run (default: 40)\n"
                 + "-o <filename.gif>: output directory (default: anim_out)\n"
@@ -495,15 +499,27 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
         boolean auto_size = true;
         int rows = 0;
         int cols = 0;
-        int turns = 40;
+        int turns = 64;
         File gridInput = null;
         String animOutput = "anim_out";
+        Random rng = new Random();
+        boolean random = false;
         boolean usage = true;
 
         // Read command line arguments
         for (int i = 0; i < args.length; i++) {
             String currentArg = args[i];
             switch (currentArg) {
+                case "-r":
+                    random = true;
+                    usage = false;
+                    try{
+                        rng.setSeed(Long.decode(args[i+1]));
+                        i++;
+                    }catch(Exception e) {
+                        rng.setSeed(rng.nextLong());
+                    }
+                    break;
                 case "-g":
                     String inPath = args[++i];
                     try {
@@ -556,12 +572,37 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
         }
 
         if (auto_size) {
-            rows = 1;
-            cols = 1;
+            if (random) {
+                rows = 128;
+                cols = 128;
+            } else {
+                rows = 1;
+                cols = 1;
+            }
         }
+        
         final SimulationCLIServer simulation = new SimulationCLIServer(rows, cols);
+        final SpeciesLoader loader = simulation.getSpeciesLoader();
 
-        simulation.readGrid(gridInput, auto_size);
+        if (random) {
+            ArrayList<Integer> IDs = new ArrayList<>();
+            IDs.add(-1);
+            
+            loader.getSpeciesIDs().forEach(id -> {
+                IDs.add(id);
+            });
+            
+            for (int r = 0; r < simulation.getRowCount(); r++) {
+                for (int c = 0; c < simulation.getColumnCount(); c++) {
+                    int id = IDs.get(Math.abs(rng.nextInt()) % IDs.size());
+                    if(id != -1)
+                        simulation.setUnit(r, c, 
+                                loader.getNewUnit(id, simulation.getLocalPlayerID()));
+                }
+            }
+        } else {
+            simulation.readGrid(gridInput, auto_size);
+        }
 
         GridPanel panel = new GridPanel();
         panel.setVisible(true);

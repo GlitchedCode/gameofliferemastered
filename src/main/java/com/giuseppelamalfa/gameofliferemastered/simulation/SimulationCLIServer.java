@@ -94,6 +94,8 @@ public class SimulationCLIServer extends SimulationInterface {
     private Thread acceptConnectionThread;
     private int lastSyncTurn = 0;
     private final SpeciesLoader speciesLoader = new SpeciesLoader();
+    
+    private final int localPlayerID;
 
     protected void writeToStatusLog(String msg) {
         System.out.println(msg);
@@ -207,6 +209,7 @@ public class SimulationCLIServer extends SimulationInterface {
         this.mode = mode;
         speciesLoader.loadSpecies();
         initializeRemoteServer(portNumber, playerCount, rowCount, columnCount);
+        localPlayerID = -1;
     }
 
     public SimulationCLIServer(int rowCount, int columnCount) throws Exception {
@@ -222,6 +225,7 @@ public class SimulationCLIServer extends SimulationInterface {
                 availableColors.add(color);
             }
         }
+        localPlayerID = 0;
     }
 
     public void reloadSpeciesConf(String path) throws Exception {
@@ -378,7 +382,7 @@ public class SimulationCLIServer extends SimulationInterface {
 
     @Override
     public int getLocalPlayerID() {
-        return -1;
+        return localPlayerID;
     }
 
     @Override
@@ -432,6 +436,11 @@ public class SimulationCLIServer extends SimulationInterface {
 
     @Override
     public void setUnit(int row, int col, Unit unit) {
+        try {
+            currentGrid.setUnit(row, col, unit);
+        } catch (GameLogicException ex) {
+            Logger.getLogger(SimulationCLIServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @Override

@@ -9,7 +9,6 @@ import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
 import com.giuseppelamalfa.gameofliferemastered.simulation.SimulationInterface;
 import com.giuseppelamalfa.gameofliferemastered.ui.GridPanel;
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;

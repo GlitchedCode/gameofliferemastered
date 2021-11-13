@@ -95,34 +95,6 @@
             }
         },
         {
-            "name": "Live Free or Die",
-            "id": 1,
-            "implementingType": "LifeUnit",
-            "textureCode": "cell",
-            "color": {
-                "type": "FLAT",
-                "color": "0x44e18a"
-            },
-            "filterColor": "0x44e18a",
-            "friendlySpecies": [
-                1
-            ],
-            "hostileSpecies": [
-                "Life",
-                2
-            ],
-            "health": 1,
-            "initialState": "ALIVE",
-            "friendlyCountSelector": {
-                "ruleClassName": "IntegerSetRule",
-                "args": [0]
-            },
-            "reproductionSelector": {
-                "ruleClassName": "IntegerSetRule",
-                "args": [2]
-            }
-        },
-        {
             "name": "Mimic",
             "id": 3,
             "implementingType": "Mimic",
