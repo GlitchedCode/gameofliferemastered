@@ -23,7 +23,7 @@ public class PixelGridRenderer implements GridRenderer {
 
     private int lineSpacing;
     private int sideLength;
-    private Color bg = new Color(0.0f, 0.0f, 0.0f, 0.1f);
+    private Color bg = new Color(0.0f, 0.0f, 0.0f, 0.0f);
 
     @Override
     public int getLineSpacing() {

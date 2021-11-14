@@ -7,7 +7,6 @@ package com.giuseppelamalfa.gameofliferemastered.ui;
 
 import com.giuseppelamalfa.gameofliferemastered.ui.renderers.TextureGridRenderer;
 import com.giuseppelamalfa.gameofliferemastered.ApplicationFrame;
-import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesData;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.SpeciesLoader;
 import com.giuseppelamalfa.gameofliferemastered.utils.ImageManager;
 import java.awt.Dimension;
@@ -28,11 +27,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
 import com.giuseppelamalfa.gameofliferemastered.simulation.SimulationCLIServer;
-import com.giuseppelamalfa.gameofliferemastered.simulation.SimulationGUIServer;
 import com.giuseppelamalfa.gameofliferemastered.ui.colors.ColorProvider;
 import com.giuseppelamalfa.gameofliferemastered.ui.renderers.GridRenderer;
 import com.giuseppelamalfa.gameofliferemastered.ui.renderers.PixelGridRenderer;
 import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -56,6 +58,20 @@ import javax.swing.JFileChooser;
  */
 public class GridPanel extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener, KeyListener {
 
+    class ResizeListener extends ComponentAdapter {
+
+        @Override
+        public void componentResized(ComponentEvent e) {
+            GridPanel panel = GridPanel.this;
+            Dimension size = getSize();
+            BufferedImage oldBuffer = panel.buffer;
+            BufferedImage newBuffer = panel.buffer = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g = newBuffer.createGraphics();
+            g.drawImage(oldBuffer.getScaledInstance(size.width, size.height, Image.SCALE_SMOOTH), 0, 0, null);
+            g.dispose();
+        }
+    }
+
     final int TOOLTIP_INITIAL_DELAY_MS = 150;
 
     private SimulationInterface simulation;
@@ -77,9 +93,13 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
     private ExecutorService computeExecutor = Executors.newFixedThreadPool(1);
     private final double render_delta = 1d / 30d;
 
+    private BufferedImage buffer;
     private GridRenderer currentRenderer;
 
     public GridPanel() {
+        Dimension size = getSize();
+        buffer = new BufferedImage(50, 50, BufferedImage.TYPE_INT_ARGB);
+        addComponentListener(new ResizeListener());
         textureRenderer = null;
         currentRenderer = pixelRenderer;
         isPixelRenderer = true;
@@ -87,6 +107,9 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
     }
 
     public GridPanel(ImageManager tileManager) {
+        Dimension size = getSize();
+        buffer = new BufferedImage(50, 50, BufferedImage.TYPE_INT_ARGB);
+        addComponentListener(new ResizeListener());
         textureRenderer = new TextureGridRenderer(tileManager);
         currentRenderer = textureRenderer;
         isPixelRenderer = false;
@@ -249,6 +272,10 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
     }
 
     private void swapRenderers() {
+        Graphics g = buffer.getGraphics();
+        g.setColor(Color.black);
+        g.fillRect(0, 0, buffer.getWidth(), buffer.getHeight());
+
         if (isPixelRenderer) {
             currentRenderer = textureRenderer;
             gameStatusPanel.setVisible(true);
@@ -382,7 +409,8 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
 
     @Override
     public void paintComponent(Graphics g) {
-        currentRenderer.render(g, this, screenOrigin, render_delta);
+        currentRenderer.render(buffer.getGraphics(), this, screenOrigin, render_delta);
+        g.drawImage(buffer, 0, 0, null);
     }
 
     ColorProvider getUnitColor(Unit unit) {
@@ -450,7 +478,7 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
             renderExecutor.execute(() -> {
                 repaint();
             });
-        }, 0, 33);
+        }, 0, 18);
         // board update task
         timer.scheduleAtFixedRate(() -> {
             if (simulation == null) {
@@ -513,10 +541,10 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
                 case "-r":
                     random = true;
                     usage = false;
-                    try{
-                        rng.setSeed(Long.decode(args[i+1]));
+                    try {
+                        rng.setSeed(Long.decode(args[i + 1]));
                         i++;
-                    }catch(Exception e) {
+                    } catch (Exception e) {
                         rng.setSeed(rng.nextLong());
                     }
                     break;
@@ -580,24 +608,25 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
                 cols = 1;
             }
         }
-        
+
         final SimulationCLIServer simulation = new SimulationCLIServer(rows, cols);
         final SpeciesLoader loader = simulation.getSpeciesLoader();
 
         if (random) {
             ArrayList<Integer> IDs = new ArrayList<>();
             IDs.add(-1);
-            
+
             loader.getSpeciesIDs().forEach(id -> {
                 IDs.add(id);
             });
-            
+
             for (int r = 0; r < simulation.getRowCount(); r++) {
                 for (int c = 0; c < simulation.getColumnCount(); c++) {
                     int id = IDs.get(Math.abs(rng.nextInt()) % IDs.size());
-                    if(id != -1)
-                        simulation.setUnit(r, c, 
+                    if (id != -1) {
+                        simulation.setUnit(r, c,
                                 loader.getNewUnit(id, simulation.getLocalPlayerID()));
+                    }
                 }
             }
         } else {
