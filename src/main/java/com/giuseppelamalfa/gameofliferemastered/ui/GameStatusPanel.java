@@ -18,7 +18,7 @@ import java.util.ArrayList;
  *
  * @author glitchedcode
  */
-public class GameStatusPanel extends javax.swing.JPanel implements MouseListener, MouseMotionListener, MouseWheelListener {
+public class GameStatusPanel extends javax.swing.JPanel {
 
     GridPanel gridPanel;
     ArrayList<PlayerDisplayPanel> playerPanels = new ArrayList<>();
@@ -179,7 +179,7 @@ public class GameStatusPanel extends javax.swing.JPanel implements MouseListener
     }
 
     public void setGridPanel(GridPanel panel) {
-        addMouseListener(this);
+        addMouseListener(panel.getMouseListener());
         gridPanel = panel;
     }
 
@@ -210,45 +210,7 @@ public class GameStatusPanel extends javax.swing.JPanel implements MouseListener
         }
     }
 
-    /*
-    * MOUSE INPUT HANDLING
-     */
-    @Override
-    public void mouseClicked(MouseEvent me) {
-        gridPanel.mouseClicked(me);
-    }
-
-    @Override
-    public void mouseMoved(MouseEvent me) {
-        gridPanel.mouseMoved(me);
-    }
-
-    @Override
-    public void mousePressed(MouseEvent me) {
-        gridPanel.mousePressed(me);
-    }
-
-    @Override
-    public void mouseDragged(MouseEvent me) {
-        gridPanel.mouseDragged(me);
-    }
-
-    @Override
-    public void mouseWheelMoved(MouseWheelEvent me) {
-        gridPanel.mouseWheelMoved(me);
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent me) {
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent me) {
-    }
-
-    @Override
-    public void mouseExited(MouseEvent me) {
-    }
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel gameModeLabel;
     private javax.swing.JLabel gameStatusLabel;

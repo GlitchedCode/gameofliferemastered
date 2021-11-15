@@ -13,12 +13,8 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
 import javax.swing.JPanel;
 import javax.swing.ToolTipManager;
 import com.giuseppelamalfa.gameofliferemastered.simulation.SimulationInterface;
@@ -35,6 +31,8 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.MouseAdapter;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -56,7 +54,7 @@ import javax.swing.JFileChooser;
  *
  * @author glitchedcode
  */
-public class GridPanel extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener, KeyListener {
+public class GridPanel extends JPanel {
 
     class ResizeListener extends ComponentAdapter {
 
@@ -72,78 +70,33 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
         }
     }
 
-    final int TOOLTIP_INITIAL_DELAY_MS = 150;
+    class MouseListener extends MouseAdapter {
 
-    private SimulationInterface simulation;
-
-    private Point screenOrigin = new Point();
-    private Point lastDragLocation = new Point();
-
-    private final TimerWrapper timer = new TimerWrapper();
-    private boolean initialized = false;
-    private GameStatusPanel gameStatusPanel = new GameStatusPanel();
-    private UnitPalette palette = new UnitPalette();
-
-    private boolean isPixelRenderer;
-    private final TextureGridRenderer textureRenderer;
-    private final PixelGridRenderer pixelRenderer = new PixelGridRenderer();
-    private Path screenshotSaveDir = null;
-
-    private ExecutorService renderExecutor = Executors.newFixedThreadPool(1);
-    private ExecutorService computeExecutor = Executors.newFixedThreadPool(1);
-    private final double render_delta = 1d / 30d;
-
-    private BufferedImage buffer;
-    private GridRenderer currentRenderer;
-
-    public GridPanel() {
-        Dimension size = getSize();
-        buffer = new BufferedImage(50, 50, BufferedImage.TYPE_INT_ARGB);
-        addComponentListener(new ResizeListener());
-        textureRenderer = null;
-        currentRenderer = pixelRenderer;
-        isPixelRenderer = true;
-        setSideLengthPower(5);
-    }
-
-    public GridPanel(ImageManager tileManager) {
-        Dimension size = getSize();
-        buffer = new BufferedImage(50, 50, BufferedImage.TYPE_INT_ARGB);
-        addComponentListener(new ResizeListener());
-        textureRenderer = new TextureGridRenderer(tileManager);
-        currentRenderer = textureRenderer;
-        isPixelRenderer = false;
-        setSideLengthPower(5);
-    }
-
-    /*
-    * MOUSE INPUT HANDLING
-     */
-    @Override
-    public void mouseClicked(MouseEvent me) {
-        if (simulation == null) {
-            return;
-        }
-        synchronized (simulation) {
-            int button = me.getButton();
-            if (button == MouseEvent.BUTTON1 & !simulation.isLocked()) {
-                setUnit(me.getPoint());
-            } else if (button == MouseEvent.BUTTON3) {
-                try {
-                    if (simulation.isLocallyControlled() & !simulation.isLocked()) {
-                        simulation.computeNextTurn();
-                        gameStatusPanel.setPlayerPanels(simulation.getPlayerRankings());
+        @Override
+        public void mouseClicked(MouseEvent me) {
+            if (simulation == null) {
+                return;
+            }
+            synchronized (simulation) {
+                int button = me.getButton();
+                if (button == MouseEvent.BUTTON1 & !simulation.isLocked()) {
+                    setUnit(me.getPoint());
+                } else if (button == MouseEvent.BUTTON3) {
+                    try {
+                        if (simulation.isLocallyControlled() & !simulation.isLocked()) {
+                            simulation.computeNextTurn();
+                            gameStatusPanel.setPlayerPanels(simulation.getPlayerRankings());
+                        }
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
                     }
-                } catch (Exception ex) {
-                    ex.printStackTrace();
                 }
             }
         }
-    }
 
-    @Override
-    public void mouseMoved(MouseEvent me) {
-        /*
+        @Override
+        public void mouseMoved(MouseEvent me) {
+            /*
         if (simulation == null) {
             return;
         }
@@ -169,106 +122,140 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
         }
         text += "</html>";
         setToolTipText(text);
-         */
-    }
-
-    @Override
-    public void mousePressed(MouseEvent me) {
-        int button = me.getButton();
-        if (button == MouseEvent.BUTTON1) {
-            lastDragLocation = new Point(me.getPoint());
+             */
         }
-    }
 
-    @Override
-    public void mouseDragged(MouseEvent me) {
-        int mask = MouseEvent.BUTTON1_DOWN_MASK;
-        if (me.getModifiersEx() != mask) {
-            return;
-        }
-        Point dragLocation = me.getPoint();
-        Point offset = new Point(lastDragLocation.x - dragLocation.x,
-                lastDragLocation.y - dragLocation.y);
-        screenOrigin.translate(offset.x, offset.y);
-        setScreenOrigin(screenOrigin);
-        lastDragLocation = new Point(dragLocation);
-    }
-
-    @Override
-    public void mouseWheelMoved(MouseWheelEvent me) {
-        int rotation = me.getWheelRotation();
-        if (rotation < 0) {
-            incrementSideLengthPower();
-        } else {
-            decrementSideLengthPower();
-        }
-    }
-
-    // don't need these
-    @Override
-    public void mouseReleased(MouseEvent me) {
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent me) {
-    }
-
-    @Override
-    public void mouseExited(MouseEvent me) {
-    }
-
-    /*
-    * KEYBOARD EVENT LOGIC
-     */
-    @Override
-    public void keyPressed(KeyEvent e) {
-    }
-
-    @Override
-    public void keyTyped(KeyEvent e) {
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-        if (simulation == null) {
-            return;
-        }
-        switch (e.getKeyCode()) {
-            case KeyEvent.VK_SPACE:
-                simulation.setRunning(!simulation.isRunning());
-                break;
-            case KeyEvent.VK_HOME: {
-                try {
-                    simulation.writeGrid();
-                } catch (Exception ex) {
-                    Logger.getLogger(GridPanel.class.getName()).log(Level.SEVERE, null, ex);
-                }
+        @Override
+        public void mousePressed(MouseEvent me) {
+            int button = me.getButton();
+            if (button == MouseEvent.BUTTON1) {
+                lastDragLocation = new Point(me.getPoint());
             }
-            break;
-            case KeyEvent.VK_END: {
-                try {
-                    JFileChooser fileChooser = new JFileChooser();
-                    if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                        simulation.readGrid(fileChooser.getSelectedFile());
+        }
+
+        @Override
+        public void mouseDragged(MouseEvent me) {
+            int mask = MouseEvent.BUTTON1_DOWN_MASK;
+            if (me.getModifiersEx() != mask) {
+                return;
+            }
+            Point dragLocation = me.getPoint();
+            Point offset = new Point(lastDragLocation.x - dragLocation.x,
+                    lastDragLocation.y - dragLocation.y);
+            screenOrigin.translate(offset.x, offset.y);
+            setScreenOrigin(screenOrigin);
+            lastDragLocation = new Point(dragLocation);
+        }
+
+        @Override
+        public void mouseWheelMoved(MouseWheelEvent me) {
+            int rotation = me.getWheelRotation();
+            if (rotation < 0) {
+                incrementSideLengthPower();
+            } else {
+                decrementSideLengthPower();
+            }
+        }
+    }
+
+    class KeyListener extends KeyAdapter {
+
+        @Override
+        public void keyReleased(KeyEvent e) {
+            if (simulation == null) {
+                return;
+            }
+            switch (e.getKeyCode()) {
+                case KeyEvent.VK_SPACE:
+                    simulation.setRunning(!simulation.isRunning());
+                    break;
+                case KeyEvent.VK_HOME: {
+                    try {
+                        simulation.writeGrid();
+                    } catch (Exception ex) {
+                        Logger.getLogger(GridPanel.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                } catch (Exception ex) {
-                    Logger.getLogger(GridPanel.class.getName()).log(Level.SEVERE, null, ex);
                 }
-            }
-            break;
-            case KeyEvent.VK_INSERT:
-                swapRenderers();
                 break;
-            case KeyEvent.VK_F12: {
-                try {
-                    toggleSaveScreenshot();
-                } catch (IOException ex) {
-                    Logger.getLogger(GridPanel.class.getName()).log(Level.SEVERE, null, ex);
+                case KeyEvent.VK_END: {
+                    try {
+                        JFileChooser fileChooser = new JFileChooser();
+                        if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                            simulation.readGrid(fileChooser.getSelectedFile());
+                        }
+                    } catch (Exception ex) {
+                        Logger.getLogger(GridPanel.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
+                break;
+                case KeyEvent.VK_INSERT:
+                    swapRenderers();
+                    break;
+                case KeyEvent.VK_F12: {
+                    try {
+                        toggleSaveScreenshot();
+                    } catch (IOException ex) {
+                        Logger.getLogger(GridPanel.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                break;
+                case KeyEvent.VK_R: {
+                    long seed = rng.nextLong();
+                    System.out.println("random seed: " + Long.toUnsignedString(seed));
+                    simulation.generateRandomGrid(seed);
+                }
+                break;
+                default:
             }
-            break;
-            default:
         }
+    }
+
+    final int TOOLTIP_INITIAL_DELAY_MS = 150;
+
+    private SimulationInterface simulation;
+
+    private Point screenOrigin = new Point();
+    private Point lastDragLocation = new Point();
+
+    private final TimerWrapper timer = new TimerWrapper();
+    private boolean initialized = false;
+    private GameStatusPanel gameStatusPanel = new GameStatusPanel();
+    private UnitPalette palette = new UnitPalette();
+
+    private boolean isPixelRenderer;
+    private final TextureGridRenderer textureRenderer;
+    private final PixelGridRenderer pixelRenderer = new PixelGridRenderer();
+    private Path screenshotSaveDir = null;
+
+    private ExecutorService renderExecutor = Executors.newFixedThreadPool(1);
+    private ExecutorService computeExecutor = Executors.newFixedThreadPool(1);
+    private final double render_delta = 1d / 30d;
+
+    private static final Random rng = new Random();
+    private BufferedImage buffer;
+    private GridRenderer currentRenderer;
+
+    private final MouseListener mouseListener = new MouseListener();
+    private final KeyListener keyListener = new KeyListener();
+
+    public GridPanel() {
+        Dimension size = getSize();
+        buffer = new BufferedImage(50, 50, BufferedImage.TYPE_INT_ARGB);
+        addComponentListener(new ResizeListener());
+        textureRenderer = null;
+        currentRenderer = pixelRenderer;
+        isPixelRenderer = true;
+        setSideLengthPower(5);
+    }
+
+    public GridPanel(ImageManager tileManager) {
+        Dimension size = getSize();
+        buffer = new BufferedImage(50, 50, BufferedImage.TYPE_INT_ARGB);
+        addComponentListener(new ResizeListener());
+        textureRenderer = new TextureGridRenderer(tileManager);
+        currentRenderer = textureRenderer;
+        isPixelRenderer = false;
+        setSideLengthPower(5);
     }
 
     private void swapRenderers() {
@@ -409,7 +396,7 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
 
     @Override
     public void paintComponent(Graphics g) {
-        currentRenderer.render(buffer.getGraphics(), this, screenOrigin, render_delta);
+        currentRenderer.render(buffer.getGraphics(), this, screenOrigin);
         g.drawImage(buffer, 0, 0, null);
     }
 
@@ -457,6 +444,14 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
         return gameStatusPanel;
     }
 
+    public KeyListener getKeyListener() {
+        return keyListener;
+    }
+    
+    public MouseListener getMouseListener() {
+        return mouseListener;
+    }
+    
     public void swingInit(UnitPalette palette) {
         if (initialized) {
             return;
@@ -468,10 +463,10 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
         }
         this.palette = palette;
         initialized = true;
-        addMouseListener(this);
-        addMouseMotionListener(this);
-        addMouseWheelListener(this);
-        addKeyListener(this);
+        addMouseListener(mouseListener);
+        addMouseMotionListener(mouseListener);
+        addMouseWheelListener(mouseListener);
+        addKeyListener(keyListener);
 
         // repaint 30 times a secound
         timer.scheduleAtFixedRate(() -> {
@@ -489,6 +484,7 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
             }
             computeExecutor.execute(() -> {
                 try {
+                    simulation.getSpeciesLoader().updateColors(render_delta);
                     simulation.computeNextTurn();
                     if (screenshotSaveDir != null) {
                         Path screenshotPath = Path.of(screenshotSaveDir.toString(), (Integer.toString(simulation.getCurrentTurn()) + ".gif"));
@@ -530,7 +526,7 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
         int turns = 64;
         File gridInput = null;
         String animOutput = "anim_out";
-        Random rng = new Random();
+        long seed = new Random().nextLong();
         boolean random = false;
         boolean usage = true;
 
@@ -542,10 +538,10 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
                     random = true;
                     usage = false;
                     try {
-                        rng.setSeed(Long.decode(args[i + 1]));
+                        seed = Long.decode(args[i + 1]);
                         i++;
                     } catch (Exception e) {
-                        rng.setSeed(rng.nextLong());
+                        seed = new Random().nextLong();
                     }
                     break;
                 case "-g":
@@ -613,22 +609,9 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
         final SpeciesLoader loader = simulation.getSpeciesLoader();
 
         if (random) {
-            ArrayList<Integer> IDs = new ArrayList<>();
-            IDs.add(-1);
-
-            loader.getSpeciesIDs().forEach(id -> {
-                IDs.add(id);
-            });
-
-            for (int r = 0; r < simulation.getRowCount(); r++) {
-                for (int c = 0; c < simulation.getColumnCount(); c++) {
-                    int id = IDs.get(Math.abs(rng.nextInt()) % IDs.size());
-                    if (id != -1) {
-                        simulation.setUnit(r, c,
-                                loader.getNewUnit(id, simulation.getLocalPlayerID()));
-                    }
-                }
-            }
+            simulation.generateRandomGrid(seed);
+            simulation.computeNextTurn();
+            simulation.computeNextTurn();
         } else {
             simulation.readGrid(gridInput, auto_size);
         }
@@ -686,11 +669,12 @@ public class GridPanel extends JPanel implements MouseListener, MouseMotionListe
             }
 
             try {
+                loader.updateColors(panel.render_delta);
                 simulation.computeNextTurn();
             } catch (Exception ex) {
                 Logger.getLogger(GridPanel.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } while (simulation.getCurrentTurn() < turns);
+        } while (simulation.getCurrentTurn() < turns + 2);
 
         threads.forEach(thread -> {
             try {

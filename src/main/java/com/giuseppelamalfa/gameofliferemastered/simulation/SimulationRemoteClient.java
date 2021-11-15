@@ -326,6 +326,10 @@ public class SimulationRemoteClient extends SimulationInterface {
     }
     
     @Override
+    public void generateRandomGrid(long seed) {
+    }
+    
+    @Override
     public final void readGrid(File file) throws Exception {
     }
     

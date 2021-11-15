@@ -78,7 +78,7 @@ public class TextureGridRenderer implements GridRenderer{
     }
 
     @Override
-    public void render(Graphics g, GridPanel panel, Point screenOrigin, double delta) {
+    public void render(Graphics g, GridPanel panel, Point screenOrigin) {
         Graphics2D g2 = (Graphics2D) g;
         Dimension size = panel.getSize();
         g2.setColor(panel.getBackground());

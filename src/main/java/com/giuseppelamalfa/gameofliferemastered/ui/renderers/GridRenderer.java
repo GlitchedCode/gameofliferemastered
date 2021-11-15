@@ -17,5 +17,5 @@ public interface GridRenderer {
     int getLineSpacing();
     int getSideLength();
     void setSideLength(int val);
-    void render(Graphics g, GridPanel panel, Point screenOrigin, double delta);
+    void render(Graphics g, GridPanel panel, Point screenOrigin);
 }

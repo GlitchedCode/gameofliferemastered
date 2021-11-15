@@ -17,12 +17,12 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.geom.AffineTransform;
 import java.io.Serializable;
 import java.util.ArrayList;
 import javax.swing.JPanel;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
+import java.awt.event.MouseAdapter;
 
 class PaletteItem implements Serializable {
 
@@ -31,7 +31,7 @@ class PaletteItem implements Serializable {
     public int count;
 
     public PaletteItem(int speciesID, boolean active, int count) throws IllegalArgumentException {
-        if ( count < 0 ) {
+        if (count < 0) {
             throw new IllegalArgumentException("Invalid unit count.");
         }
         this.speciesID = speciesID;
@@ -54,7 +54,26 @@ class PaletteItem implements Serializable {
  *
  * @author glitchedcode
  */
-public class UnitPalette extends JPanel implements MouseListener {
+public class UnitPalette extends JPanel {
+
+    class MouseListener extends MouseAdapter {
+
+        @Override
+        public void mouseClicked(MouseEvent me) {
+            int button = me.getButton();
+            if (button == MouseEvent.BUTTON1) {
+                int xoff = me.getPoint().x - getLocation().x;
+                int newIndex = xoff / (ICON_SIDE_LENGTH + items.size());
+                try {
+                    if (items.get(newIndex).active) {
+                        selectedIndex = newIndex;
+                    }
+                } catch (Exception e) {
+                }
+                repaint();
+            }
+        }
+    }
 
     static public final int ICON_SIDE_LENGTH = 32;
     static public final float ICON_SCALE = ICON_SIDE_LENGTH / 8.0f;
@@ -65,46 +84,10 @@ public class UnitPalette extends JPanel implements MouseListener {
     int selectedIndex = 0;
     ArrayList<PaletteItem> items = new ArrayList<>();
     ImageManager tileManager;
-    
+
     SpeciesLoader speciesLoader = new SpeciesLoader();
 
-    /*
-    * MOUSE INPUT HANDLING
-     */
-    @Override
-    public void mouseClicked(MouseEvent me) {
-        int button = me.getButton();
-        if ( button == MouseEvent.BUTTON1 ) {
-            int xoff = me.getPoint().x - getLocation().x;
-            int newIndex = xoff / (ICON_SIDE_LENGTH + items.size());
-            try {
-                if ( items.get(newIndex).active ) {
-                    selectedIndex = newIndex;
-                }
-            }
-            catch (Exception e) {
-            }
-            repaint();
-        }
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent me) {
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent me) {
-    }
-
-    @Override
-    public void mouseExited(MouseEvent me) {
-    }
-
-    @Override
-    public void mousePressed(MouseEvent me) {
-    }
-    
-    public void setSimulation(SimulationInterface simulation){
+    public void setSimulation(SimulationInterface simulation) {
         speciesLoader = simulation.getSpeciesLoader();
     }
 
@@ -112,12 +95,12 @@ public class UnitPalette extends JPanel implements MouseListener {
         boolean canAdd = true;
 
         for (PaletteItem item : items) {
-            if ( item.getSpeciesID() == speciesID ) {
+            if (item.getSpeciesID() == speciesID) {
                 canAdd = false;
             }
         }
 
-        if ( canAdd ) {
+        if (canAdd) {
             items.add(new PaletteItem(speciesID, active, count));
         }
         resetSize();
@@ -128,12 +111,12 @@ public class UnitPalette extends JPanel implements MouseListener {
         boolean canAdd = true;
 
         for (PaletteItem item : items) {
-            if ( item.getSpeciesID() == speciesID ) {
+            if (item.getSpeciesID() == speciesID) {
                 canAdd = false;
             }
         }
 
-        if ( canAdd ) {
+        if (canAdd) {
             items.add(new PaletteItem(speciesID, active));
         }
         resetSize();
@@ -142,10 +125,10 @@ public class UnitPalette extends JPanel implements MouseListener {
 
     public void removePaletteItem(int speciesID) {
         for (int i = 0; i < items.size(); i++) {
-            if ( items.get(i).getSpeciesID() == speciesID ) {
+            if (items.get(i).getSpeciesID() == speciesID) {
                 selectedIndex--;
                 for (; selectedIndex >= 0; selectedIndex--) {
-                    if ( items.get(selectedIndex).active ) {
+                    if (items.get(selectedIndex).active) {
                         break;
                     }
                 }
@@ -159,11 +142,11 @@ public class UnitPalette extends JPanel implements MouseListener {
     @SuppressWarnings("unchecked")
     public Unit getNewUnit(int playerID) throws Exception {
         PaletteItem item = items.get(selectedIndex);
-        if ( !item.active | item.count == 0 ) {
+        if (!item.active | item.count == 0) {
             return null;
         }
         Unit ret = (Unit) speciesLoader.getNewUnit(item.getSpeciesID(), playerID);
-        if ( item.count < 0 ) {
+        if (item.count < 0) {
             item.count--;
         }
         return ret;
@@ -172,23 +155,22 @@ public class UnitPalette extends JPanel implements MouseListener {
 
     public int getSpeciesAtIndex(int index) {
         PaletteItem item = items.get(index);
-        if ( item.active ) {
+        if (item.active) {
             return item.speciesID;
-        }
-        else {
+        } else {
             return -1;
         }
     }
 
     public int getSpeciesCount() {
-        if ( items.isEmpty() ) {
+        if (items.isEmpty()) {
             return 0;
         }
         PaletteItem item = items.get(selectedIndex);
-        if ( !item.active ) {
+        if (!item.active) {
             return 0;
         }
-        if ( item.count < 0 ) {
+        if (item.count < 0) {
             return 99;
         }
         return items.get(selectedIndex).count;
@@ -211,7 +193,7 @@ public class UnitPalette extends JPanel implements MouseListener {
     @Override
     public void paintComponent(Graphics g) {
 
-        if ( items.isEmpty() ) {
+        if (items.isEmpty()) {
             return;
         }
 
@@ -242,16 +224,16 @@ public class UnitPalette extends JPanel implements MouseListener {
             offset = count * (1 + ICON_SIDE_LENGTH);
 
             // count
-            if ( item.count >= 0 ) {
+            if (item.count >= 0) {
                 g2.drawString(Integer.toString(item.count), offset, 1);
             }
 
-            if ( !item.active | item.count == 0 ) // inactive icon
+            if (!item.active | item.count == 0) // inactive icon
             {
                 g2.setColor(INACTIVE_OVERLAY_COLOR);
                 g2.fillRect(offset, 1, offset, size.height - 1);
             }
-            
+
             count++;
         }
     }
@@ -259,13 +241,13 @@ public class UnitPalette extends JPanel implements MouseListener {
     public void resetPaletteItems() throws Exception {
         items.clear();
         selectedIndex = 0;
-        for (int index : speciesLoader.getSpeciesIDs() ){
+        for (int index : speciesLoader.getSpeciesIDs()) {
             addPaletteItem(index, true);
         }
     }
 
     public void init(ImageManager tileManager) throws Exception {
-        addMouseListener(this);
+        addMouseListener(new MouseListener());
         this.tileManager = tileManager;
         resetPaletteItems();
     }

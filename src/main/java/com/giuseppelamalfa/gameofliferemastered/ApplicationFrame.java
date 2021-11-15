@@ -37,8 +37,8 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener,
 
     static public final int BOARD_UPDATE_MS = 150;
     static public final int MAX_PLAYER_NAME_LENGTH = 30;
-    static public final int MAX_ROWS = 400;
-    static public final int MAX_COLS = 400;
+    static public final int MAX_ROWS = 1024;
+    static public final int MAX_COLS = 1024;
 
     private int localRowCount = 50;
     private int localColumnCount = 70;
@@ -416,7 +416,7 @@ public class ApplicationFrame extends javax.swing.JFrame implements KeyListener,
         menuPanel.setBackground(new Color(0,0,0,127));
         gridPanel.swingInit(unitPalette);
         gridPanel.setSimulation(localGrid);
-        addKeyListener(gridPanel);
+        addKeyListener(gridPanel.getKeyListener());
         try {
             unitPalette.init(tileManager);
         } catch (Exception e) {e.printStackTrace();}

@@ -42,7 +42,7 @@ public class PixelGridRenderer implements GridRenderer {
     }
 
     @Override
-    public void render(Graphics g, GridPanel panel, Point screenOrigin, double delta) {
+    public void render(Graphics g, GridPanel panel, Point screenOrigin) {
         Graphics2D g2 = (Graphics2D) g;
         Dimension size = panel.getSize();
         g2.setColor(bg);
@@ -72,9 +72,6 @@ public class PixelGridRenderer implements GridRenderer {
         int endColumn = startColumn + cols;
         int drawnRows = endRow - startRow;
         int drawnColumns = endColumn - startColumn;
-
-        SpeciesLoader loader = simulation.getSpeciesLoader();
-        loader.updateColors(delta);
 
         for (int r = 0; r < drawnRows; r++) // rows
         {

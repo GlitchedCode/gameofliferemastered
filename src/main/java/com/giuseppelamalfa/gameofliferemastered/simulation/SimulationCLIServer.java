@@ -39,6 +39,7 @@ import java.io.File;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 class ClientData {
@@ -94,7 +95,7 @@ public class SimulationCLIServer extends SimulationInterface {
     private Thread acceptConnectionThread;
     private int lastSyncTurn = 0;
     private final SpeciesLoader speciesLoader = new SpeciesLoader();
-    
+
     private final int localPlayerID;
 
     protected void writeToStatusLog(String msg) {
@@ -614,6 +615,28 @@ public class SimulationCLIServer extends SimulationInterface {
             setRunning(gameStatus.running);
         }
 
+    }
+
+    @Override
+    public void generateRandomGrid(long seed) {
+        Random rng = new Random();
+        rng.setSeed(seed);
+        ArrayList<Integer> IDs = new ArrayList<>(speciesLoader.getSpeciesIDs());
+        int size = IDs.size();
+        for(int i = 0; i < size; i++) {
+            IDs.add(-1);
+        }
+        
+        currentGrid.clearBoard();
+        
+        for (int r = 0; r < getRowCount(); r++) {
+            for (int c = 0; c < getColumnCount(); c++) {
+                int id = IDs.get(Math.abs(rng.nextInt()) % IDs.size());
+                if (id != -1) {
+                    setUnit(r, c, speciesLoader.getNewUnit(id, getLocalPlayerID()));
+                }
+            }
+        }
     }
 
     @Override

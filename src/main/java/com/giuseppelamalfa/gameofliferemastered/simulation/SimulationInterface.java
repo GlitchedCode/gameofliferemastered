@@ -74,6 +74,8 @@ public abstract class SimulationInterface {
 
     public abstract void synchronize();
 
+    public abstract void generateRandomGrid(long seed);
+    
     public abstract void readGrid(File file) throws Exception;
     
     public abstract void readGrid(File file, boolean resize) throws Exception;
