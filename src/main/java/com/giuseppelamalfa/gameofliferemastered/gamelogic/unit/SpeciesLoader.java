@@ -20,8 +20,8 @@ import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -47,7 +47,7 @@ public class SpeciesLoader {
         readme.put("__general_info", "each object in the speciesData array represents a species, defined by the following fields."
                 + "for more info on implementing types, selectors and initial states check the source code."
                 + "a species configuration example has been included to represent conway's life cell.");
-        
+
         readme.put("name", "the species' name");
         readme.put("implementingType", "unit class name that provides the implementation for this species, must implement com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit");
         readme.put("id", "the species' numeric ID, which must be unique");
@@ -212,14 +212,14 @@ public class SpeciesLoader {
         }
 
     }
-    
+
     public void updateColors(double delta) {
-        for (SpeciesData species : speciesData.values()){
+        for (SpeciesData species : speciesData.values()) {
             species.color.update(delta);
         }
     }
 
-    public Set<Integer> getSpeciesIDs() {
+    public Collection<Integer> getSpeciesIDs() {
         return speciesData.keySet();
     }
 

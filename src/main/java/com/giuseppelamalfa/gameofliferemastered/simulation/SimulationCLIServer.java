@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.giuseppelamalfa.gameofliferemastered.gamelogic.unit.Unit;
+import com.giuseppelamalfa.gameofliferemastered.utils.NoiseGenerator;
 import java.io.File;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -619,24 +620,36 @@ public class SimulationCLIServer extends SimulationInterface {
 
     @Override
     public void generateRandomGrid(long seed) {
-        Random rng = new Random();
-        rng.setSeed(seed);
-        ArrayList<Integer> IDs = new ArrayList<>(speciesLoader.getSpeciesIDs());
-        int size = IDs.size();
-        for(int i = 0; i < size; i++) {
-            IDs.add(-1);
-        }
-        
+        Random rng = new Random(seed);
+        NoiseGenerator unitNoise = new NoiseGenerator(getColumnCount() / 2, getRowCount() / 2, rng);
+        NoiseGenerator cullNoise = new NoiseGenerator(getColumnCount() / 4, getRowCount() / 4, rng);
+        ArrayList<Integer> IDs = new ArrayList<>();
+        IDs.add(-1);
+        IDs.add(-1);
+        IDs.addAll(speciesLoader.getSpeciesIDs());
+
         currentGrid.clearBoard();
-        
         for (int r = 0; r < getRowCount(); r++) {
             for (int c = 0; c < getColumnCount(); c++) {
-                int id = IDs.get(Math.abs(rng.nextInt()) % IDs.size());
+                int id = IDs.get((int) (unitNoise.noise(c, r) * IDs.size()));
                 if (id != -1) {
                     setUnit(r, c, speciesLoader.getNewUnit(id, getLocalPlayerID()));
                 }
             }
         }
+
+        /*
+        currentGrid.clearBoard();
+        IDs.add(-1);
+        for (int r = 0; r < getRowCount(); r++) {
+            for (int c = 0; c < getColumnCount(); c++) {
+                if (cullNoise.noise(c, r) < 0.7) {
+                    int id = IDs.get(Math.abs(rng.nextInt()) % IDs.size());
+                    setUnit(r, c, speciesLoader.getNewUnit(id, getLocalPlayerID()));
+                }
+            }
+        }
+         */
     }
 
     @Override
