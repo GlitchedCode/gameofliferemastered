@@ -83,7 +83,8 @@ public class SimulationCLIServer extends SimulationInterface {
     protected int columnCount;
     protected Grid currentGrid;
 
-    //static protected final ArrayList<PlayerData> offlineRanking = new ArrayList<>();
+    // static protected final ArrayList<PlayerData> offlineRanking = new
+    // ArrayList<>();
     protected ConcurrentHashMap<Integer, ClientData> connectedClients = new ConcurrentHashMap<>();
     protected ServerSocket serverSocket;
     protected String serverIP;
@@ -106,14 +107,13 @@ public class SimulationCLIServer extends SimulationInterface {
     public static void printUsage() {
         System.out.println(
                 "usage: java -jar liferemastered-headless.jar [args]\n"
-                + "-m <sandbox|competitive>: sets the game mode (default: sandbox)\n"
-                + "-r <rowCount>: grid row count (default: 50)\n"
-                + "-c <columnCount>: grid column count (default: 70)\n"
-                + "-p <portNumber>: set port number for server socket (default: 7777)\n"
-                + "-P <maxPlayers>: set max player count (default: 4, max: 8)\n"
-                + "-S <filename.json>: set species.json file to read species from (default: read from jar)\n"
-                + "-h: print this message and quit."
-        );
+                        + "-m <sandbox|competitive>: sets the game mode (default: sandbox)\n"
+                        + "-r <rowCount>: grid row count (default: 50)\n"
+                        + "-c <columnCount>: grid column count (default: 70)\n"
+                        + "-p <portNumber>: set port number for server socket (default: 7777)\n"
+                        + "-P <maxPlayers>: set max player count (default: 4, max: 8)\n"
+                        + "-S <filename.json>: set species.json file to read species from (default: read from jar)\n"
+                        + "-h: print this message and quit.");
     }
 
     public static void printUsage(int returnCode) {
@@ -254,7 +254,7 @@ public class SimulationCLIServer extends SimulationInterface {
             URL whatismyip = new URL("http://checkip.amazonaws.com");
             BufferedReader in = new BufferedReader(new InputStreamReader(
                     whatismyip.openStream()));
-            serverIP = in.readLine(); //you get the IP as a String
+            serverIP = in.readLine(); // you get the IP as a String
 
         } catch (Exception e) {
             serverIP = "localhost";
@@ -285,8 +285,7 @@ public class SimulationCLIServer extends SimulationInterface {
 
                         writeToStatusLog("Accepting connection from" + conn.getRemoteSocketAddress());
                         // Make a thread for each client connection to handle their requests separately.
-                        new Thread(()
-                                -> {
+                        new Thread(() -> {
                             ClientData clientData = client;
                             try {
                                 InputStream input = conn.getInputStream();
@@ -301,7 +300,8 @@ public class SimulationCLIServer extends SimulationInterface {
 
                                 for (ClientData data : connectedClients.values()) {
                                     if (data.playerData.ID != clientID) {
-                                        UpdatePlayerDataRequest req = new UpdatePlayerDataRequest(data.playerData, true);
+                                        UpdatePlayerDataRequest req = new UpdatePlayerDataRequest(data.playerData,
+                                                true);
                                         sendToAll(req);
                                     }
                                 }
@@ -337,7 +337,7 @@ public class SimulationCLIServer extends SimulationInterface {
 
                 }
             } catch (IOException e) {
-                //System.out.println(e);
+                // System.out.println(e);
             }
         });
         acceptConnectionThread.start();
@@ -456,9 +456,11 @@ public class SimulationCLIServer extends SimulationInterface {
 
     @Override
     public void synchronize() {
-        /*if (getCurrentTurn() == lastSyncTurn) {
-            return;
-        }*/
+        /*
+         * if (getCurrentTurn() == lastSyncTurn) {
+         * return;
+         * }
+         */
         lastSyncTurn = getCurrentTurn();
         try {
             sendToAll(new SyncGridRequest((Grid) currentGrid.clone()));
@@ -490,11 +492,11 @@ public class SimulationCLIServer extends SimulationInterface {
         for (ClientData client : connectedClients.values()) {
             if (client.playerData.ID != excludeID)
                 try {
-                client.stream.writeObject(req);
-            } catch (IOException ex) {
-                currentGrid.removePlayer(client.playerData.ID);
-                connectedClients.remove(client.playerData.ID);
-            }
+                    client.stream.writeObject(req);
+                } catch (IOException ex) {
+                    currentGrid.removePlayer(client.playerData.ID);
+                    connectedClients.remove(client.playerData.ID);
+                }
         }
     }
 
@@ -547,8 +549,7 @@ public class SimulationCLIServer extends SimulationInterface {
             }
 
             currentGrid.addPlayer(data.playerData);
-            UpdatePlayerDataRequest clientUpdateRequest
-                    = new UpdatePlayerDataRequest(data.playerData, true);
+            UpdatePlayerDataRequest clientUpdateRequest = new UpdatePlayerDataRequest(data.playerData, true);
             sendToAll(clientUpdateRequest, newPlayerData.ID);
         }
     }
@@ -639,16 +640,16 @@ public class SimulationCLIServer extends SimulationInterface {
         }
 
         /*
-        currentGrid.clearBoard();
-        IDs.add(-1);
-        for (int r = 0; r < getRowCount(); r++) {
-            for (int c = 0; c < getColumnCount(); c++) {
-                if (cullNoise.noise(c, r) < 0.7) {
-                    int id = IDs.get(Math.abs(rng.nextInt()) % IDs.size());
-                    setUnit(r, c, speciesLoader.getNewUnit(id, getLocalPlayerID()));
-                }
-            }
-        }
+         * currentGrid.clearBoard();
+         * IDs.add(-1);
+         * for (int r = 0; r < getRowCount(); r++) {
+         * for (int c = 0; c < getColumnCount(); c++) {
+         * if (cullNoise.noise(c, r) < 0.7) {
+         * int id = IDs.get(Math.abs(rng.nextInt()) % IDs.size());
+         * setUnit(r, c, speciesLoader.getNewUnit(id, getLocalPlayerID()));
+         * }
+         * }
+         * }
          */
     }
 

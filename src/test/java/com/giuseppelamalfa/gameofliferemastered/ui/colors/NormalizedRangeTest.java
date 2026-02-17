@@ -16,14 +16,14 @@ import static org.junit.Assert.*;
  * @author glitchedcode
  */
 public class NormalizedRangeTest {
-    
+
     public NormalizedRangeTest() {
     }
-    
+
     @Before
     public void setUp() {
     }
-    
+
     @After
     public void tearDown() {
     }
@@ -31,15 +31,15 @@ public class NormalizedRangeTest {
     /**
      * Test of get method, of class NormalizedRange.
      */
-    @Test
-    public void testGet() {
-        System.out.println("normalizedGet");
-        double arg = 0.0;
-        NormalizedRange instance = null;
-        double expResult = 0.0;
-        double result = instance.get(arg);
-        assertEquals(expResult, result, 0.0);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }    
+    // @Test
+    // public void testGet() {
+    // System.out.println("normalizedGet");
+    // double arg = 0.0;
+    // NormalizedRange instance = null;
+    // double expResult = 0.0;
+    // double result = instance.get(arg);
+    // assertEquals(expResult, result, 0.0);
+    // // TODO review the generated test code and remove the default call to fail.
+    // fail("The test case is a prototype.");
+    // }
 }
